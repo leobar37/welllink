@@ -1,0 +1,9 @@
+telemetry = true
+
+[install]
+linker = "isolated"
+saveTextLockfile = true
+linkWorkspacePackages = true
+
+[run]
+shell = "system"

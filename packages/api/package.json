@@ -1,0 +1,26 @@
+{
+  "name": "@wellness/api",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "start": "bun run src/index.ts",
+    "build": "rm -rf dist && bun build src/index.ts --target bun --outfile dist/index.js",
+    "lint": "bunx tsc --noEmit"
+  },
+  "dependencies": {
+    "@elysiajs/cors": "^1.4.0",
+    "@supabase/supabase-js": "^2.86.0",
+    "better-auth": "^1.4.3",
+    "date-fns": "^4.1.0",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.44.7",
+    "elysia": "latest",
+    "postgres": "^3.4.7",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "drizzle-kit": "^0.31.7"
+  }
+}

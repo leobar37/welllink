@@ -1,0 +1,45 @@
+# dependencies (bun install)
+node_modules
+
+# output
+out
+dist
+packages/*/dist
+packages/*/build
+*.tgz
+
+# code coverage
+coverage
+*.lcov
+
+# logs
+logs
+_.log
+report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
+packages/*/logs
+
+# dotenv environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+packages/*/.env
+packages/*/.env.*
+
+# caches
+.eslintcache
+.cache
+.turbo
+.vite
+*.tsbuildinfo
+packages/*/*.tsbuildinfo
+packages/*/.turbo
+packages/*/.vite
+packages/*/.eslintcache
+
+# IntelliJ based IDEs
+.idea
+
+# Finder (MacOS) folder config
+.DS_Store
