@@ -39,7 +39,28 @@ export const socialClick = pgTable(
   ]
 );
 
+export const qrDownload = pgTable(
+  "qr_download",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    profileId: uuid("profile_id")
+      .notNull()
+      .references(() => profile.id, { onDelete: "cascade" }),
+    format: varchar("format", { length: 10 }).notNull(), // 'png' or 'svg'
+    downloadedAt: timestamp("downloaded_at").notNull().defaultNow(),
+  },
+  (table) => [
+    index("qr_download_profile_id_idx").on(table.profileId),
+    index("qr_download_downloaded_at_idx").on(
+      table.profileId,
+      table.downloadedAt,
+    ),
+  ],
+);
+
 export type ProfileView = typeof profileView.$inferSelect;
 export type NewProfileView = typeof profileView.$inferInsert;
 export type SocialClick = typeof socialClick.$inferSelect;
 export type NewSocialClick = typeof socialClick.$inferInsert;
+export type QRDownload = typeof qrDownload.$inferSelect;
+export type NewQRDownload = typeof qrDownload.$inferInsert;

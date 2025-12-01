@@ -4,7 +4,7 @@ import { socialLink, profile } from '../../db/schema';
 import type { RequestContext } from '../../types/context';
 
 export class SocialLinkRepository {
-  async findByProfile(ctx: RequestContext, profileId: string) {
+  async findByProfile(_ctx: RequestContext, profileId: string) {
     return db.query.socialLink.findMany({
       where: eq(socialLink.profileId, profileId),
     });

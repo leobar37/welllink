@@ -45,7 +45,7 @@ export class ConflictException extends HttpException {
 }
 
 export class ValidationException extends BadRequestException {
-  constructor(message: string = 'Validation Failed', code?: string) {
+  constructor(message: string = 'Validation Failed', _code?: string) {
     super(message, 'VALIDATION_ERROR');
     this.name = 'ValidationException';
   }

@@ -250,4 +250,83 @@ export class AnalyticsService {
       period: { days },
     };
   }
+
+  async getQRStats(ctx: RequestContext, profileId: string, days: number = 30) {
+    const startDate = startOfDay(subDays(new Date(), days));
+    const endDate = endOfDay(new Date());
+
+    const [
+      totalDownloads,
+      downloadsByFormat,
+      totalScans,
+      trafficSources,
+      recentDownloads,
+    ] = await Promise.all([
+      this.analyticsRepository.getQRDownloadsCount(ctx, profileId),
+      this.analyticsRepository.getQRDownloadsByFormat(ctx, profileId),
+      this.analyticsRepository.getQRScansCount(ctx, profileId),
+      this.analyticsRepository.getQRScansVsDirectLink(ctx, profileId),
+      this.analyticsRepository.getQRDownloadsByDateRange(
+        ctx,
+        profileId,
+        startDate,
+        endDate,
+      ),
+    ]);
+
+    // Group downloads by day
+    const dailyDownloads = recentDownloads.reduce(
+      (acc: Record<string, number>, download) => {
+        if (!download.downloadedAt) return acc;
+        const date = download.downloadedAt.toISOString().split("T")[0];
+        if (!date) return acc;
+        if (!acc[date]) {
+          acc[date] = 0;
+        }
+        acc[date]++;
+        return acc;
+      },
+      {},
+    );
+
+    // Transform traffic sources to object
+    const trafficBySource = trafficSources.reduce(
+      (acc: Record<string, number>, source) => {
+        acc[source.source] = source.count;
+        return acc;
+      },
+      {},
+    );
+
+    // Transform downloads by format to object
+    const downloadsByFormatObj = downloadsByFormat.reduce(
+      (acc: Record<string, number>, item) => {
+        acc[item.format] = item.count;
+        return acc;
+      },
+      {},
+    );
+
+    // Calculate QR effectiveness (scans vs total profile views)
+    const qrScans = trafficBySource["qr"] || 0;
+    const directLinks = trafficBySource["direct_link"] || 0;
+    const totalViews = qrScans + directLinks + (trafficBySource["referral"] || 0);
+    const qrEffectiveness = totalViews > 0 ? (qrScans / totalViews) * 100 : 0;
+
+    return {
+      downloads: {
+        total: totalDownloads,
+        periodDownloads: recentDownloads.length,
+        byFormat: downloadsByFormatObj,
+        daily: dailyDownloads,
+      },
+      scans: {
+        total: totalScans,
+        fromQR: qrScans,
+      },
+      trafficSources: trafficBySource,
+      qrEffectiveness: Math.round(qrEffectiveness * 100) / 100,
+      period: { days, startDate, endDate },
+    };
+  }
 }

@@ -1,6 +1,5 @@
 import {
   NotFoundException,
-  BadRequestException,
 } from "../../utils/http-exceptions";
 import type { RequestContext } from "../../types/context";
 import { AssetRepository } from "../repository/asset";

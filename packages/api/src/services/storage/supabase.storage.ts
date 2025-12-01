@@ -25,7 +25,7 @@ export class SupabaseStorageStrategy implements StorageStrategy {
   async initialize(): Promise<void> {
     if (this.initialized) return;
 
-    const { data, error } = await this.supabase.storage.getBucket(this.bucket);
+    const { error } = await this.supabase.storage.getBucket(this.bucket);
 
     if (error && error.message.includes("not found")) {
       const { error: createError } = await this.supabase.storage.createBucket(
@@ -73,7 +73,6 @@ export class SupabaseStorageStrategy implements StorageStrategy {
 
     const nameParts = file.name.split(".");
     const ext = nameParts.length > 1 ? nameParts.pop() : "bin";
-    const originalName = nameParts.join(".");
 
     const folder = type === "asset" ? "assets" : "files";
     const uuid = crypto.randomUUID();

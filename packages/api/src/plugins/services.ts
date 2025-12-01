@@ -20,7 +20,7 @@ let initialized = false;
 
 async function getStorageInstance(): Promise<StorageStrategy> {
   if (!storageInstance) {
-    storageInstance = createStorageStrategy();
+    storageInstance = await createStorageStrategy();
     if (!initialized) {
       await storageInstance.initialize();
       initialized = true;

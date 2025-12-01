@@ -1,6 +1,12 @@
 import { eq, and, desc, gte, lte, count, inArray } from "drizzle-orm";
 import { db } from "../../db";
-import { profileView, socialClick, profile, socialLink } from "../../db/schema";
+import {
+  profileView,
+  socialClick,
+  qrDownload,
+  profile,
+  socialLink,
+} from "../../db/schema";
 import type { RequestContext } from "../../types/context";
 
 export class AnalyticsRepository {
@@ -193,5 +199,144 @@ export class AnalyticsRepository {
       },
       orderBy: desc(socialClick.clickedAt),
     });
+  }
+
+  // QR Downloads
+  async createQRDownload(data: { profileId: string; format: string }) {
+    const [download] = await db
+      .insert(qrDownload)
+      .values({
+        profileId: data.profileId,
+        format: data.format,
+      })
+      .returning();
+    return download;
+  }
+
+  async getQRDownloads(ctx: RequestContext, profileId: string) {
+    // Verify profile ownership
+    const foundProfile = await db.query.profile.findFirst({
+      where: and(eq(profile.id, profileId), eq(profile.userId, ctx.userId)),
+    });
+
+    if (!foundProfile) {
+      throw new Error("Profile not found or access denied");
+    }
+
+    return db.query.qrDownload.findMany({
+      where: eq(qrDownload.profileId, profileId),
+      orderBy: desc(qrDownload.downloadedAt),
+    });
+  }
+
+  async getQRDownloadsCount(ctx: RequestContext, profileId: string) {
+    // Verify profile ownership
+    const foundProfile = await db.query.profile.findFirst({
+      where: and(eq(profile.id, profileId), eq(profile.userId, ctx.userId)),
+    });
+
+    if (!foundProfile) {
+      throw new Error("Profile not found or access denied");
+    }
+
+    const [result] = await db
+      .select({ count: count() })
+      .from(qrDownload)
+      .where(eq(qrDownload.profileId, profileId));
+
+    return result?.count || 0;
+  }
+
+  async getQRDownloadsByDateRange(
+    ctx: RequestContext,
+    profileId: string,
+    startDate: Date,
+    endDate: Date,
+  ) {
+    // Verify profile ownership
+    const foundProfile = await db.query.profile.findFirst({
+      where: and(eq(profile.id, profileId), eq(profile.userId, ctx.userId)),
+    });
+
+    if (!foundProfile) {
+      throw new Error("Profile not found or access denied");
+    }
+
+    return db.query.qrDownload.findMany({
+      where: and(
+        eq(qrDownload.profileId, profileId),
+        gte(qrDownload.downloadedAt, startDate),
+        lte(qrDownload.downloadedAt, endDate),
+      ),
+      orderBy: desc(qrDownload.downloadedAt),
+    });
+  }
+
+  async getQRDownloadsByFormat(ctx: RequestContext, profileId: string) {
+    // Verify profile ownership
+    const foundProfile = await db.query.profile.findFirst({
+      where: and(eq(profile.id, profileId), eq(profile.userId, ctx.userId)),
+    });
+
+    if (!foundProfile) {
+      throw new Error("Profile not found or access denied");
+    }
+
+    const results = await db
+      .select({
+        format: qrDownload.format,
+        count: count(),
+      })
+      .from(qrDownload)
+      .where(eq(qrDownload.profileId, profileId))
+      .groupBy(qrDownload.format);
+
+    return results;
+  }
+
+  async getQRScansCount(ctx: RequestContext, profileId: string) {
+    // Verify profile ownership
+    const foundProfile = await db.query.profile.findFirst({
+      where: and(eq(profile.id, profileId), eq(profile.userId, ctx.userId)),
+    });
+
+    if (!foundProfile) {
+      throw new Error("Profile not found or access denied");
+    }
+
+    // QR scans are profile views with source = 'qr'
+    const [result] = await db
+      .select({ count: count() })
+      .from(profileView)
+      .where(
+        and(
+          eq(profileView.profileId, profileId),
+          eq(profileView.source, "qr"),
+        ),
+      );
+
+    return result?.count || 0;
+  }
+
+  async getQRScansVsDirectLink(ctx: RequestContext, profileId: string) {
+    // Verify profile ownership
+    const foundProfile = await db.query.profile.findFirst({
+      where: and(eq(profile.id, profileId), eq(profile.userId, ctx.userId)),
+    });
+
+    if (!foundProfile) {
+      throw new Error("Profile not found or access denied");
+    }
+
+    const results = await db
+      .select({
+        source: profileView.source,
+        count: count(),
+      })
+      .from(profileView)
+      .where(eq(profileView.profileId, profileId))
+      .groupBy(profileView.source);
+
+    return results;
   }
 }

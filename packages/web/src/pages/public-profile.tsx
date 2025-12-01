@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { getPublicProfile, type PublicProfileData } from "@/lib/api";
+import { useParams } from "react-router";
+import { api } from "@/lib/api";
+import type { PublicProfileData } from "@/lib/types";
 import { ProfileHeader } from "@/components/public-profile/profile-header";
 import { SocialLinks } from "@/components/public-profile/social-links";
 import { ActionButtons } from "@/components/public-profile/action-buttons";
@@ -20,11 +21,18 @@ export function PublicProfilePage() {
 
             try {
                 setLoading(true);
-                // For MVP/Demo purposes, if the API fails or returns 404 (since backend might not be fully populated),
-                // we can fallback to mock data if the username is "demo" or similar, 
-                // OR just show the error. Let's try to fetch first.
-                const profileData = await getPublicProfile(username);
-                setData(profileData);
+                const { data: profileData, error } = await api.api.public.profiles[username].get();
+
+                if (error) {
+                    throw new Error(error.value ? String(error.value) : "Error fetching profile");
+                }
+                
+                if (!profileData) {
+                     throw new Error("Profile not found");
+                }
+                
+                // The API returns exactly what we need, matching PublicProfileData structure
+                setData(profileData as unknown as PublicProfileData); 
             } catch (err) {
                 console.error(err);
                 setError("No pudimos encontrar este perfil.");

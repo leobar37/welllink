@@ -95,4 +95,11 @@ export const analyticsRoutes = new Elysia({ prefix: "/analytics" })
         days,
       );
     },
+  )
+  .get(
+    "/profiles/:profileId/qr-stats",
+    async ({ params, query, ctx, services }) => {
+      const { days } = rangeQuerySchema.parse(query);
+      return services.analyticsService.getQRStats(ctx!, params.profileId, days);
+    },
   );

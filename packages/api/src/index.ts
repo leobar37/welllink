@@ -19,6 +19,8 @@ import { analyticsRoutes } from "./api/routes/analytics";
 import { uploadRoutes } from "./api/routes/upload";
 import { onboardingRoutes } from "./api/routes/onboarding";
 import { publicRoutes } from "./api/routes/public";
+import { qrRoutes } from "./api/routes/qr";
+import { socialLinkRoutes } from "./api/routes/social-links";
 
 const modules = [
   { id: "02", name: "Public Profile" },
@@ -28,7 +30,7 @@ const modules = [
   { id: "06", name: "Dashboard" },
   { id: "07", name: "Settings" },
 ];
-
+console.log("env", process.env.NODE_ENV);
 const app = new Elysia()
   // CORS - Open for development
   .use(
@@ -36,7 +38,7 @@ const app = new Elysia()
       origin:
         process.env.NODE_ENV === "production"
           ? ["https://yourdomain.com"]
-          : true, // Allow all origins in development
+          : ["http://localhost:5176"], // Specific origin for development
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
@@ -60,9 +62,14 @@ const app = new Elysia()
       .use(analyticsRoutes)
       .use(uploadRoutes)
       .use(onboardingRoutes)
-      .use(publicRoutes),
+      .use(publicRoutes)
+      .use(qrRoutes)
+      .use(socialLinkRoutes),
   )
   .listen(5300);
+
+export type App = typeof app;
+export * from "./db/schema";
 
 console.log(
   `🦊 Wellness API ready on http://${app.server?.hostname}:${app.server?.port}`,

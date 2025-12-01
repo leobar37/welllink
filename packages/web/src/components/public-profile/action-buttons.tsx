@@ -1,4 +1,4 @@
-import type { Feature } from "@/lib/api";
+import type { Feature } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 

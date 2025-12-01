@@ -189,6 +189,52 @@ All TypeScript errors have been fixed:
 
 ---
 
+## Frontend Implementation Progress
+
+### ✅ Completed - Core Architecture & Dashboard
+
+#### 1. Infrastructure
+- [x] Setup React Router v7 with Layouts (`AuthLayout`, `DashboardLayout`, `PublicLayout`)
+- [x] Configure Type-safe API client (`edenTreaty`)
+- [x] Implement Responsive Design System (`useBreakpoint`, `ResponsiveDialog`, `shadcn/ui`)
+- [x] Integrate `better-auth` client for session management
+
+#### 2. Authentication & Onboarding
+- [x] Implement Login Page with form validation
+- [x] Implement Register Page with form validation
+- [x] Implement Onboarding Wizard (4 steps: Welcome, Profile, Avatar, Socials, Completion)
+- [x] Connect Onboarding state to backend API
+
+#### 3. Dashboard Features
+- [x] **Overview**: Real-time stats fetching (Views, Clicks)
+- [x] **Edit Profile**: Profile form with Avatar upload
+- [x] **Features**: Toggle system for enabling/disabling modules
+- [x] **QR Tools**: QR Code generation and Virtual Card download (`html-to-image`)
+- [x] **Settings**: Password management and Sign out
+
+#### 4. Public Profile
+- [x] Dynamic profile routing `/:username`
+- [x] Public data fetching via Eden Treaty
+- [x] Mobile-first design for "Link-in-bio" experience
+
+### 🚧 In Progress / Missing
+
+#### 1. Data Fetching Optimization
+- [ ] Install & Configure **TanStack Query** (currently using raw `useEffect`)
+- [ ] Refactor `DashboardOverview`, `EditProfile`, `QRTools` to use `useQuery`
+- [ ] Implement optimistic updates for toggles and form submissions
+
+#### 2. Health Survey Feature (Module 04)
+- [ ] **Visitor View**: Public-facing survey form (`/s/:surveyId` or modal)
+- [ ] **Dashboard View**: List of received survey responses
+- [ ] **Response Detail**: View individual survey answers
+
+#### 3. Backend Integration Gaps
+- [ ] Connect Frontend QR Tools to Backend QR API (`/api/qr/*`) instead of client-side generation
+- [ ] Implement "Appointments" feature placeholder
+
+---
+
 ## Storage Strategy Implementation (Latest Update)
 
 ### ✅ Completed - Supabase Storage Integration
@@ -247,5 +293,113 @@ GET /api/assets/:id/signed-url?expiresIn=3600
 
 ---
 
-_Last Updated: 2025-11-28_
-_Agent: Droid - Storage Strategy Implementation_
+## Module 05: QR & Virtual Card Implementation
+
+### ✅ Completed - QR Code & Virtual Card System
+
+#### New Files Created
+
+- `src/services/business/qr.ts` - QR code generation service (PNG/SVG)
+- `src/services/business/card.ts` - Virtual card data service
+- `src/api/routes/qr.ts` - QR and card API endpoints
+
+#### Modified Files
+
+- `src/db/schema/analytics.ts` - Added `qrDownload` table for tracking
+- `src/db/schema/relations.ts` - Added QR download relations
+- `src/services/repository/analytics.ts` - Added QR download tracking methods
+- `src/index.ts` - Registered QR routes
+- `package.json` - Added `qrcode` dependency
+
+#### New Dependencies
+
+- `qrcode` v1.5.4
+
+#### Database Schema
+
+```sql
+-- New table for QR download tracking
+CREATE TABLE qr_download (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  profile_id UUID NOT NULL REFERENCES profile(id) ON DELETE CASCADE,
+  format VARCHAR(10) NOT NULL, -- 'png' or 'svg'
+  downloaded_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+```
+
+#### API Endpoints
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/qr/public/:username` | No | Get QR code by username |
+| GET | `/api/qr/public/:username/card` | No | Get virtual card data by username |
+| GET | `/api/qr/profiles/:profileId` | Yes | Get QR code for owned profile |
+| GET | `/api/qr/profiles/:profileId/download` | Yes | Download QR as file (PNG/SVG) |
+| GET | `/api/qr/profiles/:profileId/card` | Yes | Get virtual card data for profile |
+
+#### Query Parameters
+
+```typescript
+// QR generation options
+{
+  format: "png" | "svg",  // Default: "png"
+  width: number,          // 100-1000, Default: 300
+  margin: number,         // 0-10, Default: 2
+  darkColor: string,      // Hex color, Default: "#000000"
+  lightColor: string      // Hex color, Default: "#ffffff"
+}
+
+// Card options
+{
+  includeQR: boolean,        // Default: true
+  includeSocialLinks: boolean, // Default: true
+  qrSize: number             // 50-300, Default: 150
+}
+```
+
+#### Features
+
+- **QR Generation**: PNG and SVG formats with customizable colors and sizes
+- **Virtual Card**: Structured data with profile info, social links, and embedded QR
+- **Download Tracking**: Analytics for QR downloads by format
+- **Public Access**: QR and card data accessible without authentication
+- **High Resolution**: Download endpoint provides 600px QR for printing
+
+#### Response Examples
+
+```typescript
+// GET /api/qr/profiles/:id
+{
+  qrCode: "data:image/png;base64,...",
+  format: "png",
+  mimeType: "image/png",
+  profileUrl: "https://wellnesslink.com/username"
+}
+
+// GET /api/qr/profiles/:id/card
+{
+  profile: {
+    username: "john",
+    displayName: "John Doe",
+    title: "Wellness Coach",
+    bio: "Helping you live better",
+    avatarUrl: "https://..."
+  },
+  socialLinks: [
+    { platform: "instagram", url: "https://..." }
+  ],
+  qrCodeDataUrl: "data:image/png;base64,...",
+  profileUrl: "https://wellnesslink.com/john"
+}
+```
+
+#### Environment Variables
+
+```env
+PUBLIC_URL=https://wellnesslink.com  # Base URL for QR codes
+```
+
+---
+
+_Last Updated: 2025-11-30_
+_Agent: Claude - QR & Virtual Card Implementation_

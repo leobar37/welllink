@@ -2,11 +2,15 @@
   "name": "@wellness/api",
   "version": "0.1.0",
   "type": "module",
+  "types": "src/index.ts",
   "scripts": {
     "dev": "bun run --watch src/index.ts",
     "start": "bun run src/index.ts",
     "build": "rm -rf dist && bun build src/index.ts --target bun --outfile dist/index.js",
-    "lint": "bunx tsc --noEmit"
+    "lint": "bunx tsc --noEmit",
+    "db:seed": "bun run src/db/seed.ts",
+    "db:reset": "bun run src/db/reset.ts",
+    "db:reset-seed": "bun run src/db/reset.ts && bun run src/db/seed.ts"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.4.0",
@@ -17,9 +21,11 @@
     "drizzle-orm": "^0.44.7",
     "elysia": "latest",
     "postgres": "^3.4.7",
+    "qrcode": "^1.5.4",
     "zod": "^4.1.13"
   },
   "devDependencies": {
+    "@types/qrcode": "^1.5.6",
     "bun-types": "latest",
     "drizzle-kit": "^0.31.7"
   }

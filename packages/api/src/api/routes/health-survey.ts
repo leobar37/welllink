@@ -1,39 +1,32 @@
-import { Elysia } from "elysia";
-import { z } from "zod";
+import { Elysia, t } from "elysia";
 import { servicesPlugin } from "../../plugins/services";
 import { authGuard } from "../../middleware/auth-guard";
 import { errorMiddleware } from "../../middleware/error";
-
-const createSurveySchema = z.object({
-  profileId: z.string().uuid(),
-  visitorName: z.string().min(1),
-  visitorPhone: z.string().optional(),
-  visitorEmail: z.string().email().optional(),
-  visitorWhatsapp: z.string().optional(),
-  referredBy: z.string().optional(),
-  responses: z.record(z.string(), z.unknown()),
-});
-
-const updateSurveySchema = z.object({
-  visitorName: z.string().min(1).optional(),
-  visitorPhone: z.string().optional(),
-  visitorEmail: z.string().email().optional(),
-  visitorWhatsapp: z.string().optional(),
-  referredBy: z.string().optional(),
-  responses: z.record(z.string(), z.unknown()).optional(),
-});
 
 export const healthSurveyRoutes = new Elysia({ prefix: "/health-survey" })
   .use(errorMiddleware)
   .use(servicesPlugin)
   // Public route - visitors can submit surveys without auth
-  .post("/public", async ({ body, set, services }) => {
-    const data = createSurveySchema.parse(body);
-    const response =
-      await services.healthSurveyService.createSurveyResponse(data);
-    set.status = 201;
-    return response;
-  })
+  .post(
+    "/public",
+    async ({ body, set, services }) => {
+      const response =
+        await services.healthSurveyService.createSurveyResponse(body);
+      set.status = 201;
+      return response;
+    },
+    {
+      body: t.Object({
+        profileId: t.String(),
+        visitorName: t.String({ minLength: 1 }),
+        visitorPhone: t.Optional(t.String()),
+        visitorEmail: t.Optional(t.String()),
+        visitorWhatsapp: t.Optional(t.String()),
+        referredBy: t.Optional(t.String()),
+        responses: t.Record(t.String(), t.Unknown()),
+      }),
+    },
+  )
   // Protected routes
   .use(authGuard)
   .get("/", async ({ query, services }) => {
@@ -60,18 +53,30 @@ export const healthSurveyRoutes = new Elysia({ prefix: "/health-survey" })
   .get("/:id", async ({ params, services }) => {
     return services.healthSurveyService.getSurveyResponse(params.id);
   })
-  .put("/:id", async ({ params, body, query, services }) => {
-    const profileId = query.profileId as string;
-    if (!profileId) {
-      return { error: "profileId query parameter is required" };
-    }
-    const data = updateSurveySchema.parse(body);
-    return services.healthSurveyService.updateSurveyResponse(
-      params.id,
-      profileId,
-      data,
-    );
-  })
+  .put(
+    "/:id",
+    async ({ params, body, query, services }) => {
+      const profileId = query.profileId as string;
+      if (!profileId) {
+        return { error: "profileId query parameter is required" };
+      }
+      return services.healthSurveyService.updateSurveyResponse(
+        params.id,
+        profileId,
+        body,
+      );
+    },
+    {
+      body: t.Object({
+        visitorName: t.Optional(t.String({ minLength: 1 })),
+        visitorPhone: t.Optional(t.String()),
+        visitorEmail: t.Optional(t.String()),
+        visitorWhatsapp: t.Optional(t.String()),
+        referredBy: t.Optional(t.String()),
+        responses: t.Optional(t.Record(t.String(), t.Unknown())),
+      }),
+    },
+  )
   .delete("/:id", async ({ params, query, services, set }) => {
     const profileId = query.profileId as string;
     if (!profileId) {

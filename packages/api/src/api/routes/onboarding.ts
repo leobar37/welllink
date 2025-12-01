@@ -1,19 +1,8 @@
-import { Elysia } from "elysia";
-import { z } from "zod";
+import { Elysia, t } from "elysia";
 import { servicesPlugin } from "../../plugins/services";
 import { authGuard } from "../../middleware/auth-guard";
 import { errorMiddleware } from "../../middleware/error";
 import { OnboardingService } from "../../services/business/onboarding";
-
-const updateStepSchema = z.object({
-  completed: z.boolean().optional(),
-  skipped: z.boolean().optional(),
-  stepData: z.record(z.string(), z.unknown()).optional(),
-});
-
-const tipsSchema = z.object({
-  stepId: z.string(),
-});
 
 export const onboardingRoutes = new Elysia({ prefix: "/onboarding" })
   .use(errorMiddleware)
@@ -23,20 +12,27 @@ export const onboardingRoutes = new Elysia({ prefix: "/onboarding" })
     // Initialize onboarding service using services from plugin
     const onboardingService = new OnboardingService(
       services.profileService,
-      services.assetService,
     );
     return { onboardingService };
   })
   .get("/progress", async ({ ctx, onboardingService }) => {
     return onboardingService.getOnboardingProgress(ctx!);
   })
-  .put("/step/:stepId", async ({ params, body, ctx, onboardingService }) => {
-    const data = updateStepSchema.parse(body);
-    return onboardingService.updateOnboardingStep(ctx!, params.stepId, data);
-  })
+  .put(
+    "/step/:stepId",
+    async ({ params, body, ctx, onboardingService }) => {
+      return onboardingService.updateOnboardingStep(ctx!, params.stepId, body);
+    },
+    {
+      body: t.Object({
+        completed: t.Optional(t.Boolean()),
+        skipped: t.Optional(t.Boolean()),
+        stepData: t.Optional(t.Record(t.String(), t.Any())),
+      }),
+    },
+  )
   .get("/tips/:stepId", async ({ params, ctx, onboardingService }) => {
-    const { stepId } = tipsSchema.parse(params);
-    return onboardingService.getOnboardingTips(ctx!, stepId);
+    return onboardingService.getOnboardingTips(ctx!, params.stepId);
   })
   .post("/skip", async ({ ctx, onboardingService }) => {
     return onboardingService.skipOnboarding(ctx!);

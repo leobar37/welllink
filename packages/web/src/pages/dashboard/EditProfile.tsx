@@ -1,0 +1,217 @@
+import { useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import { Loader2, Save, Upload } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useProfile } from "@/hooks/use-profile"
+
+const profileFormSchema = z.object({
+  displayName: z.string().min(2, {
+    message: "Display name must be at least 2 characters.",
+  }),
+  username: z.string().min(3).regex(/^[a-z0-9-]+$/),
+  title: z.string().max(100).optional(),
+  bio: z.string().max(160).optional(),
+  whatsappNumber: z.string().optional(),
+})
+
+type ProfileFormValues = z.infer<typeof profileFormSchema>
+
+export function EditProfile() {
+  const { profile, isLoading, updateProfile, uploadAvatar } = useProfile()
+
+  const form = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileFormSchema),
+    mode: "onChange",
+  })
+
+  useEffect(() => {
+    if (profile) {
+      form.reset({
+        displayName: profile.displayName,
+        username: profile.username,
+        title: profile.title || "",
+        bio: profile.bio || "",
+        whatsappNumber: profile.whatsappNumber || "",
+      })
+    }
+  }, [profile, form])
+
+  function onSubmit(data: ProfileFormValues) {
+    if (!profile) return
+    updateProfile.mutate({ id: profile.id, data })
+  }
+
+  function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (file) {
+        uploadAvatar.mutate(file)
+    }
+  }
+
+  if (isLoading) {
+    return (
+        <div className="flex h-96 items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    )
+  }
+
+  const avatarUrl = profile?.avatarId ? `/api/assets/${profile.avatarId}/public` : null
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold tracking-tight">Edit Profile</h1>
+      </div>
+      
+      <div className="grid gap-6 md:grid-cols-[250px_1fr]">
+        <Card>
+            <CardHeader>
+                <CardTitle>Avatar</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center gap-4">
+                <Avatar className="h-32 w-32">
+                    <AvatarImage src={avatarUrl || ""} />
+                    <AvatarFallback>?</AvatarFallback>
+                </Avatar>
+                <div className="w-full">
+                    <label htmlFor="avatar-upload" className="cursor-pointer w-full">
+                        <div className="flex items-center justify-center w-full py-2 px-4 border rounded-md hover:bg-muted transition-colors text-sm font-medium">
+                            <Upload className="w-4 h-4 mr-2" />
+                            {uploadAvatar.isPending ? "Uploading..." : "Change Photo"}
+                        </div>
+                        <input 
+                            id="avatar-upload" 
+                            type="file" 
+                            className="hidden" 
+                            accept="image/*"
+                            onChange={handleAvatarUpload}
+                            disabled={uploadAvatar.isPending}
+                        />
+                    </label>
+                </div>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+            <CardTitle>Profile Information</CardTitle>
+            <CardDescription>
+                Update your profile information visible to visitors.
+            </CardDescription>
+            </CardHeader>
+            <CardContent>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                    control={form.control}
+                    name="displayName"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Display Name</FormLabel>
+                        <FormControl>
+                        <Input placeholder="Dr. Jane Smith" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="username"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Username</FormLabel>
+                        <FormControl>
+                        <Input placeholder="jane-smith" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                        This is your unique URL: wellness.link/{field.value}
+                        </FormDescription>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Professional Title</FormLabel>
+                        <FormControl>
+                        <Input placeholder="Nutritionist" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="bio"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Bio</FormLabel>
+                        <FormControl>
+                        <Textarea 
+                            placeholder="Tell us about yourself" 
+                            className="resize-none" 
+                            {...field} 
+                        />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="whatsappNumber"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>WhatsApp Number</FormLabel>
+                        <FormControl>
+                        <Input placeholder="+1234567890" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                            Used for receiving survey results (private).
+                        </FormDescription>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <div className="flex justify-end">
+                    <Button type="submit" disabled={updateProfile.isPending}>
+                        {updateProfile.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        <Save className="mr-2 h-4 w-4" />
+                        Save Changes
+                    </Button>
+                </div>
+                </form>
+            </Form>
+            </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}

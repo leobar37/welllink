@@ -1,4 +1,4 @@
-import type { SocialLink } from "@/lib/api";
+import type { SocialLink } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import {
     Instagram,
@@ -33,7 +33,7 @@ export function SocialLinks({ links }: SocialLinksProps) {
     return (
         <div className="flex flex-wrap justify-center gap-2">
             {links
-                .sort((a, b) => a.order - b.order)
+                .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
                 .map((link) => {
                     const Icon = iconMap[link.platform.toLowerCase()] || Globe;
 

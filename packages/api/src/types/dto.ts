@@ -9,6 +9,7 @@
 
 export interface CreateProfileData {
   username: string;
+  displayName: string;
   title?: string;
   bio?: string;
   avatarId?: string;
@@ -20,6 +21,7 @@ export interface CreateProfileData {
 
 export interface UpdateProfileData {
   username?: string;
+  displayName?: string;
   title?: string;
   bio?: string;
   avatarId?: string;
@@ -96,6 +98,7 @@ export interface ProfileCreationData {
 /** Alias for onboarding step that maps to CreateProfileData */
 export interface OnboardingProfileData {
   username: string;
+  displayName: string;
   title?: string;
   bio?: string;
 }

@@ -5,7 +5,7 @@ import { profile } from "./profile";
 import { profileCustomization } from "./profile-customization";
 import { socialLink } from "./social-link";
 import { healthSurveyResponse } from "./health-survey";
-import { profileView, socialClick } from "./analytics";
+import { profileView, socialClick, qrDownload } from "./analytics";
 
 // User relations
 export const userRelations = relations(user, ({ many }) => ({
@@ -59,6 +59,7 @@ export const profileRelations = relations(profile, ({ one, many }) => ({
   socialLinks: many(socialLink),
   healthSurveyResponses: many(healthSurveyResponse),
   views: many(profileView),
+  qrDownloads: many(qrDownload),
 }));
 
 // Profile Customization relations
@@ -105,5 +106,13 @@ export const socialClickRelations = relations(socialClick, ({ one }) => ({
   socialLink: one(socialLink, {
     fields: [socialClick.socialLinkId],
     references: [socialLink.id],
+  }),
+}));
+
+// QR Download relations
+export const qrDownloadRelations = relations(qrDownload, ({ one }) => ({
+  profile: one(profile, {
+    fields: [qrDownload.profileId],
+    references: [profile.id],
   }),
 }));

@@ -9,7 +9,6 @@ import type {
   OnboardingExample,
 } from "../../types/dto";
 import { ProfileService } from "./profile";
-import { AssetService } from "./asset";
 
 export interface OnboardingStep {
   id: string;
@@ -37,7 +36,6 @@ export interface OnboardingProgress {
 export class OnboardingService {
   constructor(
     private profileService: ProfileService,
-    private assetService: AssetService,
   ) {}
 
   async getOnboardingProgress(
@@ -272,6 +270,7 @@ export class OnboardingService {
   ): Promise<void> {
     await this.profileService.createProfile(ctx, {
       username: profileData.slug,
+      displayName: profileData.name,
       title: profileData.name,
       bio: profileData.bio,
     });

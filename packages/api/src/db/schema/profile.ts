@@ -19,6 +19,7 @@ export const profile = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     username: varchar("username", { length: 50 }).notNull().unique(),
+    displayName: varchar("display_name", { length: 100 }).notNull(),
     title: varchar("title", { length: 100 }),
     bio: varchar("bio", { length: 160 }),
     avatarId: uuid("avatar_id").references(() => asset.id, {
