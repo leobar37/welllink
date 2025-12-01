@@ -24,6 +24,16 @@ const PROFILE_DATA = [
     isPublished: true,
     onboardingStep: 5,
     onboardingCompletedAt: new Date("2024-11-15T10:30:00Z"),
+    featuresConfig: {
+      healthSurvey: {
+        enabled: true,
+        buttonText: "Evalúate gratis",
+      },
+      tuHistoria: {
+        enabled: true,
+        buttonText: "Mi historia",
+      },
+    },
   },
   {
     key: "carlos",
@@ -39,6 +49,16 @@ const PROFILE_DATA = [
     isPublished: true,
     onboardingStep: 5,
     onboardingCompletedAt: new Date("2024-11-20T14:00:00Z"),
+    featuresConfig: {
+      healthSurvey: {
+        enabled: true,
+        buttonText: "Evalúate gratis",
+      },
+      tuHistoria: {
+        enabled: true,
+        buttonText: "Historias reales",
+      },
+    },
   },
   {
     key: "ana",
@@ -54,6 +74,16 @@ const PROFILE_DATA = [
     isPublished: false, // Ana aún no ha publicado su perfil
     onboardingStep: 3, // Onboarding incompleto
     onboardingCompletedAt: null,
+    featuresConfig: {
+      healthSurvey: {
+        enabled: false,
+        buttonText: "Evalúate gratis",
+      },
+      tuHistoria: {
+        enabled: false,
+        buttonText: "Mi historia",
+      },
+    },
   },
 ];
 

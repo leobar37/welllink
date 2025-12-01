@@ -163,3 +163,53 @@ export interface UpdateHealthSurveyData {
   referredBy?: string;
   responses?: Record<string, unknown>;
 }
+
+// =============================================================================
+// Tu Historia DTOs
+// =============================================================================
+
+export interface StorySectionConfigData {
+  title?: string;
+  intro?: string | null;
+  ctaLabel?: string | null;
+  ctaUrl?: string | null;
+}
+
+export type StoryType = "self" | "client";
+
+export interface CreateStoryData {
+  profileId: string;
+  title: string;
+  type: StoryType;
+  beforeAssetId: string;
+  afterAssetId: string;
+  text?: string | null;
+  isPublished?: boolean;
+}
+
+export interface UpdateStoryData {
+  title?: string;
+  type?: StoryType;
+  beforeAssetId?: string;
+  afterAssetId?: string;
+  text?: string | null;
+  isPublished?: boolean;
+}
+
+export interface ReorderStoriesData {
+  profileId: string;
+  items: Array<{ id: string; order: number }>;
+}
+
+export type StoryEventType =
+  | "section_viewed"
+  | "story_changed"
+  | "text_opened"
+  | "cta_clicked";
+
+export interface TrackStoryEventData {
+  profileId: string;
+  storyId?: string;
+  eventType: StoryEventType;
+  metadata?: Record<string, unknown>;
+}

@@ -7,6 +7,10 @@ import { ProfileRepository } from "../../services/repository/profile";
 import { SocialLinkRepository } from "../../services/repository/social-link";
 import { AssetRepository } from "../../services/repository/asset";
 import { AnalyticsRepository } from "../../services/repository/analytics";
+import { StorySectionRepository } from "../../services/repository/story-section";
+import { StoryRepository } from "../../services/repository/story";
+import { StoryEventRepository } from "../../services/repository/story-event";
+import { StoryService } from "../../services/business/story";
 
 export const publicRoutes = new Elysia({ prefix: "/public" })
     .use(errorMiddleware)
@@ -22,6 +26,9 @@ export const publicRoutes = new Elysia({ prefix: "/public" })
         const socialLinkRepository = new SocialLinkRepository();
         const assetRepository = new AssetRepository();
         const analyticsRepository = new AnalyticsRepository();
+        const storySectionRepository = new StorySectionRepository();
+        const storyRepository = new StoryRepository();
+        const storyEventRepository = new StoryEventRepository();
 
         const profileService = new ProfileService(
             profileRepository,
@@ -34,12 +41,21 @@ export const publicRoutes = new Elysia({ prefix: "/public" })
             analyticsRepository,
         );
 
+        const storyService = new StoryService(
+            storySectionRepository,
+            storyRepository,
+            storyEventRepository,
+            profileRepository,
+            assetRepository,
+        );
+
         return {
             profileService,
             socialLinkService,
+            storyService,
         };
     })
-    .get("/profiles/:username", async ({ params, profileService, socialLinkService }) => {
+    .get("/profiles/:username", async ({ params, profileService, socialLinkService, storyService }) => {
         // Create a guest context
         const guestCtx = {
             userId: "", // Empty string or specific guest ID
@@ -53,6 +69,14 @@ export const publicRoutes = new Elysia({ prefix: "/public" })
         // Build features array from profile's featuresConfig
         const featuresConfig = profile.featuresConfig || {};
         const healthSurveyConfig = featuresConfig.healthSurvey || { enabled: true, buttonText: "Evalúate gratis" };
+        const tuHistoriaConfig = featuresConfig.tuHistoria || { enabled: false, buttonText: "Mi historia" };
+
+        const tuHistoriaData = tuHistoriaConfig.enabled
+            ? await storyService.getPublicStories(profile.id)
+            : null;
+        const isTuHistoriaEnabled = Boolean(
+            tuHistoriaConfig.enabled && tuHistoriaData && tuHistoriaData.stories.length > 0,
+        );
 
         const features = [
             {
@@ -61,6 +85,16 @@ export const publicRoutes = new Elysia({ prefix: "/public" })
                 isEnabled: healthSurveyConfig.enabled,
                 config: {
                     buttonText: healthSurveyConfig.buttonText || "Evalúate gratis",
+                },
+            },
+            {
+                id: "tu-historia",
+                type: "tu-historia",
+                isEnabled: isTuHistoriaEnabled,
+                config: {
+                    buttonText: tuHistoriaConfig.buttonText || "Mi historia",
+                    section: tuHistoriaData?.section ?? null,
+                    stories: tuHistoriaData?.stories ?? [],
                 },
             },
         ];

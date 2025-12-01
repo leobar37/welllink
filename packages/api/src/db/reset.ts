@@ -34,6 +34,15 @@ async function reset() {
     await sql`DROP TABLE IF EXISTS profile_customization CASCADE;`;
     console.log("  ✓ Dropped profile_customization");
 
+    await sql`DROP TABLE IF EXISTS story_event CASCADE;`;
+    console.log("  ✓ Dropped story_event");
+
+    await sql`DROP TABLE IF EXISTS story CASCADE;`;
+    console.log("  ✓ Dropped story");
+
+    await sql`DROP TABLE IF EXISTS story_section CASCADE;`;
+    console.log("  ✓ Dropped story_section");
+
     await sql`DROP TABLE IF EXISTS social_link CASCADE;`;
     console.log("  ✓ Dropped social_link");
 
@@ -61,6 +70,12 @@ async function reset() {
 
     await sql`DROP TYPE IF EXISTS view_source CASCADE;`;
     console.log("  ✓ Dropped view_source enum");
+
+    await sql`DROP TYPE IF EXISTS story_event_type CASCADE;`;
+    console.log("  ✓ Dropped story_event_type enum");
+
+    await sql`DROP TYPE IF EXISTS story_type CASCADE;`;
+    console.log("  ✓ Dropped story_type enum");
 
     // Re-enable foreign key checks
     await sql`SET session_replication_role = 'origin';`;

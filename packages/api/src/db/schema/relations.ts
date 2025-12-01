@@ -6,6 +6,9 @@ import { profileCustomization } from "./profile-customization";
 import { socialLink } from "./social-link";
 import { healthSurveyResponse } from "./health-survey";
 import { profileView, socialClick, qrDownload } from "./analytics";
+import { storySection } from "./story-section";
+import { story } from "./story";
+import { storyEvent } from "./story-event";
 
 // User relations
 export const userRelations = relations(user, ({ many }) => ({
@@ -60,6 +63,12 @@ export const profileRelations = relations(profile, ({ one, many }) => ({
   healthSurveyResponses: many(healthSurveyResponse),
   views: many(profileView),
   qrDownloads: many(qrDownload),
+  storySection: one(storySection, {
+    fields: [profile.id],
+    references: [storySection.profileId],
+  }),
+  stories: many(story),
+  storyEvents: many(storyEvent),
 }));
 
 // Profile Customization relations
@@ -92,6 +101,44 @@ export const healthSurveyResponseRelations = relations(
     }),
   })
 );
+
+// Story Section relations
+export const storySectionRelations = relations(storySection, ({ one }) => ({
+  profile: one(profile, {
+    fields: [storySection.profileId],
+    references: [profile.id],
+  }),
+}));
+
+// Story relations
+export const storyRelations = relations(story, ({ one }) => ({
+  profile: one(profile, {
+    fields: [story.profileId],
+    references: [profile.id],
+  }),
+  beforeAsset: one(asset, {
+    fields: [story.beforeAssetId],
+    references: [asset.id],
+    relationName: "storyBeforeAsset",
+  }),
+  afterAsset: one(asset, {
+    fields: [story.afterAssetId],
+    references: [asset.id],
+    relationName: "storyAfterAsset",
+  }),
+}));
+
+// Story Event relations
+export const storyEventRelations = relations(storyEvent, ({ one }) => ({
+  profile: one(profile, {
+    fields: [storyEvent.profileId],
+    references: [profile.id],
+  }),
+  story: one(story, {
+    fields: [storyEvent.storyId],
+    references: [story.id],
+  }),
+}));
 
 // Profile View relations
 export const profileViewRelations = relations(profileView, ({ one }) => ({

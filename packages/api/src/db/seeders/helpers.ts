@@ -17,7 +17,7 @@ import type { RequestContext } from "../../types/context";
  */
 export async function initializeServices() {
   // Initialize storage
-  const storage = createStorageStrategy();
+  const storage = await createStorageStrategy();
   await storage.initialize();
 
   // Repositories

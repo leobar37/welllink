@@ -10,14 +10,19 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { FileText, Settings2, Loader2 } from "lucide-react";
+import { FileText, Settings2, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useProfile } from "@/hooks/use-profile";
 import { SurveyConfigModal } from "@/components/dashboard/SurveyConfigModal";
+import { TuHistoriaPanel } from "@/components/dashboard/tu-historia";
 
 interface FeaturesConfig {
   healthSurvey?: {
+    enabled: boolean;
+    buttonText: string;
+  };
+  tuHistoria?: {
     enabled: boolean;
     buttonText: string;
   };
@@ -30,6 +35,7 @@ interface ProfileWithFeatures {
 
 export function FeaturesList() {
   const [configModalOpen, setConfigModalOpen] = useState(false);
+  const [tuHistoriaOpen, setTuHistoriaOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { profile: rawProfile, isLoading } = useProfile();
@@ -40,6 +46,10 @@ export function FeaturesList() {
   const healthSurveyConfig = featuresConfig.healthSurvey || {
     enabled: true,
     buttonText: "Evalúate gratis",
+  };
+  const tuHistoriaConfig = featuresConfig.tuHistoria || {
+    enabled: false,
+    buttonText: "Mi historia",
   };
 
   // Mutation for updating features config
@@ -80,6 +90,25 @@ export function FeaturesList() {
     );
   };
 
+  const toggleTuHistoria = async () => {
+    const newEnabled = !tuHistoriaConfig.enabled;
+    updateFeaturesConfig.mutate(
+      {
+        tuHistoria: {
+          ...tuHistoriaConfig,
+          enabled: newEnabled,
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success(
+            `"Mi historia" ${newEnabled ? "activada" : "desactivada"}`,
+          );
+        },
+      },
+    );
+  };
+
   const handleSaveConfig = async (data: { buttonText: string }) => {
     updateFeaturesConfig.mutate(
       {
@@ -106,6 +135,17 @@ export function FeaturesList() {
       enabled: healthSurveyConfig.enabled,
       icon: FileText,
       configurable: true,
+      onConfigure: () => setConfigModalOpen(true),
+    },
+    {
+      id: "tu-historia",
+      name: "Mi historia",
+      description:
+        "Comparte historias visuales con antes/después y un CTA personalizado.",
+      enabled: tuHistoriaConfig.enabled,
+      icon: Sparkles,
+      configurable: true,
+      onConfigure: () => setTuHistoriaOpen(true),
     },
     {
       id: "appointments",
@@ -160,6 +200,11 @@ export function FeaturesList() {
                     }
                     if (feature.id === "health-survey") {
                       toggleHealthSurvey();
+                      return;
+                    }
+                    if (feature.id === "tu-historia") {
+                      toggleTuHistoria();
+                      return;
                     }
                   }}
                   disabled={
@@ -181,7 +226,7 @@ export function FeaturesList() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setConfigModalOpen(true)}
+                    onClick={() => feature.onConfigure?.()}
                   >
                     <Settings2 className="mr-2 h-4 w-4" />
                     Configurar
@@ -201,6 +246,22 @@ export function FeaturesList() {
         }}
         onSave={handleSaveConfig}
         isLoading={updateFeaturesConfig.isPending}
+      />
+
+      <TuHistoriaPanel
+        open={tuHistoriaOpen}
+        onOpenChange={setTuHistoriaOpen}
+        profileId={profile?.id}
+        buttonText={tuHistoriaConfig.buttonText}
+        onUpdateButtonText={async (text) =>
+          updateFeaturesConfig.mutateAsync({
+            tuHistoria: {
+              ...tuHistoriaConfig,
+              buttonText: text,
+            },
+          })
+        }
+        isSavingButtonText={updateFeaturesConfig.isPending}
       />
     </div>
   );

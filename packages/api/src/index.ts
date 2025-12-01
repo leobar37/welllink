@@ -21,6 +21,7 @@ import { onboardingRoutes } from "./api/routes/onboarding";
 import { publicRoutes } from "./api/routes/public";
 import { qrRoutes } from "./api/routes/qr";
 import { socialLinkRoutes } from "./api/routes/social-links";
+import { storiesRoutes } from "./api/routes/stories";
 
 const modules = [
   { id: "02", name: "Public Profile" },
@@ -31,6 +32,8 @@ const modules = [
   { id: "07", name: "Settings" },
 ];
 console.log("env", process.env.NODE_ENV);
+const devOrigins = ["http://localhost:5176", "http://localhost:5174"];
+
 const app = new Elysia()
   // CORS - Open for development
   .use(
@@ -38,7 +41,7 @@ const app = new Elysia()
       origin:
         process.env.NODE_ENV === "production"
           ? ["https://yourdomain.com"]
-          : ["http://localhost:5176"], // Specific origin for development
+          : devOrigins, // Specific origins for development
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
@@ -64,7 +67,8 @@ const app = new Elysia()
       .use(onboardingRoutes)
       .use(publicRoutes)
       .use(qrRoutes)
-      .use(socialLinkRoutes),
+      .use(socialLinkRoutes)
+      .use(storiesRoutes),
   )
   .listen(5300);
 

@@ -6,6 +6,7 @@ import { seedSocialLinks } from "./seeders/social-links.seeder";
 import { seedHealthSurveys } from "./seeders/health-surveys.seeder";
 import { seedAnalytics } from "./seeders/analytics.seeder";
 import { seedProfileCustomizations } from "./seeders/profile-customization.seeder";
+import { seedStories } from "./seeders/stories.seeder";
 
 // Load environment variables
 config({ path: ".env" });
@@ -32,20 +33,26 @@ async function seed() {
     // 5. Profile Customizations (depends on profiles)
     await seedProfileCustomizations();
 
-    // 6. Health Survey Responses (depends on profiles)
+    // 6. Tu Historia (depends on profiles & assets)
+    await seedStories();
+
+    // 7. Health Survey Responses (depends on profiles)
     await seedHealthSurveys();
 
-    // 7. Analytics (depends on profiles and social links)
+    // 8. Analytics (depends on profiles and social links)
     await seedAnalytics();
 
     console.log("\n" + "=".repeat(50));
     console.log("\n🎉 Database seeding completed successfully!\n");
     console.log("📊 Summary:");
     console.log("  - 3 users created");
-    console.log("  - 6 assets created (avatars & covers)");
+    console.log("  - 14 assets created (avatars, covers y slider antes/después)");
     console.log("  - 3 profiles created");
     console.log("  - 11 social links created");
     console.log("  - 2 profile customizations created");
+    console.log("  - 2 secciones 'Tu Historia' configuradas");
+    console.log("  - 4 historias creadas (3 publicadas)");
+    console.log("  - 49 eventos de interacción registrados");
     console.log("  - 5 health survey responses created");
     console.log("  - 85+ profile views created");
     console.log("  - 100+ social clicks created");

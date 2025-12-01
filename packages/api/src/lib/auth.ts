@@ -22,5 +22,5 @@ export const auth = betterAuth({
     updateAge: 60 * 60 * 24, // 1 day
   },
   socialProviders: {}, // No social providers for now
-  trustedOrigins: ["http://localhost:5176"],
+  trustedOrigins: ["http://localhost:5176", "http://localhost:5174"],
 });

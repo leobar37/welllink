@@ -78,7 +78,7 @@ export function Login() {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
             <FormField
               control={form.control}
               name="email"
@@ -86,7 +86,13 @@ export function Login() {
                 <FormItem>
                   <FormLabel>Correo electrónico</FormLabel>
                   <FormControl>
-                    <Input placeholder="tu@correo.com" type="email" {...field} />
+                    <Input
+                      placeholder="tu@correo.com"
+                      type="email"
+                      autoComplete="email"
+                      autoCapitalize="none"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -99,13 +105,21 @@ export function Login() {
                 <FormItem>
                   <FormLabel>Contraseña</FormLabel>
                   <FormControl>
-                    <Input type="password" {...field} />
+                    <Input
+                      type="password"
+                      autoComplete="current-password"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button className="w-full" type="submit" disabled={isLoading}>
+            <Button
+              className="w-full h-11 text-base"
+              type="submit"
+              disabled={isLoading || !form.formState.isValid}
+            >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Iniciar Sesión
             </Button>

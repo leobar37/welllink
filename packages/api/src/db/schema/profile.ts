@@ -16,6 +16,10 @@ export interface FeaturesConfig {
     enabled: boolean;
     buttonText: string;
   };
+  tuHistoria?: {
+    enabled: boolean;
+    buttonText: string;
+  };
 }
 import { user } from "./auth";
 import { asset } from "./asset";
