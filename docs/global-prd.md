@@ -169,8 +169,9 @@ El sistema de features permite agregar funcionalidades modulares al perfil del a
 
 | # | Feature | Descripción | Prioridad |
 |---|---------|-------------|-----------|
-| 2 | Agenda de citas | Permitir agendar consultas con el asesor | 🟡 Media |
-| 3 | Testimonios | Mostrar reseñas de clientes satisfechos | 🟢 Baja |
+| 2 | Mi historia | Historias visuales con slider antes/después y CTA configurable para reforzar credibilidad | 🟡 Media |
+| 3 | Agenda de citas | Permitir agendar consultas con el asesor | 🟡 Media |
+| 4 | Testimonios | Mostrar reseñas de clientes satisfechos | 🟢 Baja |
 
 ---
 

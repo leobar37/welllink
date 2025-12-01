@@ -50,14 +50,17 @@ export const publicRoutes = new Elysia({ prefix: "/public" })
         const profile = await profileService.getProfileByUsername(guestCtx, params.username);
         const socialLinks = await socialLinkService.getSocialLinks(guestCtx, profile.id);
 
-        // Mock features for now until Feature module is ready
+        // Build features array from profile's featuresConfig
+        const featuresConfig = profile.featuresConfig || {};
+        const healthSurveyConfig = featuresConfig.healthSurvey || { enabled: true, buttonText: "Evalúate gratis" };
+
         const features = [
             {
-                id: "1",
+                id: "health-survey",
                 type: "health-survey",
-                isEnabled: true,
+                isEnabled: healthSurveyConfig.enabled,
                 config: {
-                    buttonText: "Evalúate gratis",
+                    buttonText: healthSurveyConfig.buttonText || "Evalúate gratis",
                 },
             },
         ];

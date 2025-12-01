@@ -5,6 +5,7 @@ import {
 } from "../../utils/http-exceptions";
 import type { RequestContext } from "../../types/context";
 import type { CreateProfileData, UpdateProfileData } from "../../types/dto";
+import type { FeaturesConfig } from "../../db/schema/profile";
 import { ProfileRepository } from "../repository/profile";
 import { AssetRepository } from "../repository/asset";
 import { AnalyticsRepository } from "../repository/analytics";
@@ -148,5 +149,27 @@ export class ProfileService {
       views: viewCount,
       socialClicks: socialClicks.length,
     };
+  }
+
+  async updateFeaturesConfig(
+    ctx: RequestContext,
+    profileId: string,
+    featuresConfig: FeaturesConfig,
+  ) {
+    // Check if profile exists and user owns it
+    const profile = await this.profileRepository.findOne(ctx, profileId);
+    if (!profile) {
+      throw new NotFoundException("Profile not found");
+    }
+
+    // Merge with existing config
+    const mergedConfig = {
+      ...profile.featuresConfig,
+      ...featuresConfig,
+    };
+
+    return this.profileRepository.update(ctx, profileId, {
+      featuresConfig: mergedConfig,
+    });
   }
 }

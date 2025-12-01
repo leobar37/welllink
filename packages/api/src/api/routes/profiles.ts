@@ -91,4 +91,20 @@ export const profileRoutes = new Elysia({ prefix: "/profiles" })
   })
   .get("/:id/stats", async ({ params, ctx, profileService }) => {
     return profileService.getProfileStats(ctx!, params.id);
-  });
+  })
+  .patch(
+    "/:id/features-config",
+    async ({ params, body, ctx, profileService }) => {
+      return profileService.updateFeaturesConfig(ctx!, params.id, body);
+    },
+    {
+      body: t.Object({
+        healthSurvey: t.Optional(
+          t.Object({
+            enabled: t.Boolean(),
+            buttonText: t.String({ maxLength: 100 }),
+          }),
+        ),
+      }),
+    },
+  );

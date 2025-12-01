@@ -7,7 +7,16 @@ import {
   integer,
   timestamp,
   index,
+  jsonb,
 } from "drizzle-orm/pg-core";
+
+// Features configuration type
+export interface FeaturesConfig {
+  healthSurvey?: {
+    enabled: boolean;
+    buttonText: string;
+  };
+}
 import { user } from "./auth";
 import { asset } from "./asset";
 
@@ -29,6 +38,7 @@ export const profile = pgTable(
       onDelete: "set null",
     }),
     whatsappNumber: varchar("whatsapp_number", { length: 20 }),
+    featuresConfig: jsonb("features_config").$type<FeaturesConfig>().default({}),
     isDefault: boolean("is_default").notNull().default(true),
     isPublished: boolean("is_published").notNull().default(false),
     onboardingStep: integer("onboarding_step").notNull().default(0),
