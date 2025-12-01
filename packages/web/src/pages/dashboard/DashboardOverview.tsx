@@ -18,10 +18,10 @@ export function DashboardOverview() {
   if (!profile) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-xl font-semibold">No profile found</h2>
-        <p className="text-muted-foreground mb-4">Complete onboarding to see your dashboard.</p>
+        <h2 className="text-xl font-semibold">No se encontró perfil</h2>
+        <p className="text-muted-foreground mb-4">Completa el proceso de configuración para ver tu panel.</p>
         <Button asChild>
-            <Link to="/onboarding">Go to Onboarding</Link>
+            <Link to="/onboarding">Ir a Configuración</Link>
         </Button>
       </div>
     )
@@ -31,19 +31,19 @@ export function DashboardOverview() {
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h1 className="text-3xl font-bold tracking-tight">
-            Hello, {profile.displayName || session?.user.name} 👋
+            Hola, {profile.displayName || session?.user.name} 👋
         </h1>
         <div className="flex gap-2">
             <Button variant="outline" asChild>
                 <a href={`/${profile.username}`} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="mr-2 h-4 w-4" />
-                    View Public
+                    Ver Público
                 </a>
             </Button>
             <Button asChild>
                  <Link to="/dashboard/qr">
                     <Share2 className="mr-2 h-4 w-4" />
-                    Share
+                    Compartir
                  </Link>
             </Button>
         </div>
@@ -52,37 +52,37 @@ export function DashboardOverview() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Views</CardTitle>
+            <CardTitle className="text-sm font-medium">Visualizaciones Totales</CardTitle>
             <Eye className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.views || 0}</div>
             <p className="text-xs text-muted-foreground">
-              +0% from last month
+              +0% desde el mes pasado
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Social Clicks</CardTitle>
+            <CardTitle className="text-sm font-medium">Clics en Redes</CardTitle>
             <MousePointerClick className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.socialClicks || 0}</div>
             <p className="text-xs text-muted-foreground">
-              +0% from last month
+              +0% desde el mes pasado
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Survey Responses</CardTitle>
+            <CardTitle className="text-sm font-medium">Respuestas de Encuestas</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">0</div>
             <p className="text-xs text-muted-foreground">
-              Coming soon
+              Próximamente
             </p>
           </CardContent>
         </Card>
@@ -92,36 +92,36 @@ export function DashboardOverview() {
          {/* Placeholder for Chart or Activity Feed */}
          <Card className="col-span-4">
             <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
+                <CardTitle>Actividad Reciente</CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="flex items-center justify-center h-[200px] text-muted-foreground bg-muted/20 rounded-md border border-dashed">
-                    No recent activity to show
+                    No hay actividad reciente que mostrar
                 </div>
             </CardContent>
          </Card>
 
          <Card className="col-span-3">
             <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
+                <CardTitle>Acciones Rápidas</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-2">
                 <Button variant="outline" className="justify-start" asChild>
                     <Link to="/dashboard/profile">
                         <PenSquare className="mr-2 h-4 w-4" />
-                        Edit Profile
+                        Editar Perfil
                     </Link>
                 </Button>
                 <Button variant="outline" className="justify-start" asChild>
                     <Link to="/dashboard/features">
                         <FileText className="mr-2 h-4 w-4" />
-                        Manage Features
+                        Gestionar Funciones
                     </Link>
                 </Button>
                 <Button variant="outline" className="justify-start" asChild>
                     <Link to="/dashboard/settings">
                         <Share2 className="mr-2 h-4 w-4" />
-                        Account Settings
+                        Configuración de Cuenta
                     </Link>
                 </Button>
             </CardContent>

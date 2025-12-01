@@ -12,15 +12,15 @@ export function FeaturesList() {
   const [features, setFeatures] = useState([
     {
         id: "health-survey",
-        name: "Health Survey",
-        description: "7-day transformation test that sends results via WhatsApp.",
+        name: "Encuesta de Salud",
+        description: "Prueba de transformación de 7 días que envía resultados por WhatsApp.",
         enabled: true,
         icon: FileText
     },
     {
         id: "appointments",
-        name: "Appointments",
-        description: "Allow clients to book consultations directly.",
+        name: "Citas",
+        description: "Permite a los clientes reservar consultas directamente.",
         enabled: false,
         comingSoon: true,
         icon: Settings2
@@ -31,11 +31,11 @@ export function FeaturesList() {
     setFeatures(features.map(f => {
         if (f.id === id) {
             if (f.comingSoon) {
-                toast.info("This feature is coming soon!")
+                toast.info("¡Esta función próximamente!")
                 return f
             }
             // Here we would call API to update feature status
-            toast.success(`Feature ${!f.enabled ? "enabled" : "disabled"}`)
+            toast.success(`Función ${!f.enabled ? "activada" : "desactivada"}`)
             return { ...f, enabled: !f.enabled }
         }
         return f
@@ -45,7 +45,7 @@ export function FeaturesList() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Features</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Funciones</h1>
       </div>
 
       <div className="grid gap-4">
@@ -69,16 +69,16 @@ export function FeaturesList() {
                             disabled={feature.comingSoon}
                         />
                         <Label htmlFor={`feature-${feature.id}`}>
-                            {feature.comingSoon ? "Coming Soon" : (feature.enabled ? "Active" : "Inactive")}
+                            {feature.comingSoon ? "Próximamente" : (feature.enabled ? "Activa" : "Inactiva")}
                         </Label>
                     </div>
                 </CardHeader>
                 {!feature.comingSoon && feature.enabled && (
                     <CardContent className="pt-4 border-t mt-4">
                         <div className="flex justify-end">
-                            <Button variant="outline" size="sm" onClick={() => toast.info("Configuration coming soon")}>
+                            <Button variant="outline" size="sm" onClick={() => toast.info("Configuración próximamente")}>
                                 <Settings2 className="mr-2 h-4 w-4" />
-                                Configure
+                                Configurar
                             </Button>
                         </div>
                     </CardContent>

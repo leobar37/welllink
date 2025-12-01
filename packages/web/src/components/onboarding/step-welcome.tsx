@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Logo } from "@/components/ui/logo"
 
 export function StepWelcome({ onNext }: { onNext: () => void }) {
   return (
     <Card>
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Bienvenido a Wellness Link</CardTitle>
+        <CardTitle className="text-2xl">Bienvenido a <Logo size="lg" className="inline" /></CardTitle>
         <CardDescription>
           Configuremos tu tarjeta digital profesional en solo unos minutos.
         </CardDescription>

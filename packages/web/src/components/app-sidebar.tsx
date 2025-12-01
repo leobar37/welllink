@@ -1,4 +1,5 @@
 import { User, Settings, QrCode, Sparkles, LayoutDashboard, FileText, Link as LinkIcon } from "lucide-react"
+import { Logo } from "@/components/ui/logo"
 import {
   Sidebar,
   SidebarContent,
@@ -16,37 +17,37 @@ import { Link, useLocation } from "react-router"
 // Menu items.
 const items = [
   {
-    title: "Dashboard",
+    title: "Panel",
     url: "/dashboard",
     icon: LayoutDashboard,
   },
   {
-    title: "Profile",
+    title: "Perfil",
     url: "/dashboard/profile",
     icon: User,
   },
   {
-    title: "Social Links",
+    title: "Enlaces Sociales",
     url: "/dashboard/social",
     icon: LinkIcon,
   },
   {
-    title: "Features",
+    title: "Funciones",
     url: "/dashboard/features",
     icon: Sparkles,
   },
   {
-    title: "Surveys",
+    title: "Encuestas",
     url: "/dashboard/surveys",
     icon: FileText,
   },
   {
-    title: "QR & Card",
+    title: "QR y Tarjeta",
     url: "/dashboard/qr",
     icon: QrCode,
   },
   {
-    title: "Settings",
+    title: "Configuración",
     url: "/dashboard/settings",
     icon: Settings,
   },
@@ -58,11 +59,13 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-         <div className="px-4 py-2 font-bold text-lg">Wellness Link</div>
+        <div className="px-4 py-2">
+          <Logo size="md" />
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Menu</SidebarGroupLabel>
+          <SidebarGroupLabel>Menú</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (

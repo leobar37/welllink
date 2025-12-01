@@ -19,7 +19,7 @@ export function FloatingActions({ username, displayName }: FloatingActionsProps)
             try {
                 await navigator.share({
                     title: `Perfil de ${displayName}`,
-                    text: `Conecta con ${displayName} en Wellness Link`,
+                    text: `Conecta con ${displayName} en Wellink`,
                     url,
                 });
             } catch (err) {

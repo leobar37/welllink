@@ -28,9 +28,11 @@ import { useProfile } from "@/hooks/use-profile"
 
 const profileFormSchema = z.object({
   displayName: z.string().min(2, {
-    message: "Display name must be at least 2 characters.",
+    message: "El nombre para mostrar debe tener al menos 2 caracteres.",
   }),
-  username: z.string().min(3).regex(/^[a-z0-9-]+$/),
+  username: z.string().min(3).regex(/^[a-z0-9-]+$/, {
+    message: "El nombre de usuario solo puede contener letras minúsculas, números y guiones.",
+  }),
   title: z.string().max(100).optional(),
   bio: z.string().max(160).optional(),
   whatsappNumber: z.string().optional(),
@@ -83,7 +85,7 @@ export function EditProfile() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Edit Profile</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Editar Perfil</h1>
       </div>
       
       <div className="grid gap-6 md:grid-cols-[250px_1fr]">
@@ -100,12 +102,12 @@ export function EditProfile() {
                     <label htmlFor="avatar-upload" className="cursor-pointer w-full">
                         <div className="flex items-center justify-center w-full py-2 px-4 border rounded-md hover:bg-muted transition-colors text-sm font-medium">
                             <Upload className="w-4 h-4 mr-2" />
-                            {uploadAvatar.isPending ? "Uploading..." : "Change Photo"}
+                            {uploadAvatar.isPending ? "Subiendo..." : "Cambiar Foto"}
                         </div>
-                        <input 
-                            id="avatar-upload" 
-                            type="file" 
-                            className="hidden" 
+                        <input
+                            id="avatar-upload"
+                            type="file"
+                            className="hidden"
                             accept="image/*"
                             onChange={handleAvatarUpload}
                             disabled={uploadAvatar.isPending}
@@ -117,9 +119,9 @@ export function EditProfile() {
 
         <Card>
             <CardHeader>
-            <CardTitle>Profile Information</CardTitle>
+            <CardTitle>Información del Perfil</CardTitle>
             <CardDescription>
-                Update your profile information visible to visitors.
+                Actualiza la información de tu perfil visible para los visitantes.
             </CardDescription>
             </CardHeader>
             <CardContent>
@@ -130,9 +132,9 @@ export function EditProfile() {
                     name="displayName"
                     render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Display Name</FormLabel>
+                        <FormLabel>Nombre para Mostrar</FormLabel>
                         <FormControl>
-                        <Input placeholder="Dr. Jane Smith" {...field} />
+                        <Input placeholder="Dra. Juana Pérez" {...field} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -143,12 +145,12 @@ export function EditProfile() {
                     name="username"
                     render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Username</FormLabel>
+                        <FormLabel>Nombre de Usuario</FormLabel>
                         <FormControl>
-                        <Input placeholder="jane-smith" {...field} />
+                        <Input placeholder="juana-perez" {...field} />
                         </FormControl>
                         <FormDescription>
-                        This is your unique URL: wellness.link/{field.value}
+                        Esta es tu URL única: wellness.link/{field.value}
                         </FormDescription>
                         <FormMessage />
                     </FormItem>
@@ -159,9 +161,9 @@ export function EditProfile() {
                     name="title"
                     render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Professional Title</FormLabel>
+                        <FormLabel>Título Profesional</FormLabel>
                         <FormControl>
-                        <Input placeholder="Nutritionist" {...field} />
+                        <Input placeholder="Nutriólogo" {...field} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -172,12 +174,12 @@ export function EditProfile() {
                     name="bio"
                     render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Bio</FormLabel>
+                        <FormLabel>Biografía</FormLabel>
                         <FormControl>
-                        <Textarea 
-                            placeholder="Tell us about yourself" 
-                            className="resize-none" 
-                            {...field} 
+                        <Textarea
+                            placeholder="Cuéntanos sobre ti"
+                            className="resize-none"
+                            {...field}
                         />
                         </FormControl>
                         <FormMessage />
@@ -189,12 +191,12 @@ export function EditProfile() {
                     name="whatsappNumber"
                     render={({ field }) => (
                     <FormItem>
-                        <FormLabel>WhatsApp Number</FormLabel>
+                        <FormLabel>Número de WhatsApp</FormLabel>
                         <FormControl>
                         <Input placeholder="+1234567890" {...field} />
                         </FormControl>
                         <FormDescription>
-                            Used for receiving survey results (private).
+                            Se usa para recibir resultados de encuestas (privado).
                         </FormDescription>
                         <FormMessage />
                     </FormItem>
@@ -204,7 +206,7 @@ export function EditProfile() {
                     <Button type="submit" disabled={updateProfile.isPending}>
                         {updateProfile.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         <Save className="mr-2 h-4 w-4" />
-                        Save Changes
+                        Guardar Cambios
                     </Button>
                 </div>
                 </form>

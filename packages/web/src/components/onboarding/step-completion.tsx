@@ -2,6 +2,7 @@ import { useNavigate } from "react-router"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckCircle2 } from "lucide-react"
+import { Logo } from "@/components/ui/logo"
 
 export function StepCompletion() {
   const navigate = useNavigate()
@@ -14,7 +15,7 @@ export function StepCompletion() {
         </div>
         <CardTitle className="text-2xl">¡Todo Listo!</CardTitle>
         <CardDescription>
-          Tu perfil de Wellness Link está listo para compartir.
+          Tu perfil de <Logo size="sm" className="inline" /> está listo para compartir.
         </CardDescription>
       </CardHeader>
       <CardContent className="text-center space-y-2">

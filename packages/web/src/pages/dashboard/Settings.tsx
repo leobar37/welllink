@@ -32,16 +32,16 @@ export function Settings() {
         })
 
         if (error) {
-            toast.error(error.message || "Failed to update password")
+            toast.error(error.message || "Error al actualizar la contraseña")
             return
         }
 
-        toast.success("Password updated successfully")
+        toast.success("Contraseña actualizada exitosamente")
         setCurrentPassword("")
         setNewPassword("")
     } catch (err) {
         console.error(err)
-        toast.error("An error occurred")
+        toast.error("Ocurrió un error")
     } finally {
         setLoading(false)
     }
@@ -50,24 +50,24 @@ export function Settings() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Configuración</h1>
       </div>
 
       <div className="grid gap-6 max-w-2xl">
         <Card>
             <CardHeader>
-                <CardTitle>Account</CardTitle>
-                <CardDescription>Manage your account details.</CardDescription>
+                <CardTitle>Cuenta</CardTitle>
+                <CardDescription>Administra los detalles de tu cuenta.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="space-y-2">
-                    <Label>Email</Label>
+                    <Label>Correo Electrónico</Label>
                     <Input value={session?.user.email} disabled />
                 </div>
                 <div className="pt-2">
                     <Button variant="destructive" onClick={handleSignOut}>
                         <LogOut className="mr-2 h-4 w-4" />
-                        Sign Out
+                        Cerrar Sesión
                     </Button>
                 </div>
             </CardContent>
@@ -75,26 +75,26 @@ export function Settings() {
 
         <Card>
             <CardHeader>
-                <CardTitle>Security</CardTitle>
-                <CardDescription>Update your password.</CardDescription>
+                <CardTitle>Seguridad</CardTitle>
+                <CardDescription>Actualiza tu contraseña.</CardDescription>
             </CardHeader>
             <CardContent>
                 <form onSubmit={handleChangePassword} className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="current">Current Password</Label>
-                        <Input 
-                            id="current" 
-                            type="password" 
+                        <Label htmlFor="current">Contraseña Actual</Label>
+                        <Input
+                            id="current"
+                            type="password"
                             value={currentPassword}
                             onChange={(e) => setCurrentPassword(e.target.value)}
                             required
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="new">New Password</Label>
-                        <Input 
-                            id="new" 
-                            type="password" 
+                        <Label htmlFor="new">Nueva Contraseña</Label>
+                        <Input
+                            id="new"
+                            type="password"
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
                             required
@@ -103,7 +103,7 @@ export function Settings() {
                     </div>
                     <Button type="submit" disabled={loading || !currentPassword || !newPassword}>
                         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Update Password
+                        Actualizar Contraseña
                     </Button>
                 </form>
             </CardContent>

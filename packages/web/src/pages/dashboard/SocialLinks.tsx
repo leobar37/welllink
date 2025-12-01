@@ -33,7 +33,7 @@ import { useSocialLinks } from "@/hooks/use-social-links";
 
 const socialLinkSchema = z.object({
   platform: z.enum(["whatsapp", "instagram", "tiktok", "facebook", "youtube"]),
-  url: z.string().url("Must be a valid URL"),
+  url: z.string().url("Debe ser una URL válida"),
 });
 
 type SocialLinkValues = z.infer<typeof socialLinkSchema>;
@@ -83,16 +83,16 @@ export function SocialLinks() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Social Links</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Enlaces Sociales</h1>
         <Button onClick={() => setAdding(!adding)} disabled={adding}>
-          <Plus className="mr-2 h-4 w-4" /> Add Link
+          <Plus className="mr-2 h-4 w-4" /> Agregar Enlace
         </Button>
       </div>
 
       {adding && (
         <Card className="border-primary/20 bg-primary/5">
           <CardHeader>
-            <CardTitle className="text-base">New Link</CardTitle>
+            <CardTitle className="text-base">Nuevo Enlace</CardTitle>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -105,14 +105,14 @@ export function SocialLinks() {
                   name="platform"
                   render={({ field }) => (
                     <FormItem className="w-full md:w-48">
-                      <FormLabel>Platform</FormLabel>
+                      <FormLabel>Plataforma</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select platform" />
+                            <SelectValue placeholder="Seleccionar plataforma" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -145,14 +145,14 @@ export function SocialLinks() {
                     {createLink.isPending && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
-                    Save
+                    Guardar
                   </Button>
                   <Button
                     type="button"
                     variant="ghost"
                     onClick={() => setAdding(false)}
                   >
-                    Cancel
+                    Cancelar
                   </Button>
                 </div>
               </form>
@@ -223,7 +223,7 @@ export function SocialLinks() {
             ))
           : !adding && (
               <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">
-                No social links added yet. Click "Add Link" to get started.
+                No hay enlaces sociales agregados aún. Haz clic en "Agregar Enlace" para empezar.
               </div>
             )}
       </div>

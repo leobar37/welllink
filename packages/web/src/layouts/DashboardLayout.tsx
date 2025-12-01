@@ -25,7 +25,7 @@ export function DashboardLayout() {
       <main className="w-full">
         <div className="flex h-16 items-center px-4 border-b">
             <SidebarTrigger />
-            <div className="ml-4 font-semibold">Dashboard</div>
+            <div className="ml-4 font-semibold">Panel</div>
         </div>
         <div className="p-4 md:p-8">
             <Outlet />

@@ -33,7 +33,7 @@ export function QRTools() {
         document.body.removeChild(link);
     } catch (err) {
         console.error(err)
-        toast.error("Failed to download QR")
+        toast.error("Error al descargar el QR")
     }
   }
 
@@ -48,10 +48,10 @@ export function QRTools() {
         link.download = `card-${profile.username}.png`
         link.href = dataUrl
         link.click()
-        toast.success("Card downloaded")
+        toast.success("Tarjeta descargada")
     } catch (err) {
       console.error(err)
-      toast.error("Failed to generate card")
+      toast.error("Error al generar la tarjeta")
     }
   }
 
@@ -60,36 +60,36 @@ export function QRTools() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">QR & Virtual Card</h1>
+        <h1 className="text-3xl font-bold tracking-tight">QR y Tarjeta Virtual</h1>
       </div>
 
       <Tabs defaultValue="qr" className="w-full">
         <TabsList className="grid w-full grid-cols-2 max-w-md">
-          <TabsTrigger value="qr">QR Code</TabsTrigger>
-          <TabsTrigger value="card">Virtual Card</TabsTrigger>
+          <TabsTrigger value="qr">Código QR</TabsTrigger>
+          <TabsTrigger value="card">Tarjeta Virtual</TabsTrigger>
         </TabsList>
         
         <TabsContent value="qr" className="space-y-4">
             <Card>
                 <CardHeader>
-                    <CardTitle>Your QR Code</CardTitle>
-                    <CardDescription>Scan to visit your profile instantly.</CardDescription>
+                    <CardTitle>Tu Código QR</CardTitle>
+                    <CardDescription>Escanea para visitar tu perfil al instante.</CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center space-y-6">
                     <div className="bg-white p-4 rounded-xl border shadow-sm">
-                        <img src={qrUrl} alt="QR Code" className="w-64 h-64" />
+                        <img src={qrUrl} alt="Código QR" className="w-64 h-64" />
                     </div>
                     <div className="flex gap-4">
                         <Button onClick={downloadQr}>
                             <Download className="mr-2 h-4 w-4" />
-                            Download PNG
+                            Descargar PNG
                         </Button>
                         <Button variant="outline" onClick={() => {
                             navigator.clipboard.writeText(`${window.location.origin}/${profile.username}`)
-                            toast.success("Link copied")
+                            toast.success("Enlace copiado")
                         }}>
                             <Share2 className="mr-2 h-4 w-4" />
-                            Copy Link
+                            Copiar Enlace
                         </Button>
                     </div>
                 </CardContent>
@@ -99,18 +99,18 @@ export function QRTools() {
         <TabsContent value="card">
             <Card>
                 <CardHeader>
-                    <CardTitle>Digital Business Card</CardTitle>
-                    <CardDescription>Download and share this image on social media or print it.</CardDescription>
+                    <CardTitle>Tarjeta de Presentación Digital</CardTitle>
+                    <CardDescription>Descarga y comparte esta imagen en redes sociales o imprímela.</CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center space-y-6">
                     {/* Card Preview Area */}
-                    <div 
+                    <div
                         ref={cardRef}
                         className="w-[350px] h-[200px] bg-gradient-to-br from-primary/90 to-primary rounded-xl shadow-lg p-6 text-primary-foreground flex flex-col justify-between relative overflow-hidden"
                     >
                         {/* Background Pattern */}
                         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-xl" />
-                        
+
                         <div className="flex items-start gap-4 z-10">
                             <Avatar className="h-16 w-16 border-2 border-white/50 shadow-md">
                                 <AvatarImage src={avatarUrl || ""} />
@@ -120,7 +120,7 @@ export function QRTools() {
                             </Avatar>
                             <div>
                                 <h3 className="font-bold text-lg leading-tight">{profile.displayName}</h3>
-                                <p className="text-sm opacity-90">{profile.title || "Wellness Advisor"}</p>
+                                <p className="text-sm opacity-90">{profile.title || "Asesor de Bienestar"}</p>
                             </div>
                         </div>
 
@@ -136,7 +136,7 @@ export function QRTools() {
 
                     <Button onClick={downloadCard}>
                         <Download className="mr-2 h-4 w-4" />
-                        Download Card
+                        Descargar Tarjeta
                     </Button>
                 </CardContent>
             </Card>
