@@ -1,13 +1,14 @@
 # Dependencies
 node_modules
 
-# Build output
+# Build output (will be rebuilt in container)
 dist
 
-# Environment files
+# Environment files (pass via Dokploy env vars)
 .env
 .env.local
 .env.*.local
+.env.example
 
 # IDE
 .idea
@@ -30,14 +31,8 @@ coverage
 
 # Git
 .git
-.gitignore
-
-# Docker
-Dockerfile
-.dockerignore
-docker-compose*.yml
 
 # Misc
 *.md
-*.txt
 test-image.txt
+uploads/
