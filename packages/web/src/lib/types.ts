@@ -3,7 +3,7 @@ import type {
   SocialLink as DbSocialLink,
   Story as DbStory,
   StorySection as DbStorySection,
-} from "@wellness/api";
+} from "../../../api/src/db/schema";
 
 // Extend the DB profile with properties returned by the API (e.g. computed avatarUrl)
 export type Profile = DbProfile & {

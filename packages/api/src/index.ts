@@ -34,21 +34,23 @@ const modules = [
   { id: "06", name: "Dashboard" },
   { id: "07", name: "Settings" },
 ];
-console.log("env", process.env.NODE_ENV);
-const devOrigins = [
-  "http://localhost:5176",
-  "http://localhost:5175",
-  "http://localhost:5174",
-];
+const getCorsOrigins = (): string[] => {
+  if (process.env.CORS_ORIGIN) {
+    return process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim());
+  }
+  // Default development origins
+  return [
+    "http://localhost:5176",
+    "http://localhost:5175",
+    "http://localhost:5174",
+  ];
+};
 
 const app = new Elysia()
-  // CORS - Open for development
+  // CORS - configurable via CORS_ORIGIN env variable
   .use(
     cors({
-      origin:
-        process.env.NODE_ENV === "production"
-          ? ["https://yourdomain.com"]
-          : devOrigins, // Specific origins for development
+      origin: getCorsOrigins(),
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],

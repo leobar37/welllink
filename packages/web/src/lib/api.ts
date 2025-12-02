@@ -1,7 +1,9 @@
 import { edenTreaty } from "@elysiajs/eden";
-import type { App } from "@wellness/api";
+import type { App } from "../../../api/src/index";
 
-export const api = edenTreaty<App>("http://localhost:5300", {
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5300";
+
+export const api = edenTreaty<App>(API_URL, {
   $fetch: {
     credentials: "include",
   },
