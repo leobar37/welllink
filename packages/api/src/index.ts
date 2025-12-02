@@ -116,7 +116,10 @@ const app = new Elysia()
       .use(storiesRoutes)
       .use(themeRoutes),
   )
-  .listen(Number(process.env.PORT) || 5300);
+  .listen({
+    port: Number(process.env.PORT) || 5300,
+    hostname: "0.0.0.0",
+  });
 
 export type App = typeof app;
 export * from "./db/schema";
