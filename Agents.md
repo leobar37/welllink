@@ -72,8 +72,33 @@ When creating a new service:
   // GOOD: click.socialLink.platform
   ```
 
+## Media Script
+
+A CLI script for image and video generation using Replicate AI models.
+
+**Location:** `scripts/media.ts`
+**Documentation:** `docs/media-script.md`
+
+**Common uses:**
+```bash
+# Generate profile image for wellness professional
+bun run media nano -p "Minimalist wellness logo" -o logo.jpg
+
+# Remove background from image
+bun run media remove-bg -i photo.jpg -o photo-clean.png
+
+# Generate promotional video
+bun run media hailuo -p "Inspiring wellness video" -q pro -o promo.mp4
+```
+
+**Available Commands:**
+- **Images:** `nano`, `flux`, `remove-bg`, `enhance`
+- **Videos:** `hailuo`, `hailuo2`, `hailuo-fast`, `director`, `live`
+
 ## Quick Links
 
 - `packages/web` — React 19 + Vite + Tailwind v4 + shadcn/ui.
 - `packages/api` — Bun + Elysia REST API.
 - `docs/modules` — Module-by-module MVP scope.
+- `scripts/media.ts` — CLI script for multimedia content generation.
+- `docs/media-script.md` — Complete media script documentation.

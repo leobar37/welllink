@@ -48,7 +48,7 @@ export function Login() {
   async function onSubmit(values: LoginValues) {
     setIsLoading(true)
     try {
-      const { error } = await authClient.signIn.email({
+      const { data, error } = await authClient.signIn.email({
         email: values.email,
         password: values.password,
       })
@@ -59,7 +59,11 @@ export function Login() {
       }
 
       toast.success("Sesión iniciada correctamente")
-      navigate("/dashboard")
+      if (data?.redirect && data.redirectTo) {
+        window.location.href = data.redirectTo
+        return
+      }
+      navigate("/dashboard", { replace: true })
     } catch (err) {
       console.error(err)
       toast.error("Error al iniciar sesión")

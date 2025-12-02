@@ -13,7 +13,7 @@ import {
   ChevronRight,
   Eye,
   EyeOff,
-  MousePointerSquare,
+  MousePointerClick,
 } from "lucide-react";
 
 interface TuHistoriaViewerProps {
@@ -83,7 +83,7 @@ export function TuHistoriaViewer({
   if (!stories.length) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-8 text-center">
-        <MousePointerSquare className="h-10 w-10 text-muted-foreground" />
+        <MousePointerClick className="h-10 w-10 text-muted-foreground" />
         <p className="text-sm text-muted-foreground">
           El asesor aún no ha publicado historias.
         </p>

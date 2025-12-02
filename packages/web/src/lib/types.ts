@@ -2,18 +2,18 @@ import type {
   Profile as DbProfile,
   SocialLink as DbSocialLink,
   Story as DbStory,
-  StorySection,
+  StorySection as DbStorySection,
 } from "@wellness/api";
 
 // Extend the DB profile with properties returned by the API (e.g. computed avatarUrl)
-export type Profile = DbProfile & { 
-    avatarUrl?: string | null;
+export type Profile = DbProfile & {
+  avatarUrl?: string | null;
 };
 
 export type SocialLink = DbSocialLink;
 
 export type TuHistoriaStory = DbStory;
-export type TuHistoriaSection = StorySection;
+export type TuHistoriaSection = DbStorySection;
 
 interface BaseFeature<Config = Record<string, unknown>> {
   id: string;
@@ -22,27 +22,25 @@ interface BaseFeature<Config = Record<string, unknown>> {
   config: Config;
 }
 
-export interface HealthSurveyFeature
-  extends BaseFeature<{ buttonText?: string }> {
+export interface HealthSurveyFeature extends BaseFeature<{
+  buttonText?: string;
+}> {
   type: "health-survey";
 }
 
-export interface TuHistoriaFeature
-  extends BaseFeature<{
-    buttonText?: string;
-    section: TuHistoriaSection | null;
-    stories: TuHistoriaStory[];
-  }> {
+export interface TuHistoriaFeature extends BaseFeature<{
+  buttonText?: string;
+  section: TuHistoriaSection | null;
+  stories: TuHistoriaStory[];
+}> {
   type: "tu-historia";
 }
 
-export type Feature =
-  | HealthSurveyFeature
-  | TuHistoriaFeature
-  | BaseFeature;
+export type Feature = HealthSurveyFeature | TuHistoriaFeature | BaseFeature;
 
 export interface PublicProfileData {
-    profile: Profile;
-    socialLinks: SocialLink[];
-    features: Feature[];
+  profile: Profile;
+  socialLinks: SocialLink[];
+  features: Feature[];
+  themeId?: string;
 }

@@ -24,7 +24,6 @@ const updateAssetSchema = z.object({
 
 export const assetRoutes = new Elysia({ prefix: "/assets" })
   .use(errorMiddleware)
-  .use(contextPlugin)
   .use(servicesPlugin)
   .use(authGuard)
   .get("/", async ({ ctx, services, query }) => {
@@ -33,9 +32,9 @@ export const assetRoutes = new Elysia({ prefix: "/assets" })
 
     let assets;
     if (type) {
-      assets = await services.assetService.getAssetsByType(ctx!, type);
+      assets = await services.assetService.getAssetsByType(ctx, type);
     } else {
-      assets = await services.assetService.getAssets(ctx!, userId);
+      assets = await services.assetService.getAssets(ctx, userId);
     }
 
     // Resolve URLs for all assets
@@ -46,11 +45,11 @@ export const assetRoutes = new Elysia({ prefix: "/assets" })
   })
   .get("/stats", async ({ ctx, services, query }) => {
     const userId = query.userId as string;
-    return services.assetService.getAssetStats(ctx!, userId);
+    return services.assetService.getAssetStats(ctx, userId);
   })
   .post("/", async ({ body, set, ctx, services }) => {
     const data = createAssetSchema.parse(body);
-    const asset = await services.assetService.createAsset(ctx!, data);
+    const asset = await services.assetService.createAsset(ctx, data);
     set.status = 201;
     if (!asset) {
       throw new BadRequestException("Failed to create asset");
@@ -68,7 +67,7 @@ export const assetRoutes = new Elysia({ prefix: "/assets" })
 
     // Handle file upload
     const file = body as File;
-    const asset = await services.assetService.uploadFile(ctx!, file, type);
+    const asset = await services.assetService.uploadFile(ctx, file, type);
     if (!asset) {
       throw new BadRequestException("Failed to upload file");
     }
@@ -79,14 +78,14 @@ export const assetRoutes = new Elysia({ prefix: "/assets" })
     };
   })
   .get("/:id", async ({ params, ctx, services }) => {
-    const asset = await services.assetService.getAsset(ctx!, params.id);
+    const asset = await services.assetService.getAsset(ctx, params.id);
     return {
       ...asset,
       url: services.storage.getPublicUrl(asset.path),
     };
   })
   .get("/:id/url", async ({ params, ctx, services }) => {
-    const url = await services.assetService.getAssetUrl(ctx!, params.id);
+    const url = await services.assetService.getAssetUrl(ctx, params.id);
     return { url };
   })
   .get("/:id/signed-url", async ({ params, ctx, services, query }) => {
@@ -94,14 +93,14 @@ export const assetRoutes = new Elysia({ prefix: "/assets" })
       ? parseInt(query.expiresIn as string)
       : 3600;
     const url = await services.assetService.getAssetSignedUrl(
-      ctx!,
+      ctx,
       params.id,
       expiresIn,
     );
     return { url, expiresIn };
   })
   .get("/:id/file", async ({ params, ctx, services, set }) => {
-    const fileData = await services.assetService.getAssetFile(ctx!, params.id);
+    const fileData = await services.assetService.getAssetFile(ctx, params.id);
 
     set.headers["Content-Type"] = fileData.mimeType;
     set.headers["Content-Disposition"] =
@@ -112,7 +111,7 @@ export const assetRoutes = new Elysia({ prefix: "/assets" })
   .put("/:id", async ({ params, body, ctx, services }) => {
     const data = updateAssetSchema.parse(body);
     const asset = await services.assetService.updateAsset(
-      ctx!,
+      ctx,
       params.id,
       data,
     );
@@ -122,6 +121,6 @@ export const assetRoutes = new Elysia({ prefix: "/assets" })
     };
   })
   .delete("/:id", async ({ params, ctx, services, set }) => {
-    await services.assetService.deleteAsset(ctx!, params.id);
+    await services.assetService.deleteAsset(ctx, params.id);
     set.status = 204;
   });

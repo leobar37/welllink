@@ -13,8 +13,11 @@ export interface TrackStoryEventPayload {
   metadata?: Record<string, unknown>;
 }
 
-export const getAssetPublicUrl = (assetId?: string | null) =>
-  assetId ? `/api/assets/${assetId}/public` : null;
+export const getAssetPublicUrl = (assetId?: string | null) => {
+  if (!assetId) return null;
+  // Return a data URL that will trigger the component to fetch the actual URL
+  return `asset://${assetId}`;
+};
 
 export async function trackStoryEvent(payload: TrackStoryEventPayload) {
   try {

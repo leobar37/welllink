@@ -1,4 +1,4 @@
-import { User, Settings, QrCode, Sparkles, LayoutDashboard, FileText, Link as LinkIcon } from "lucide-react"
+import { User, Settings, QrCode, Sparkles, LayoutDashboard, FileText, Link as LinkIcon, Palette } from "lucide-react"
 import { Logo } from "@/components/ui/logo"
 import {
   Sidebar,
@@ -35,6 +35,11 @@ const items = [
     title: "Funciones",
     url: "/dashboard/features",
     icon: Sparkles,
+  },
+  {
+    title: "Temas",
+    url: "/dashboard/themes",
+    icon: Palette,
   },
   {
     title: "Encuestas",

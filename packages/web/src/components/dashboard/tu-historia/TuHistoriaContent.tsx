@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { ResponsiveDrawerSheet } from "@/components/ui/responsive-drawer-sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,23 +42,9 @@ import { getAssetPublicUrl } from "@/lib/tu-historia";
 import { useAssetUrl } from "@/hooks/use-asset-url";
 
 const sectionSchema = z.object({
-  title: z
-    .string()
-    .min(1, "El título es requerido")
-    .max(120, "Máximo 120 caracteres"),
-  intro: z
-    .string()
-    .max(2000, "Máximo 2000 caracteres")
-    .optional()
-    .or(z.literal("")),
   ctaLabel: z
     .string()
     .max(120, "Máximo 120 caracteres")
-    .optional()
-    .or(z.literal("")),
-  ctaUrl: z
-    .string()
-    .url("Debe ser una URL válida")
     .optional()
     .or(z.literal("")),
 });
@@ -83,10 +68,9 @@ const storySchema = z.object({
 type SectionFormValues = z.infer<typeof sectionSchema>;
 type StoryFormValues = z.infer<typeof storySchema>;
 
-interface TuHistoriaPanelProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+interface TuHistoriaContentProps {
   profileId?: string;
+  profile?: { whatsappNumber?: string };
   buttonText: string;
   onUpdateButtonText: (text: string) => Promise<void>;
   isSavingButtonText?: boolean;
@@ -97,24 +81,13 @@ interface DashboardStoriesResponse {
   stories: TuHistoriaStory[];
 }
 
-export function TuHistoriaPanel({
-  open,
-  onOpenChange,
+export function TuHistoriaContent({
   profileId,
-  buttonText,
-  onUpdateButtonText,
-  isSavingButtonText,
-}: TuHistoriaPanelProps) {
+  profile,
+}: TuHistoriaContentProps) {
   const queryClient = useQueryClient();
   const [storyDialogOpen, setStoryDialogOpen] = useState(false);
-  const [editingStory, setEditingStory] = useState<TuHistoriaStory | null>(
-    null,
-  );
-  const [buttonTextValue, setButtonTextValue] = useState(buttonText);
-
-  useEffect(() => {
-    setButtonTextValue(buttonText);
-  }, [buttonText]);
+  const [editingStory, setEditingStory] = useState<TuHistoriaStory | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["tu-historia", profileId],
@@ -124,7 +97,7 @@ export function TuHistoriaPanel({
       if (error) throw error;
       return data as unknown as DashboardStoriesResponse;
     },
-    enabled: open && !!profileId,
+    enabled: !!profileId,
   });
 
   const { data: metrics } = useQuery({
@@ -141,7 +114,7 @@ export function TuHistoriaPanel({
         counts: Record<string, number>;
       };
     },
-    enabled: open && !!profileId,
+    enabled: !!profileId,
   });
 
   const stories = useMemo(() => {
@@ -151,32 +124,42 @@ export function TuHistoriaPanel({
   const sectionForm = useForm<SectionFormValues>({
     resolver: zodResolver(sectionSchema),
     defaultValues: {
-      title: "Mi historia",
-      intro: "",
-      ctaLabel: "",
-      ctaUrl: "",
+      ctaLabel: "Agenda una llamada",
     },
   });
 
   useEffect(() => {
     if (data?.section) {
       sectionForm.reset({
-        title: data.section.title,
-        intro: data.section.intro || "",
         ctaLabel: data.section.ctaLabel || "",
-        ctaUrl: data.section.ctaUrl || "",
       });
     }
   }, [data?.section, sectionForm]);
 
+  // Helper function to generate WhatsApp URL from profile
+  const generateWhatsAppUrl = (): string => {
+    if (!profile?.whatsappNumber) return "";
+
+    // Clean the phone number and create WhatsApp link
+    const cleanPhone = profile.whatsappNumber.replace(/[^\d+]/g, "");
+    if (cleanPhone.startsWith("+")) {
+      return `https://wa.me/${cleanPhone.replace("+", "")}`;
+    }
+    return `https://wa.me/${cleanPhone}`;
+  };
+
   const sectionMutation = useMutation({
     mutationFn: async (formValues: SectionFormValues) => {
       if (!profileId) throw new Error("Sin perfil");
+
+      // Generate WhatsApp URL from profile
+      const whatsappUrl = generateWhatsAppUrl();
+
       const payload = {
-        ...formValues,
-        intro: formValues.intro || null,
+        title: "Mi historia",
+        intro: null,
         ctaLabel: formValues.ctaLabel || null,
-        ctaUrl: formValues.ctaUrl || null,
+        ctaUrl: whatsappUrl || null,
       };
       const { data, error } =
         await api.api.stories.profile[profileId].config.put(payload);
@@ -184,7 +167,7 @@ export function TuHistoriaPanel({
       return data;
     },
     onSuccess: () => {
-      toast.success("Sección actualizada");
+      toast.success("Configuración guardada");
       queryClient.invalidateQueries({ queryKey: ["tu-historia", profileId] });
     },
     onError: () => toast.error("No pudimos guardar los cambios"),
@@ -331,207 +314,132 @@ export function TuHistoriaPanel({
     });
   };
 
-  const handleButtonTextSave = async () => {
-    if (!buttonTextValue.trim()) {
-      toast.error("Necesitas un texto para el botón");
-      return;
-    }
-    try {
-      await onUpdateButtonText(buttonTextValue.trim());
-      toast.success("Texto del botón actualizado");
-    } catch (error) {
-      console.error(error);
-      toast.error("No pudimos guardar el texto");
-    }
-  };
-
+  
   const sectionLoading = sectionMutation.isPending;
   const storySaving =
     createStoryMutation.isPending || updateStoryMutation.isPending;
 
   return (
-    <ResponsiveDialog
-      open={open}
-      onOpenChange={(next) => {
-        if (!next) {
-          setStoryDialogOpen(false);
-          setEditingStory(null);
-        }
-        onOpenChange(next);
-      }}
-      title="Configurar Tu Historia"
-      description="Gestiona las historias visuales que aparecen en tu perfil público"
-    >
-      {isLoading ? (
-        <div className="flex h-72 items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+    <div className="space-y-8">
+      <section className="space-y-4">
+        <div>
+          <h3 className="text-lg font-semibold">Configuración</h3>
+          <p className="text-sm text-muted-foreground">
+            Personaliza el texto del botón WhatsApp. Se usará automáticamente tu número configurado.
+          </p>
         </div>
-      ) : (
-        <div className="space-y-8">
-          <section className="space-y-4">
-            <div>
-              <h3 className="text-lg font-semibold">Encabezado y CTA</h3>
-              <p className="text-sm text-muted-foreground">
-                Este contenido aparece antes del deslizador en tu perfil.
-              </p>
-            </div>
-            <form
-              className="grid gap-4"
-              onSubmit={sectionForm.handleSubmit((values) =>
-                sectionMutation.mutate(values),
-              )}
-            >
-              <div className="grid gap-2">
-                <Label htmlFor="title">Título</Label>
-                <Input
-                  id="title"
-                  placeholder="Mi historia"
-                  disabled={sectionLoading}
-                  {...sectionForm.register("title")}
-                />
-                {sectionForm.formState.errors.title && (
-                  <p className="text-sm text-destructive">
-                    {sectionForm.formState.errors.title.message}
-                  </p>
-                )}
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="intro">Introducción</Label>
-                <Textarea
-                  id="intro"
-                  placeholder="Cuenta brevemente qué verán los visitantes"
-                  className="min-h-28"
-                  disabled={sectionLoading}
-                  {...sectionForm.register("intro")}
-                />
-                {sectionForm.formState.errors.intro && (
-                  <p className="text-sm text-destructive">
-                    {sectionForm.formState.errors.intro.message}
-                  </p>
-                )}
-              </div>
-              <div className="grid gap-2 md:grid-cols-2">
-                <div className="grid gap-2">
-                  <Label htmlFor="ctaLabel">Texto del CTA</Label>
-                  <Input
-                    id="ctaLabel"
-                    placeholder="Agenda una llamada"
-                    disabled={sectionLoading}
-                    {...sectionForm.register("ctaLabel")}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="ctaUrl">URL del CTA</Label>
-                  <Input
-                    id="ctaUrl"
-                    placeholder="https://wa.me/"
-                    disabled={sectionLoading}
-                    {...sectionForm.register("ctaUrl")}
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col gap-3 rounded-lg border p-4 md:flex-row md:items-end">
-                <div className="flex-1 space-y-2">
-                  <Label htmlFor="buttonText">Texto del botón en la bio</Label>
-                  <Input
-                    id="buttonText"
-                    value={buttonTextValue}
-                    onChange={(event) => setButtonTextValue(event.target.value)}
-                    disabled={isSavingButtonText}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Este texto aparece en el botón principal (ej. "Mi
-                    historia").
-                  </p>
-                </div>
-                <Button
-                  type="button"
-                  className="md:w-auto"
-                  onClick={handleButtonTextSave}
-                  disabled={isSavingButtonText}
-                >
-                  {isSavingButtonText && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Guardar texto
-                </Button>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button
-                  type="submit"
-                  disabled={sectionLoading || !sectionForm.formState.isDirty}
-                >
-                  {sectionLoading && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Guardar sección
-                </Button>
-              </div>
-            </form>
-          </section>
-
-          <Separator />
-
-          <section className="space-y-4">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div>
-                <h3 className="text-lg font-semibold">Historias</h3>
-                <p className="text-sm text-muted-foreground">
-                  Puedes publicar hasta 3 historias. Prioriza imágenes
-                  verticales.
-                </p>
-              </div>
-              <Button onClick={openCreateDialog} disabled={stories.length >= 3}>
-                <Plus className="mr-2 h-4 w-4" /> Agregar historia
-              </Button>
-            </div>
-            <div className="space-y-3">
-              {stories.length === 0 && (
-                <Card className="border-dashed">
-                  <CardHeader>
-                    <CardTitle className="text-base">
-                      Aún no tienes historias
-                    </CardTitle>
-                    <CardDescription>
-                      Sube tu transformación o la de tus clientes para inspirar
-                      confianza.
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              )}
-              {stories.map((story, index) => (
-                <StoryRow
-                  key={story.id}
-                  story={story}
-                  index={index}
-                  total={stories.length}
-                  onEdit={() => openEditDialog(story)}
-                  onDelete={() => handleDeleteStory(story)}
-                  onPublish={() => handlePublishToggle(story)}
-                  onMove={(direction) => handleReorder(story.id, direction)}
-                  disabled={
-                    reorderMutation.isPending || deleteStoryMutation.isPending
-                  }
-                />
-              ))}
-            </div>
-          </section>
-
-          {metrics?.counts && (
-            <section className="grid gap-4 rounded-lg border p-4 md:grid-cols-2">
-              <MetricsCard
-                label="Vistas (30 días)"
-                value={metrics.counts.section_viewed || 0}
-                helper="Cuántas personas abrieron la sección"
-              />
-              <MetricsCard
-                label="Clicks del CTA"
-                value={metrics.counts.cta_clicked || 0}
-                helper="Veces que pulsaron tu botón final"
-              />
-            </section>
+        <form
+          className="grid gap-4"
+          onSubmit={sectionForm.handleSubmit((values) =>
+            sectionMutation.mutate(values),
           )}
+        >
+          <div className="grid gap-2">
+            <Label htmlFor="ctaLabel">Texto del botón WhatsApp</Label>
+            <Input
+              id="ctaLabel"
+              placeholder="Agenda una llamada"
+              disabled={sectionLoading}
+              {...sectionForm.register("ctaLabel")}
+            />
+            {sectionForm.formState.errors.ctaLabel && (
+              <p className="text-sm text-destructive">
+                {sectionForm.formState.errors.ctaLabel.message}
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Este texto aparecerá en el botón que conecta con tu WhatsApp.
+            </p>
+          </div>
+          {profile?.whatsappNumber && (
+            <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <div className="h-2 w-2 bg-green-500 rounded-full"></div>
+              <span className="text-sm text-green-700">
+                WhatsApp configurado: {profile.whatsappNumber}
+              </span>
+            </div>
+          )}
+          {!profile?.whatsappNumber && (
+            <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="h-2 w-2 bg-yellow-500 rounded-full"></div>
+              <span className="text-sm text-yellow-700">
+                Configura tu WhatsApp en tu perfil para activar el CTA
+              </span>
+            </div>
+          )}
+          <div className="flex justify-end gap-2">
+            <Button
+              type="submit"
+              disabled={sectionLoading || !sectionForm.formState.isDirty}
+            >
+              {sectionLoading && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Guardar
+            </Button>
+          </div>
+        </form>
+      </section>
+
+      <Separator />
+
+      <section className="space-y-4">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h3 className="text-lg font-semibold">Historias</h3>
+            <p className="text-sm text-muted-foreground">
+              Puedes publicar hasta 3 historias. Prioriza imágenes verticales.
+            </p>
+          </div>
+          <Button onClick={openCreateDialog} disabled={stories.length >= 3}>
+            <Plus className="mr-2 h-4 w-4" /> Agregar historia
+          </Button>
         </div>
+        <div className="space-y-3">
+          {stories.length === 0 && (
+            <Card className="border-dashed">
+              <CardHeader>
+                <CardTitle className="text-base">
+                  Aún no tienes historias
+                </CardTitle>
+                <CardDescription>
+                  Sube tu transformación o la de tus clientes para inspirar
+                  confianza.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          )}
+          {stories.map((story, index) => (
+            <StoryRow
+              key={story.id}
+              story={story}
+              index={index}
+              total={stories.length}
+              onEdit={() => openEditDialog(story)}
+              onDelete={() => handleDeleteStory(story)}
+              onPublish={() => handlePublishToggle(story)}
+              onMove={(direction) => handleReorder(story.id, direction)}
+              disabled={
+                reorderMutation.isPending || deleteStoryMutation.isPending
+              }
+            />
+          ))}
+        </div>
+      </section>
+
+      {metrics?.counts && (
+        <section className="grid gap-4 rounded-lg border p-4 md:grid-cols-2">
+          <MetricsCard
+            label="Vistas (30 días)"
+            value={metrics.counts.section_viewed || 0}
+            helper="Cuántas personas abrieron la sección"
+          />
+          <MetricsCard
+            label="Clicks del CTA"
+            value={metrics.counts.cta_clicked || 0}
+            helper="Veces que pulsaron tu botón final"
+          />
+        </section>
       )}
 
       <ResponsiveDrawerSheet
@@ -550,7 +458,7 @@ export function TuHistoriaPanel({
           onCancel={() => setStoryDialogOpen(false)}
         />
       </ResponsiveDrawerSheet>
-    </ResponsiveDialog>
+    </div>
   );
 }
 

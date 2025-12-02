@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useProfile } from "@/hooks/use-profile";
 import { SurveyConfigModal } from "@/components/dashboard/SurveyConfigModal";
-import { TuHistoriaPanel } from "@/components/dashboard/tu-historia";
+import { useNavigate } from "react-router";
 
 interface FeaturesConfig {
   healthSurvey?: {
@@ -35,7 +35,7 @@ interface ProfileWithFeatures {
 
 export function FeaturesList() {
   const [configModalOpen, setConfigModalOpen] = useState(false);
-  const [tuHistoriaOpen, setTuHistoriaOpen] = useState(false);
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const { profile: rawProfile, isLoading } = useProfile();
@@ -145,7 +145,7 @@ export function FeaturesList() {
       enabled: tuHistoriaConfig.enabled,
       icon: Sparkles,
       configurable: true,
-      onConfigure: () => setTuHistoriaOpen(true),
+      onConfigure: () => navigate("/dashboard/tu-historia"),
     },
     {
       id: "appointments",
@@ -246,22 +246,6 @@ export function FeaturesList() {
         }}
         onSave={handleSaveConfig}
         isLoading={updateFeaturesConfig.isPending}
-      />
-
-      <TuHistoriaPanel
-        open={tuHistoriaOpen}
-        onOpenChange={setTuHistoriaOpen}
-        profileId={profile?.id}
-        buttonText={tuHistoriaConfig.buttonText}
-        onUpdateButtonText={async (text) =>
-          updateFeaturesConfig.mutateAsync({
-            tuHistoria: {
-              ...tuHistoriaConfig,
-              buttonText: text,
-            },
-          })
-        }
-        isSavingButtonText={updateFeaturesConfig.isPending}
       />
     </div>
   );

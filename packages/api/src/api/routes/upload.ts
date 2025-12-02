@@ -7,7 +7,6 @@ import { BadRequestException } from "../../utils/http-exceptions";
 
 export const uploadRoutes = new Elysia({ prefix: "/upload" })
   .use(errorMiddleware)
-  .use(contextPlugin)
   .use(servicesPlugin)
   .use(authGuard)
   .post(
@@ -30,6 +29,7 @@ export const uploadRoutes = new Elysia({ prefix: "/upload" })
         avatar: ["image/jpeg", "image/png", "image/webp"],
         cover: ["image/jpeg", "image/png", "image/webp"],
         image: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+        "story-image": ["image/jpeg", "image/png", "image/webp"],
         document: [
           "application/pdf",
           "text/plain",
@@ -47,8 +47,7 @@ export const uploadRoutes = new Elysia({ prefix: "/upload" })
       }
 
       // Upload file
-      // @ts-ignore - type match
-      const asset = await services.assetService.uploadFile(ctx!, file, type);
+      const asset = await services.assetService.uploadFile(ctx, file, type);
       if (!asset) {
         throw new BadRequestException("Failed to upload file");
       }
@@ -72,6 +71,7 @@ export const uploadRoutes = new Elysia({ prefix: "/upload" })
           t.Literal("cover"),
           t.Literal("document"),
           t.Literal("image"),
+          t.Literal("story-image"),
         ]),
         folder: t.Optional(t.String({ default: "uploads" })),
       }),
@@ -98,8 +98,7 @@ export const uploadRoutes = new Elysia({ prefix: "/upload" })
 
       for (const file of files) {
         try {
-          // @ts-ignore
-          const asset = await services.assetService.uploadFile(ctx!, file, type);
+          const asset = await services.assetService.uploadFile(ctx, file, type);
           if (!asset) {
             throw new Error("Failed to upload file");
           }
@@ -141,6 +140,6 @@ export const uploadRoutes = new Elysia({ prefix: "/upload" })
     },
   )
   .delete("/:id", async ({ params, ctx, services, set }) => {
-    await services.assetService.deleteAsset(ctx!, params.id);
+    await services.assetService.deleteAsset(ctx, params.id);
     set.status = 204;
   });

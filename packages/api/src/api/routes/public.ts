@@ -11,6 +11,7 @@ import { StorySectionRepository } from "../../services/repository/story-section"
 import { StoryRepository } from "../../services/repository/story";
 import { StoryEventRepository } from "../../services/repository/story-event";
 import { StoryService } from "../../services/business/story";
+import { DEFAULT_THEME_ID } from "../../config/themes";
 
 export const publicRoutes = new Elysia({ prefix: "/public" })
     .use(errorMiddleware)
@@ -99,14 +100,17 @@ export const publicRoutes = new Elysia({ prefix: "/public" })
             },
         ];
 
+        // Get themeId from customization (loaded via relation)
+        const themeId = profile.customization?.themeId ?? DEFAULT_THEME_ID;
+
         return {
             profile: {
                 ...profile,
                 // Ensure we return the avatar URL if it exists (ProfileService might return avatarId)
-                // actually ProfileService returns the raw profile record. 
+                // actually ProfileService returns the raw profile record.
                 // We might need to resolve the avatar URL if it's not in the record.
                 // But for now let's assume the frontend handles it or the record has it.
-                // Looking at the schema, it has avatarId. 
+                // Looking at the schema, it has avatarId.
                 // The frontend expects avatarUrl.
                 // We should probably resolve it here or let the frontend construct it.
                 // For MVP, let's assume the frontend constructs it or we add it here.
@@ -114,5 +118,6 @@ export const publicRoutes = new Elysia({ prefix: "/public" })
             },
             socialLinks,
             features,
+            themeId,
         };
     });

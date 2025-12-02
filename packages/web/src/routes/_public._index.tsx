@@ -1,5 +1,5 @@
-import { HomePage } from "../pages/home";
+import { LandingPage } from "../pages/landing";
 
 export default function PublicIndexRoute() {
-  return <HomePage />;
+  return <LandingPage />;
 }

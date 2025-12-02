@@ -46,7 +46,9 @@ async function seed() {
     console.log("\n🎉 Database seeding completed successfully!\n");
     console.log("📊 Summary:");
     console.log("  - 3 users created");
-    console.log("  - 14 assets created (avatars, covers y slider antes/después)");
+    console.log(
+      "  - 14 assets created (avatars, covers y slider antes/después)",
+    );
     console.log("  - 3 profiles created");
     console.log("  - 11 social links created");
     console.log("  - 2 profile customizations created");

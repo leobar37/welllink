@@ -6,6 +6,7 @@ import { ProfileHeader } from "@/components/public-profile/profile-header";
 import { SocialLinks } from "@/components/public-profile/social-links";
 import { ActionButtons } from "@/components/public-profile/action-buttons";
 import { FloatingActions } from "@/components/public-profile/floating-actions";
+import { ProfileThemeProvider } from "@/components/public-profile/theme-provider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
 
@@ -75,21 +76,23 @@ export function PublicProfilePage() {
     }
 
     return (
-        <div className="min-h-screen bg-background text-foreground pb-24">
-            <main className="max-w-md mx-auto px-6 py-12 flex flex-col items-center space-y-8 animate-in fade-in duration-500">
-                <ProfileHeader profile={data.profile} />
+        <ProfileThemeProvider themeId={data.themeId}>
+            <div className="min-h-screen bg-background text-foreground pb-24">
+                <main className="max-w-md mx-auto px-6 py-12 flex flex-col items-center space-y-8 animate-in fade-in duration-500">
+                    <ProfileHeader profile={data.profile} />
 
-                <SocialLinks links={data.socialLinks} />
+                    <SocialLinks links={data.socialLinks} />
 
-                <div className="w-full h-px bg-border/50" />
+                    <div className="w-full h-px bg-border/50" />
 
-                <ActionButtons features={data.features} />
-            </main>
+                    <ActionButtons features={data.features} />
+                </main>
 
-            <FloatingActions
-                username={data.profile.username}
-                displayName={data.profile.displayName}
-            />
-        </div>
+                <FloatingActions
+                    username={data.profile.username}
+                    displayName={data.profile.displayName}
+                />
+            </div>
+        </ProfileThemeProvider>
     );
 }

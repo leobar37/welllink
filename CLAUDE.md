@@ -118,3 +118,22 @@ wellness-link/
 - **healthSurvey**: Visitor survey responses
 - **analytics**: Profile views and clicks tracking
 - **asset**: File uploads (avatars, images)
+
+## Media Script
+
+A CLI script for generating images and videos using Replicate AI models. Useful for creating profile visuals, promotional content, and multimedia resources for wellness professionals.
+
+**Location:** `scripts/media.ts`
+**Documentation:** `docs/media-script.md`
+
+**Example usage:**
+```bash
+# Generate a profile image
+bun run media nano -p "Professional wellness coach headshot" -o profile.jpg
+
+# Remove background
+bun run media remove-bg -i photo.jpg -o clean-photo.png
+
+# Create promotional video
+bun run media hailuo -p "Peaceful meditation scene" -q pro -o promo.mp4
+```

@@ -5,23 +5,42 @@ import type { RequestContext } from "../types/context";
 export const authPlugin = new Elysia({ name: "auth" }).derive(
   { as: "global" },
   async ({ request }) => {
-    // Extract session from Better Auth cookies
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    try {
+      // Extract session from Better Auth cookies
+      const session = await auth.api.getSession({
+        headers: request.headers,
+      });
 
-    // Build context from session
-    const ctx: RequestContext | null = session?.user
-      ? {
-          userId: session.user.id,
-          email: session.user.email,
-          role: (session.user as { role?: string }).role || "user",
-        }
-      : null;
+      console.log("Session found:", !!session);
+      console.log("User found:", !!session?.user);
 
-    return {
-      ctx,
-      auth,
-    };
+      if (!session?.user) {
+        // Return null ctx, authGuard will handle rejection
+        return {
+          ctx: null,
+          auth,
+        };
+      }
+
+      // Build context from session
+      const ctx: RequestContext = {
+        userId: session.user.id,
+        email: session.user.email,
+        role: (session.user as { role?: string }).role || "user",
+      };
+
+      console.log("Created ctx with userId:", ctx.userId);
+
+      return {
+        ctx,
+        auth,
+      };
+    } catch (error) {
+      console.error("Auth plugin error:", error);
+      return {
+        ctx: null,
+        auth,
+      };
+    }
   },
 );
