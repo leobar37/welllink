@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react"
-import { motion, MotionProps, useInView } from "motion/react"
+import { useEffect, useMemo, useRef, useState, type ComponentProps } from "react"
+import { motion, useInView } from "motion/react"
 
 import { cn } from "@/lib/utils"
 
-interface TypingAnimationProps extends MotionProps {
+interface TypingAnimationProps extends ComponentProps<typeof motion.span> {
   children?: string
   words?: string[]
   className?: string
