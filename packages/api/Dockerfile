@@ -5,7 +5,7 @@
 # ================================
 
 # Single stage build (simpler, more compatible)
-FROM oven/bun:1
+FROM oven/bun:1 AS production
 
 WORKDIR /app
 
