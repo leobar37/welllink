@@ -2,6 +2,7 @@ import { useParams } from "react-router"
 import { useQuery } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import { SurveyWizard } from "@/components/survey"
+import { ProfileThemeProvider } from "@/components/public-profile/theme-provider"
 import { Loader2, AlertCircle } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -101,13 +102,18 @@ export default function PublicSurveyRoute() {
     ? `${import.meta.env.VITE_API_URL || "http://localhost:5300"}/api/assets/${profile.avatarId}/public`
     : null
 
+  // Get themeId from profileData (returned by API)
+  const themeId = profileData.themeId
+
   return (
-    <SurveyWizard
-      username={username!}
-      profileId={profile.id}
-      advisorName={profile.displayName}
-      advisorAvatar={avatarUrl}
-      advisorWhatsapp={profile.whatsappNumber}
-    />
+    <ProfileThemeProvider themeId={themeId}>
+      <SurveyWizard
+        username={username!}
+        profileId={profile.id}
+        advisorName={profile.displayName}
+        advisorAvatar={avatarUrl}
+        advisorWhatsapp={profile.whatsappNumber}
+      />
+    </ProfileThemeProvider>
   )
 }

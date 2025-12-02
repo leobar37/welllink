@@ -1,5 +1,5 @@
-import { PublicProfilePage } from "../pages/public-profile";
+import { Outlet } from "react-router";
 
-export default function PublicProfileRoute() {
-  return <PublicProfilePage />;
+export default function PublicUsernameLayout() {
+  return <Outlet />;
 }

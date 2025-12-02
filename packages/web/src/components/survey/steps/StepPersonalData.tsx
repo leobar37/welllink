@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input"
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -77,7 +76,7 @@ export function StepPersonalData() {
                   name="visitorPhone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Teléfono (opcional)</FormLabel>
+                      <FormLabel>Celular (opcional)</FormLabel>
                       <FormControl>
                         <Input
                           type="tel"
@@ -88,29 +87,6 @@ export function StepPersonalData() {
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="visitorWhatsapp"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>WhatsApp (opcional)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="tel"
-                          inputMode="tel"
-                          placeholder="+52 123 456 7890"
-                          className="h-12"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Si es diferente a tu teléfono
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

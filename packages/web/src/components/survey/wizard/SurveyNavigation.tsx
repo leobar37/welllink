@@ -1,7 +1,7 @@
 import { ArrowRight, Loader2, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useWizard } from "./WizardContext"
-import { TOTAL_STEPS } from "@/lib/survey/constants"
+import { TOTAL_STEPS, CATEGORY_ORDER } from "@/lib/survey/constants"
 
 interface SurveyNavigationProps {
   onSubmit?: () => void
@@ -23,11 +23,23 @@ export function SurveyNavigation({ onSubmit, isValid = true }: SurveyNavigationP
     }
   }
 
+  // Check if current condition step has selections
+  const hasConditionsSelected = () => {
+    // Condition steps are 3-10 (indices 0-7 in CATEGORY_ORDER)
+    if (currentStep >= 3 && currentStep <= 10) {
+      const categoryIndex = currentStep - 3
+      const category = CATEGORY_ORDER[categoryIndex]
+      const conditions = state.data.conditions?.[category] || []
+      return conditions.length > 0
+    }
+    return false
+  }
+
   // Get button text based on step
   const getButtonText = () => {
     if (isIntroStep) return "Comenzar"
     if (isLastStep) return "Enviar por WhatsApp"
-    if (canSkip) return "Nada de esto me aplica"
+    if (canSkip && !hasConditionsSelected()) return "Nada de esto me aplica"
     return "Continuar"
   }
 

@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,6 +17,13 @@ import { SurveyNavigation } from "../wizard/SurveyNavigation"
 
 export function StepMeasurements() {
   const { state, updateMeasurements, nextStep } = useWizard()
+
+  // Local state for input display values (allows empty string while typing)
+  const [displayValues, setDisplayValues] = useState({
+    weight: state.data.measurements?.weight?.toString() || "",
+    height: state.data.measurements?.height?.toString() || "",
+    age: state.data.measurements?.age?.toString() || "",
+  })
 
   const form = useForm<MeasurementsForm>({
     resolver: zodResolver(measurementsSchema),
@@ -71,15 +79,27 @@ export function StepMeasurements() {
                       <FormControl>
                         <div className="relative">
                           <Input
-                            type="number"
+                            type="text"
                             inputMode="decimal"
                             placeholder="70"
-                            min={20}
-                            max={300}
-                            step={0.1}
                             className="h-12 pr-12"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            value={displayValues.weight}
+                            onChange={(e) => {
+                              const value = e.target.value
+                              // Allow empty string or valid decimal numbers
+                              if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                                setDisplayValues((prev) => ({ ...prev, weight: value }))
+                                const numValue = parseFloat(value)
+                                field.onChange(isNaN(numValue) ? 0 : numValue)
+                              }
+                            }}
+                            onBlur={() => {
+                              field.onBlur()
+                              // Format display on blur if empty
+                              if (displayValues.weight === "") {
+                                setDisplayValues((prev) => ({ ...prev, weight: "0" }))
+                              }
+                            }}
                           />
                           <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">
                             kg
@@ -100,14 +120,26 @@ export function StepMeasurements() {
                       <FormControl>
                         <div className="relative">
                           <Input
-                            type="number"
+                            type="text"
                             inputMode="numeric"
                             placeholder="170"
-                            min={50}
-                            max={250}
                             className="h-12 pr-12"
-                            {...field}
-                            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                            value={displayValues.height}
+                            onChange={(e) => {
+                              const value = e.target.value
+                              // Allow empty string or valid integers
+                              if (value === "" || /^\d*$/.test(value)) {
+                                setDisplayValues((prev) => ({ ...prev, height: value }))
+                                const numValue = parseInt(value)
+                                field.onChange(isNaN(numValue) ? 0 : numValue)
+                              }
+                            }}
+                            onBlur={() => {
+                              field.onBlur()
+                              if (displayValues.height === "") {
+                                setDisplayValues((prev) => ({ ...prev, height: "0" }))
+                              }
+                            }}
                           />
                           <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">
                             cm
@@ -128,14 +160,26 @@ export function StepMeasurements() {
                       <FormControl>
                         <div className="relative">
                           <Input
-                            type="number"
+                            type="text"
                             inputMode="numeric"
                             placeholder="30"
-                            min={1}
-                            max={120}
                             className="h-12 pr-16"
-                            {...field}
-                            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                            value={displayValues.age}
+                            onChange={(e) => {
+                              const value = e.target.value
+                              // Allow empty string or valid integers
+                              if (value === "" || /^\d*$/.test(value)) {
+                                setDisplayValues((prev) => ({ ...prev, age: value }))
+                                const numValue = parseInt(value)
+                                field.onChange(isNaN(numValue) ? 0 : numValue)
+                              }
+                            }}
+                            onBlur={() => {
+                              field.onBlur()
+                              if (displayValues.age === "") {
+                                setDisplayValues((prev) => ({ ...prev, age: "0" }))
+                              }
+                            }}
                           />
                           <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">
                             años

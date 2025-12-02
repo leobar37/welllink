@@ -77,7 +77,7 @@ export function PublicProfilePage() {
 
     return (
         <ProfileThemeProvider themeId={data.themeId}>
-            <div className="min-h-screen bg-background text-foreground pb-24">
+            <div className="bg-background text-foreground pb-24">
                 <main className="max-w-md mx-auto px-6 py-12 flex flex-col items-center space-y-8 animate-in fade-in duration-500">
                     <ProfileHeader profile={data.profile} />
 

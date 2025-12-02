@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router";
 import { api } from "@/lib/api";
 import type { Feature, TuHistoriaFeature } from "@/lib/types";
 import { TuHistoriaViewer } from "@/components/public-profile/tu-historia-viewer";
+import { ProfileThemeProvider } from "@/components/public-profile/theme-provider";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,7 +22,7 @@ export default function PublicStoriesRoute() {
       if (!username) throw new Error("Username requerido");
       const { data, error } = await api.api.public.profiles[username].get();
       if (error) throw error;
-      return data as { profile: { id: string; displayName: string }; features: Feature[] };
+      return data as { profile: { id: string; displayName: string }; features: Feature[]; themeId?: string };
     },
     enabled: !!username,
     retry: 1,
@@ -65,13 +66,15 @@ export default function PublicStoriesRoute() {
   }
 
   return (
-    <TuHistoriaViewer
-      profileId={data.profile.id}
-      profileName={data.profile.displayName}
-      section={storyFeature.config.section}
-      stories={storyFeature.config.stories}
-      onBack={() => navigate(-1)}
-    />
+    <ProfileThemeProvider themeId={data.themeId}>
+      <TuHistoriaViewer
+        profileId={data.profile.id}
+        profileName={data.profile.displayName}
+        section={storyFeature.config.section}
+        stories={storyFeature.config.stories}
+        onBack={() => navigate(-1)}
+      />
+    </ProfileThemeProvider>
   );
 }
 

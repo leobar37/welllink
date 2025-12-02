@@ -9,6 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { useThemeContainer } from "@/components/public-profile/theme-provider"
 import { WizardProvider, useWizard, useSurveyDraft } from "./WizardContext"
 import { SurveyProgress } from "./SurveyProgress"
 import { SurveyNavigation } from "./SurveyNavigation"
@@ -48,6 +49,7 @@ function SurveyWizardContent({
   const { hasDraft, draft } = useSurveyDraft(username)
   const [showDraftDialog, setShowDraftDialog] = useState(false)
   const [initialized, setInitialized] = useState(false)
+  const themeContainer = useThemeContainer()
 
   // Check for draft on mount
   useEffect(() => {
@@ -76,7 +78,7 @@ function SurveyWizardContent({
   // Show loading while checking draft
   if (!initialized && !showDraftDialog) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-full flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     )
@@ -132,10 +134,10 @@ function SurveyWizardContent({
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="bg-background flex flex-col min-h-full">
       {/* Draft Recovery Dialog */}
       <AlertDialog open={showDraftDialog} onOpenChange={setShowDraftDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent container={themeContainer}>
           <AlertDialogHeader>
             <AlertDialogTitle>¿Continuar encuesta?</AlertDialogTitle>
             <AlertDialogDescription>

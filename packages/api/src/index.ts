@@ -34,7 +34,11 @@ const modules = [
   { id: "07", name: "Settings" },
 ];
 console.log("env", process.env.NODE_ENV);
-const devOrigins = ["http://localhost:5176", "http://localhost:5175", "http://localhost:5174"];
+const devOrigins = [
+  "http://localhost:5176",
+  "http://localhost:5175",
+  "http://localhost:5174",
+];
 
 const app = new Elysia()
   // CORS - Open for development
@@ -58,30 +62,30 @@ const app = new Elysia()
       const blob = await storageService.download(params.path);
 
       // Set appropriate content type based on file extension
-      const ext = params.path.split('.').pop()?.toLowerCase();
-      let contentType = 'application/octet-stream';
+      const ext = params.path.split(".").pop()?.toLowerCase();
+      let contentType = "application/octet-stream";
 
       switch (ext) {
-        case 'jpg':
-        case 'jpeg':
-          contentType = 'image/jpeg';
+        case "jpg":
+        case "jpeg":
+          contentType = "image/jpeg";
           break;
-        case 'png':
-          contentType = 'image/png';
+        case "png":
+          contentType = "image/png";
           break;
-        case 'webp':
-          contentType = 'image/webp';
+        case "webp":
+          contentType = "image/webp";
           break;
-        case 'gif':
-          contentType = 'image/gif';
+        case "gif":
+          contentType = "image/gif";
           break;
       }
 
       return new Response(blob, {
         headers: {
-          'Content-Type': contentType,
-          'Cache-Control': 'public, max-age=31536000' // 1 year
-        }
+          "Content-Type": contentType,
+          "Cache-Control": "public, max-age=31536000", // 1 year
+        },
       });
     } catch (error) {
       set.status = 404;
@@ -112,7 +116,7 @@ const app = new Elysia()
       .use(storiesRoutes)
       .use(themeRoutes),
   )
-  .listen(5300);
+  .listen(Number(process.env.PORT) || 5300);
 
 export type App = typeof app;
 export * from "./db/schema";
