@@ -1,5 +1,11 @@
 import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
+import { setDefaultResultOrder } from "node:dns";
+
+// Force IPv4 preference to avoid IPv6 connection issues in Docker/Cloud environments
+// This fixes ECONNREFUSED errors when connecting to databases like Supabase
+setDefaultResultOrder("ipv4first");
+
 import { auth } from "./lib/auth";
 
 // Plugins

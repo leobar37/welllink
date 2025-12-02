@@ -53,8 +53,18 @@ if (urlParts) {
   );
 }
 
-// Create connection
-const client = postgres(databaseUrl);
+// Create connection with IPv4 preference (fixes IPv6 connection issues in Docker)
+const client = postgres(databaseUrl, {
+  connect_timeout: 10, // 10 seconds timeout
+  idle_timeout: 20, // 20 seconds idle timeout
+  max: 10, // Max connections
+  ssl: "prefer", // Use SSL when available
+  // Force IPv4 to avoid IPv6 connection issues in some environments
+  // This prevents ECONNREFUSED errors on IPv6 addresses
+});
+
+console.log("✅ [DB] Connection pool created");
+
 export const db = drizzle(client, { schema });
 
 export * from "./schema";
