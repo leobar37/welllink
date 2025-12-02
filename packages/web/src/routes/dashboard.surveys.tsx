@@ -1,5 +1,5 @@
-import { SurveyResults } from "../pages/dashboard/SurveyResults";
+import { Outlet } from "react-router";
 
-export default function DashboardSurveysRoute() {
-  return <SurveyResults />;
+export default function DashboardSurveysLayout() {
+  return <Outlet />;
 }

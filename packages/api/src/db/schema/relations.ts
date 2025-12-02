@@ -9,6 +9,7 @@ import { profileView, socialClick, qrDownload } from "./analytics";
 import { storySection } from "./story-section";
 import { story } from "./story";
 import { storyEvent } from "./story-event";
+import { aiRecommendation } from "./ai-recommendation";
 
 // User relations
 export const userRelations = relations(user, ({ many }) => ({
@@ -61,6 +62,7 @@ export const profileRelations = relations(profile, ({ one, many }) => ({
   customization: one(profileCustomization),
   socialLinks: many(socialLink),
   healthSurveyResponses: many(healthSurveyResponse),
+  aiRecommendations: many(aiRecommendation),
   views: many(profileView),
   qrDownloads: many(qrDownload),
   storySection: one(storySection, {
@@ -94,10 +96,26 @@ export const socialLinkRelations = relations(socialLink, ({ one, many }) => ({
 // Health Survey Response relations
 export const healthSurveyResponseRelations = relations(
   healthSurveyResponse,
-  ({ one }) => ({
+  ({ one, many }) => ({
     profile: one(profile, {
       fields: [healthSurveyResponse.profileId],
       references: [profile.id],
+    }),
+    aiRecommendations: many(aiRecommendation),
+  })
+);
+
+// AI Recommendation relations
+export const aiRecommendationRelations = relations(
+  aiRecommendation,
+  ({ one }) => ({
+    profile: one(profile, {
+      fields: [aiRecommendation.profileId],
+      references: [profile.id],
+    }),
+    surveyResponse: one(healthSurveyResponse, {
+      fields: [aiRecommendation.surveyResponseId],
+      references: [healthSurveyResponse.id],
     }),
   })
 );

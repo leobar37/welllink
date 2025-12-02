@@ -7,6 +7,7 @@ import { AssetRepository } from "../services/repository/asset";
 import { ProfileRepository } from "../services/repository/profile";
 import { SocialLinkRepository } from "../services/repository/social-link";
 import { HealthSurveyRepository } from "../services/repository/health-survey";
+import { AIRecommendationRepository } from "../services/repository/ai-recommendation";
 import { AnalyticsRepository } from "../services/repository/analytics";
 import { StorySectionRepository } from "../services/repository/story-section";
 import { StoryRepository } from "../services/repository/story";
@@ -16,6 +17,7 @@ import { CDNService } from "../services/business/cdn";
 import { ProfileService } from "../services/business/profile";
 import { SocialLinkService } from "../services/business/social-link";
 import { HealthSurveyService } from "../services/business/health-survey";
+import { AIRecommendationService } from "../services/business/ai-recommendation";
 import { AnalyticsService } from "../services/business/analytics";
 import { StoryService } from "../services/business/story";
 
@@ -43,6 +45,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     const profileRepository = new ProfileRepository();
     const socialLinkRepository = new SocialLinkRepository();
     const healthSurveyRepository = new HealthSurveyRepository();
+    const aiRecommendationRepository = new AIRecommendationRepository();
     const analyticsRepository = new AnalyticsRepository();
     const storySectionRepository = new StorySectionRepository();
     const storyRepository = new StoryRepository();
@@ -61,6 +64,10 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
       analyticsRepository,
     );
     const healthSurveyService = new HealthSurveyService(healthSurveyRepository);
+    const aiRecommendationService = new AIRecommendationService(
+      aiRecommendationRepository,
+      healthSurveyRepository
+    );
     const analyticsService = new AnalyticsService(analyticsRepository);
     const storyService = new StoryService(
       storySectionRepository,
@@ -78,6 +85,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         profileRepository,
         socialLinkRepository,
         healthSurveyRepository,
+        aiRecommendationRepository,
         analyticsRepository,
         storySectionRepository,
         storyRepository,
@@ -88,6 +96,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         profileService,
         socialLinkService,
         healthSurveyService,
+        aiRecommendationService,
         analyticsService,
         storyService,
       },

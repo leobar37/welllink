@@ -15,6 +15,13 @@
       "when": 1764561419732,
       "tag": "0001_warm_bloodstorm",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1764682687603,
+      "tag": "0002_eminent_big_bertha",
+      "breakpoints": true
     }
   ]
 }

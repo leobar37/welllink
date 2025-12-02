@@ -25,9 +25,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowUpDown, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
+import { useNavigate } from "react-router";
 import { useProfile } from "@/hooks/use-profile";
 import { useBreakpoint } from "@/hooks/use-breakpoint";
 import {
@@ -64,6 +65,7 @@ export function SurveyResults() {
   const { profile } = useProfile();
   const { isMd } = useBreakpoint();
   const isMobileView = !isMd;
+  const navigate = useNavigate();
 
   // Estado para filtros y sorting
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -212,8 +214,24 @@ export function SurveyResults() {
           );
         },
       },
+      {
+        id: "actions",
+        header: "Acciones",
+        cell: ({ row }) => {
+          return (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate(`/dashboard/surveys/${row.original.id}/recommendations`)}
+            >
+              <Sparkles className="h-4 w-4 mr-1" />
+              IA
+            </Button>
+          );
+        },
+      },
     ],
-    []
+    [navigate]
   );
 
   // Configurar tabla
@@ -343,6 +361,18 @@ export function SurveyResults() {
                             </a>
                           </div>
                         )}
+
+                        <div className="pt-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full"
+                            onClick={() => navigate(`/dashboard/surveys/${row.original.id}/recommendations`)}
+                          >
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            Análisis IA
+                          </Button>
+                        </div>
                       </div>
                     </Item>
                   ))}

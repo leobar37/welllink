@@ -23,6 +23,7 @@ import { qrRoutes } from "./api/routes/qr";
 import { socialLinkRoutes } from "./api/routes/social-links";
 import { storiesRoutes } from "./api/routes/stories";
 import { themeRoutes } from "./api/routes/themes";
+import { aiRecommendationRoutes } from "./api/routes/ai-recommendation";
 import { LocalStorageStrategy } from "./services/storage/local.storage";
 
 const modules = [
@@ -114,7 +115,8 @@ const app = new Elysia()
       .use(qrRoutes)
       .use(socialLinkRoutes)
       .use(storiesRoutes)
-      .use(themeRoutes),
+      .use(themeRoutes)
+      .use(aiRecommendationRoutes),
   )
   .listen({
     port: Number(process.env.PORT) || 5300,

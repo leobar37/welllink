@@ -14,6 +14,7 @@ export * from "./analytics";
 export * from "./story-section";
 export * from "./story";
 export * from "./story-event";
+export * from "./ai-recommendation";
 
 // Relations
 export * from "./relations";
