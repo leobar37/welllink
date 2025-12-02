@@ -9,6 +9,9 @@ FROM oven/bun:1 AS production
 
 WORKDIR /app
 
+# Environment variables BEFORE build (so bun can inline them)
+ENV NODE_ENV=production
+
 # Copy package files
 COPY package.json ./
 
@@ -18,18 +21,14 @@ RUN bun install
 # Copy source code
 COPY . .
 
-# Build the application
-RUN bun run build
+# Build the application with NODE_ENV=production
+RUN NODE_ENV=production bun run build
 
 # Create uploads directory for local storage
 RUN mkdir -p /app/uploads
 
-# Expose port
-EXPOSE 5300
-
-# Environment variables
-ENV NODE_ENV=production
-ENV PORT=5300
+# Expose port (configurable via PORT env var)
+EXPOSE ${PORT:-5300}
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
