@@ -5,7 +5,7 @@ import type { RequestContext } from "../types/context";
 
 export const authGuard = new Elysia({ name: "auth-guard" })
   .use(authPlugin)
-  .derive({ as: "global" }, ({ ctx }) => {
+  .derive({ as: "scoped" }, ({ ctx }) => {
     if (!ctx) {
       throw new UnauthorizedException("No authentication context found");
     }

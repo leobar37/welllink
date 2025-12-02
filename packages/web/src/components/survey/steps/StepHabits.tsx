@@ -1,8 +1,14 @@
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
   FormControl,
@@ -11,15 +17,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { useWizard } from "../wizard/WizardContext"
-import { habitsSchema, type HabitsForm } from "@/lib/survey/schema"
-import { RadioCardGroup } from "../ui/RadioCard"
-import { SurveyNavigation } from "../wizard/SurveyNavigation"
-import { TRAINING_OPTIONS, NUTRITION_OPTIONS } from "@/lib/survey/constants"
+} from "@/components/ui/form";
+import { useWizard } from "../wizard/WizardContext";
+import { habitsSchema, type HabitsForm } from "@/lib/survey/schema";
+import { RadioCardGroup } from "../ui/RadioCard";
+import { SurveyNavigation } from "../wizard/SurveyNavigation";
+import { TRAINING_OPTIONS, NUTRITION_OPTIONS } from "@/lib/survey/constants";
 
 export function StepHabits() {
-  const { state, updateHabits, nextStep } = useWizard()
+  const { state, updateHabits, nextStep } = useWizard();
 
   const form = useForm<HabitsForm>({
     resolver: zodResolver(habitsSchema),
@@ -30,12 +36,12 @@ export function StepHabits() {
       familyHistory: "",
     },
     mode: "onBlur",
-  })
+  });
 
   const onSubmit = (data: HabitsForm) => {
-    updateHabits(data)
-    nextStep()
-  }
+    updateHabits(data);
+    nextStep();
+  };
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-120px)]">
@@ -116,7 +122,9 @@ export function StepHabits() {
                   name="familyHistory"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Historial de salud familiar (opcional)</FormLabel>
+                      <FormLabel>
+                        Historial de salud familiar (opcional)
+                      </FormLabel>
                       <FormControl>
                         <Textarea
                           placeholder="Ej: diabetes, presión alta, problemas del corazón..."
@@ -137,7 +145,7 @@ export function StepHabits() {
         </Card>
       </div>
 
-      <SurveyNavigation isValid={form.formState.isValid} />
+      <SurveyNavigation formId="habits-form" isValid={form.formState.isValid} />
     </div>
-  )
+  );
 }

@@ -1,8 +1,14 @@
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -10,20 +16,20 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { useWizard } from "../wizard/WizardContext"
-import { measurementsSchema, type MeasurementsForm } from "@/lib/survey/schema"
-import { SurveyNavigation } from "../wizard/SurveyNavigation"
+} from "@/components/ui/form";
+import { useWizard } from "../wizard/WizardContext";
+import { measurementsSchema, type MeasurementsForm } from "@/lib/survey/schema";
+import { SurveyNavigation } from "../wizard/SurveyNavigation";
 
 export function StepMeasurements() {
-  const { state, updateMeasurements, nextStep } = useWizard()
+  const { state, updateMeasurements, nextStep } = useWizard();
 
   // Local state for input display values (allows empty string while typing)
   const [displayValues, setDisplayValues] = useState({
     weight: state.data.measurements?.weight?.toString() || "",
     height: state.data.measurements?.height?.toString() || "",
     age: state.data.measurements?.age?.toString() || "",
-  })
+  });
 
   const form = useForm<MeasurementsForm>({
     resolver: zodResolver(measurementsSchema),
@@ -33,24 +39,25 @@ export function StepMeasurements() {
       age: 0,
     },
     mode: "onBlur",
-  })
+  });
 
   const onSubmit = (data: MeasurementsForm) => {
-    updateMeasurements(data)
-    nextStep()
-  }
+    updateMeasurements(data);
+    nextStep();
+  };
 
   // Calculate BMI if both weight and height are available
-  const weight = form.watch("weight")
-  const height = form.watch("height")
-  const bmi = weight > 0 && height > 0 ? (weight / ((height / 100) ** 2)).toFixed(1) : null
+  const weight = form.watch("weight");
+  const height = form.watch("height");
+  const bmi =
+    weight > 0 && height > 0 ? (weight / (height / 100) ** 2).toFixed(1) : null;
 
   const getBMICategory = (bmi: number): { label: string; color: string } => {
-    if (bmi < 18.5) return { label: "Bajo peso", color: "text-yellow-600" }
-    if (bmi < 25) return { label: "Peso saludable", color: "text-green-600" }
-    if (bmi < 30) return { label: "Sobrepeso", color: "text-yellow-600" }
-    return { label: "Área de oportunidad", color: "text-orange-600" }
-  }
+    if (bmi < 18.5) return { label: "Bajo peso", color: "text-yellow-600" };
+    if (bmi < 25) return { label: "Peso saludable", color: "text-green-600" };
+    if (bmi < 30) return { label: "Sobrepeso", color: "text-yellow-600" };
+    return { label: "Área de oportunidad", color: "text-orange-600" };
+  };
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-120px)]">
@@ -85,19 +92,25 @@ export function StepMeasurements() {
                             className="h-12 pr-12"
                             value={displayValues.weight}
                             onChange={(e) => {
-                              const value = e.target.value
+                              const value = e.target.value;
                               // Allow empty string or valid decimal numbers
                               if (value === "" || /^\d*\.?\d*$/.test(value)) {
-                                setDisplayValues((prev) => ({ ...prev, weight: value }))
-                                const numValue = parseFloat(value)
-                                field.onChange(isNaN(numValue) ? 0 : numValue)
+                                setDisplayValues((prev) => ({
+                                  ...prev,
+                                  weight: value,
+                                }));
+                                const numValue = parseFloat(value);
+                                field.onChange(isNaN(numValue) ? 0 : numValue);
                               }
                             }}
                             onBlur={() => {
-                              field.onBlur()
+                              field.onBlur();
                               // Format display on blur if empty
                               if (displayValues.weight === "") {
-                                setDisplayValues((prev) => ({ ...prev, weight: "0" }))
+                                setDisplayValues((prev) => ({
+                                  ...prev,
+                                  weight: "0",
+                                }));
                               }
                             }}
                           />
@@ -126,18 +139,24 @@ export function StepMeasurements() {
                             className="h-12 pr-12"
                             value={displayValues.height}
                             onChange={(e) => {
-                              const value = e.target.value
+                              const value = e.target.value;
                               // Allow empty string or valid integers
                               if (value === "" || /^\d*$/.test(value)) {
-                                setDisplayValues((prev) => ({ ...prev, height: value }))
-                                const numValue = parseInt(value)
-                                field.onChange(isNaN(numValue) ? 0 : numValue)
+                                setDisplayValues((prev) => ({
+                                  ...prev,
+                                  height: value,
+                                }));
+                                const numValue = parseInt(value);
+                                field.onChange(isNaN(numValue) ? 0 : numValue);
                               }
                             }}
                             onBlur={() => {
-                              field.onBlur()
+                              field.onBlur();
                               if (displayValues.height === "") {
-                                setDisplayValues((prev) => ({ ...prev, height: "0" }))
+                                setDisplayValues((prev) => ({
+                                  ...prev,
+                                  height: "0",
+                                }));
                               }
                             }}
                           />
@@ -166,18 +185,24 @@ export function StepMeasurements() {
                             className="h-12 pr-16"
                             value={displayValues.age}
                             onChange={(e) => {
-                              const value = e.target.value
+                              const value = e.target.value;
                               // Allow empty string or valid integers
                               if (value === "" || /^\d*$/.test(value)) {
-                                setDisplayValues((prev) => ({ ...prev, age: value }))
-                                const numValue = parseInt(value)
-                                field.onChange(isNaN(numValue) ? 0 : numValue)
+                                setDisplayValues((prev) => ({
+                                  ...prev,
+                                  age: value,
+                                }));
+                                const numValue = parseInt(value);
+                                field.onChange(isNaN(numValue) ? 0 : numValue);
                               }
                             }}
                             onBlur={() => {
-                              field.onBlur()
+                              field.onBlur();
                               if (displayValues.age === "") {
-                                setDisplayValues((prev) => ({ ...prev, age: "0" }))
+                                setDisplayValues((prev) => ({
+                                  ...prev,
+                                  age: "0",
+                                }));
                               }
                             }}
                           />
@@ -195,10 +220,14 @@ export function StepMeasurements() {
                 {bmi && (
                   <div className="p-4 bg-muted/50 rounded-lg">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Tu IMC</span>
+                      <span className="text-sm text-muted-foreground">
+                        Tu IMC
+                      </span>
                       <div className="text-right">
                         <span className="text-lg font-semibold">{bmi}</span>
-                        <span className={`ml-2 text-sm ${getBMICategory(parseFloat(bmi)).color}`}>
+                        <span
+                          className={`ml-2 text-sm ${getBMICategory(parseFloat(bmi)).color}`}
+                        >
                           {getBMICategory(parseFloat(bmi)).label}
                         </span>
                       </div>
@@ -211,7 +240,10 @@ export function StepMeasurements() {
         </Card>
       </div>
 
-      <SurveyNavigation isValid={form.formState.isValid} />
+      <SurveyNavigation
+        formId="measurements-form"
+        isValid={form.formState.isValid}
+      />
     </div>
-  )
+  );
 }

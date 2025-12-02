@@ -59,14 +59,37 @@ export function useUpdateProfileTheme(profileId?: string) {
       if (error) throw error;
       return data as unknown as ProfileThemeResponse;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profile-theme", profileId] });
-      queryClient.invalidateQueries({ queryKey: ["profiles"] });
-      toast.success("Tema actualizado correctamente");
+    onMutate: async (themeId: string) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["profile-theme", profileId] });
+
+      // Snapshot previous value
+      const previousTheme = queryClient.getQueryData<ProfileThemeResponse>(["profile-theme", profileId]);
+
+      // Optimistically update
+      queryClient.setQueryData<ProfileThemeResponse>(["profile-theme", profileId], (old) => {
+        if (!old) return old;
+        return { ...old, themeId };
+      });
+
+      return { previousTheme };
     },
-    onError: (err) => {
+    onError: (err, _themeId, context) => {
+      // Rollback on error
+      if (context?.previousTheme) {
+        queryClient.setQueryData(["profile-theme", profileId], context.previousTheme);
+      }
       console.error(err);
       toast.error("Error al actualizar el tema");
+    },
+    onSettled: () => {
+      // Refetch after mutation settles
+      queryClient.invalidateQueries({ queryKey: ["profile-theme", profileId] });
+      queryClient.invalidateQueries({ queryKey: ["profiles"] });
+      queryClient.invalidateQueries({ queryKey: ["preview-profile"] });
+    },
+    onSuccess: () => {
+      toast.success("Tema actualizado correctamente");
     },
   });
 }

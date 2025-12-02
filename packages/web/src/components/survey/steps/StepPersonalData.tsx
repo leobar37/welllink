@@ -1,7 +1,13 @@
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -9,13 +15,13 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { useWizard } from "../wizard/WizardContext"
-import { personalDataSchema, type PersonalDataForm } from "@/lib/survey/schema"
-import { SurveyNavigation } from "../wizard/SurveyNavigation"
+} from "@/components/ui/form";
+import { useWizard } from "../wizard/WizardContext";
+import { personalDataSchema, type PersonalDataForm } from "@/lib/survey/schema";
+import { SurveyNavigation } from "../wizard/SurveyNavigation";
 
 export function StepPersonalData() {
-  const { state, updatePersonalData, nextStep } = useWizard()
+  const { state, updatePersonalData, nextStep } = useWizard();
 
   const form = useForm<PersonalDataForm>({
     resolver: zodResolver(personalDataSchema),
@@ -27,12 +33,12 @@ export function StepPersonalData() {
       referredBy: "",
     },
     mode: "onBlur",
-  })
+  });
 
   const onSubmit = (data: PersonalDataForm) => {
-    updatePersonalData(data)
-    nextStep()
-  }
+    updatePersonalData(data);
+    nextStep();
+  };
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-120px)]">
@@ -136,7 +142,10 @@ export function StepPersonalData() {
         </Card>
       </div>
 
-      <SurveyNavigation isValid={form.formState.isValid} />
+      <SurveyNavigation
+        formId="personal-data-form"
+        isValid={form.formState.isValid}
+      />
     </div>
-  )
+  );
 }

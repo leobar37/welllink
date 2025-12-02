@@ -3,11 +3,13 @@ import { Loader2, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/use-profile";
 import { useThemeManager } from "@/hooks/use-themes";
+import { usePreviewPanel } from "@/components/preview-panel";
 import { ThemeCard } from "@/components/dashboard/theme-card";
 import { ThemePreview } from "@/components/dashboard/theme-preview";
 
 export function ThemesPage() {
   const { profile, isLoading: isLoadingProfile } = useProfile();
+  const { refresh: refreshPreview } = usePreviewPanel();
   const {
     themes,
     currentThemeId,
@@ -32,6 +34,7 @@ export function ThemesPage() {
       updateTheme(selectedThemeId, {
         onSuccess: () => {
           setSelectedThemeId(null);
+          refreshPreview();
         },
       });
     }

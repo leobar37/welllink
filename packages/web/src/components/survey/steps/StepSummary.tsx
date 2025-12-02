@@ -1,57 +1,72 @@
-import { useState } from "react"
-import { CheckCircle2, ChevronDown, ChevronUp, Edit2 } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { useState } from "react";
+import { CheckCircle2, ChevronDown, ChevronUp, Edit2 } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible"
-import { useWizard } from "../wizard/WizardContext"
-import { SurveyNavigation } from "../wizard/SurveyNavigation"
-import { CATEGORY_META, CATEGORY_ORDER, TRAINING_OPTIONS, NUTRITION_OPTIONS } from "@/lib/survey/constants"
-import { generateWhatsAppMessage, generateWhatsAppLink } from "@/lib/survey/whatsapp"
-import { api } from "@/lib/api"
-import { toast } from "sonner"
-import type { HealthSurveyFormData } from "@/lib/survey/schema"
+} from "@/components/ui/collapsible";
+import { useWizard } from "../wizard/WizardContext";
+import { SurveyNavigation } from "../wizard/SurveyNavigation";
+import {
+  CATEGORY_META,
+  CATEGORY_ORDER,
+  TRAINING_OPTIONS,
+  NUTRITION_OPTIONS,
+} from "@/lib/survey/constants";
+import {
+  generateWhatsAppMessage,
+  generateWhatsAppLink,
+} from "@/lib/survey/whatsapp";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
+import type { HealthSurveyFormData } from "@/lib/survey/schema";
 
 interface StepSummaryProps {
-  profileId: string
-  advisorWhatsapp: string
+  profileId: string;
+  advisorWhatsapp: string;
 }
 
 export function StepSummary({ profileId, advisorWhatsapp }: StepSummaryProps) {
-  const { state, goToStep, setSubmitting, setSubmitted, setError } = useWizard()
-  const [openSections, setOpenSections] = useState<string[]>(["conditions"])
+  const { state, goToStep, setSubmitting, setSubmitted, setError } =
+    useWizard();
+  const [openSections, setOpenSections] = useState<string[]>(["conditions"]);
 
-  const data = state.data as HealthSurveyFormData
+  const data = state.data as HealthSurveyFormData;
 
   // Count total conditions
   const totalConditions = CATEGORY_ORDER.reduce(
     (sum, cat) => sum + (data.conditions?.[cat]?.length || 0),
-    0
-  )
+    0,
+  );
 
   // Toggle section
   const toggleSection = (section: string) => {
     setOpenSections((prev) =>
       prev.includes(section)
         ? prev.filter((s) => s !== section)
-        : [...prev, section]
-    )
-  }
+        : [...prev, section],
+    );
+  };
 
   // Format training/nutrition values
   const formatTraining = (value: string) =>
-    TRAINING_OPTIONS.find((o) => o.value === value)?.label || value
+    TRAINING_OPTIONS.find((o) => o.value === value)?.label || value;
   const formatNutrition = (value: string) =>
-    NUTRITION_OPTIONS.find((o) => o.value === value)?.label || value
+    NUTRITION_OPTIONS.find((o) => o.value === value)?.label || value;
 
   // Handle submission
   const handleSubmit = async () => {
-    setSubmitting(true)
-    setError(null)
+    setSubmitting(true);
+    setError(null);
 
     try {
       // Submit to API
@@ -68,29 +83,29 @@ export function StepSummary({ profileId, advisorWhatsapp }: StepSummaryProps) {
           habits: data.habits,
           metadata: data.metadata,
         },
-      })
+      });
 
-      if (error) throw error
+      if (error) throw error;
 
       // Mark as submitted
-      setSubmitted()
+      setSubmitted();
 
       // Generate and open WhatsApp
-      const message = generateWhatsAppMessage(data)
-      const link = generateWhatsAppLink(advisorWhatsapp, message)
+      const message = generateWhatsAppMessage(data);
+      const link = generateWhatsAppLink(advisorWhatsapp, message);
 
-      toast.success("¡Tu evaluación se ha enviado correctamente!")
+      toast.success("¡Tu evaluación se ha enviado correctamente!");
 
       // Small delay to show success before opening WhatsApp
       setTimeout(() => {
-        window.open(link, "_blank")
-      }, 500)
+        window.open(link, "_blank");
+      }, 500);
     } catch (err) {
-      console.error("Failed to submit survey:", err)
-      setError("Error al enviar la encuesta. Por favor intenta de nuevo.")
-      toast.error("Error al enviar la encuesta")
+      console.error("Failed to submit survey:", err);
+      setError("Error al enviar la encuesta. Por favor intenta de nuevo.");
+      toast.error("Error al enviar la encuesta");
     }
-  }
+  };
 
   // If submitted, show success
   if (state.isSubmitted) {
@@ -103,26 +118,26 @@ export function StepSummary({ profileId, advisorWhatsapp }: StepSummaryProps) {
             </div>
             <CardTitle className="text-2xl">¡Listo!</CardTitle>
             <CardDescription className="text-base">
-              Tu evaluación de salud ha sido enviada. Revisa WhatsApp para
-              completar el envío del mensaje.
+              Tu evaluación de salud ha sido enviada correctamente. El asesor la
+              recibirá en su panel.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button
               variant="outline"
               onClick={() => {
-                const message = generateWhatsAppMessage(data)
-                const link = generateWhatsAppLink(advisorWhatsapp, message)
-                window.open(link, "_blank")
+                const message = generateWhatsAppMessage(data);
+                const link = generateWhatsAppLink(advisorWhatsapp, message);
+                window.open(link, "_blank");
               }}
               className="w-full"
             >
-              Abrir WhatsApp de nuevo
+              Saludar por WhatsApp
             </Button>
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   return (
@@ -152,11 +167,26 @@ export function StepSummary({ profileId, advisorWhatsapp }: StepSummaryProps) {
               onEdit={() => goToStep(1)}
             >
               <div className="space-y-2 text-sm">
-                <SummaryRow label="Nombre" value={data.personalData?.visitorName} />
-                <SummaryRow label="Teléfono" value={data.personalData?.visitorPhone} />
-                <SummaryRow label="WhatsApp" value={data.personalData?.visitorWhatsapp} />
-                <SummaryRow label="Email" value={data.personalData?.visitorEmail} />
-                <SummaryRow label="Referido por" value={data.personalData?.referredBy} />
+                <SummaryRow
+                  label="Nombre"
+                  value={data.personalData?.visitorName}
+                />
+                <SummaryRow
+                  label="Teléfono"
+                  value={data.personalData?.visitorPhone}
+                />
+                <SummaryRow
+                  label="WhatsApp"
+                  value={data.personalData?.visitorWhatsapp}
+                />
+                <SummaryRow
+                  label="Email"
+                  value={data.personalData?.visitorEmail}
+                />
+                <SummaryRow
+                  label="Referido por"
+                  value={data.personalData?.referredBy}
+                />
               </div>
             </SummarySection>
 
@@ -168,9 +198,18 @@ export function StepSummary({ profileId, advisorWhatsapp }: StepSummaryProps) {
               onEdit={() => goToStep(2)}
             >
               <div className="space-y-2 text-sm">
-                <SummaryRow label="Peso" value={`${data.measurements?.weight} kg`} />
-                <SummaryRow label="Estatura" value={`${data.measurements?.height} cm`} />
-                <SummaryRow label="Edad" value={`${data.measurements?.age} años`} />
+                <SummaryRow
+                  label="Peso"
+                  value={`${data.measurements?.weight} kg`}
+                />
+                <SummaryRow
+                  label="Estatura"
+                  value={`${data.measurements?.height} cm`}
+                />
+                <SummaryRow
+                  label="Edad"
+                  value={`${data.measurements?.age} años`}
+                />
               </div>
             </SummarySection>
 
@@ -188,10 +227,10 @@ export function StepSummary({ profileId, advisorWhatsapp }: StepSummaryProps) {
               ) : (
                 <div className="space-y-3">
                   {CATEGORY_ORDER.map((category) => {
-                    const conditions = data.conditions?.[category] || []
-                    if (conditions.length === 0) return null
+                    const conditions = data.conditions?.[category] || [];
+                    if (conditions.length === 0) return null;
 
-                    const meta = CATEGORY_META[category]
+                    const meta = CATEGORY_META[category];
                     return (
                       <div key={category}>
                         <p className="text-sm font-medium mb-1">
@@ -199,13 +238,17 @@ export function StepSummary({ profileId, advisorWhatsapp }: StepSummaryProps) {
                         </p>
                         <div className="flex flex-wrap gap-1">
                           {conditions.map((c: string) => (
-                            <Badge key={c} variant="secondary" className="text-xs">
+                            <Badge
+                              key={c}
+                              variant="secondary"
+                              className="text-xs"
+                            >
                               {c}
                             </Badge>
                           ))}
                         </div>
                       </div>
-                    )
+                    );
                   })}
                 </div>
               )}
@@ -219,7 +262,10 @@ export function StepSummary({ profileId, advisorWhatsapp }: StepSummaryProps) {
               onEdit={() => goToStep(11)}
             >
               <div className="space-y-2 text-sm">
-                <SummaryRow label="Agua diaria" value={data.habits?.waterIntake} />
+                <SummaryRow
+                  label="Agua diaria"
+                  value={data.habits?.waterIntake}
+                />
                 <SummaryRow
                   label="Entrena"
                   value={formatTraining(data.habits?.training)}
@@ -240,16 +286,16 @@ export function StepSummary({ profileId, advisorWhatsapp }: StepSummaryProps) {
 
       <SurveyNavigation onSubmit={handleSubmit} />
     </div>
-  )
+  );
 }
 
 // Summary Section Component
 interface SummarySectionProps {
-  title: string
-  isOpen: boolean
-  onToggle: () => void
-  onEdit: () => void
-  children: React.ReactNode
+  title: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  onEdit: () => void;
+  children: React.ReactNode;
 }
 
 function SummarySection({
@@ -288,21 +334,21 @@ function SummarySection({
         </CollapsibleContent>
       </div>
     </Collapsible>
-  )
+  );
 }
 
 // Summary Row Component
 interface SummaryRowProps {
-  label: string
-  value?: string | null
+  label: string;
+  value?: string | null;
 }
 
 function SummaryRow({ label, value }: SummaryRowProps) {
-  if (!value) return null
+  if (!value) return null;
   return (
     <div className="flex justify-between">
       <span className="text-muted-foreground">{label}</span>
       <span className="font-medium">{value}</span>
     </div>
-  )
+  );
 }

@@ -1,14 +1,15 @@
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { Link, useNavigate } from "react-router"
-import { toast } from "sonner"
-import { Loader2 } from "lucide-react"
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Link, useNavigate } from "react-router";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
-import { authClient } from "@/lib/auth-client"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { authClient } from "@/lib/auth-client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import {
   Form,
   FormControl,
@@ -16,7 +17,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 import {
   Card,
   CardContent,
@@ -24,18 +25,18 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 
 const loginSchema = z.object({
   email: z.string().email("Correo electrónico inválido"),
   password: z.string().min(1, "La contraseña es requerida"),
-})
+});
 
-type LoginValues = z.infer<typeof loginSchema>
+type LoginValues = z.infer<typeof loginSchema>;
 
 export function Login() {
-  const navigate = useNavigate()
-  const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -43,32 +44,32 @@ export function Login() {
       email: "",
       password: "",
     },
-  })
+  });
 
   async function onSubmit(values: LoginValues) {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       const { data, error } = await authClient.signIn.email({
         email: values.email,
         password: values.password,
-      })
+      });
 
       if (error) {
-        toast.error(error.message ?? "Correo o contraseña incorrectos")
-        return
+        toast.error(error.message ?? "Correo o contraseña incorrectos");
+        return;
       }
 
-      toast.success("Sesión iniciada correctamente")
+      toast.success("Sesión iniciada correctamente");
       if (data?.redirect && data.redirectTo) {
-        window.location.href = data.redirectTo
-        return
+        window.location.href = data.redirectTo;
+        return;
       }
-      navigate("/dashboard", { replace: true })
+      navigate("/dashboard", { replace: true });
     } catch (err) {
-      console.error(err)
-      toast.error("Error al iniciar sesión")
+      console.error(err);
+      toast.error("Error al iniciar sesión");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -82,7 +83,10 @@ export function Login() {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 sm:space-y-6"
+          >
             <FormField
               control={form.control}
               name="email"
@@ -109,11 +113,7 @@ export function Login() {
                 <FormItem>
                   <FormLabel>Contraseña</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      autoComplete="current-password"
-                      {...field}
-                    />
+                    <PasswordInput autoComplete="current-password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -139,5 +139,5 @@ export function Login() {
         </p>
       </CardFooter>
     </Card>
-  )
+  );
 }

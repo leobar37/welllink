@@ -3,6 +3,11 @@ import { AppSidebar } from "@/components/app-sidebar"
 import { Outlet, Navigate } from "react-router"
 import { authClient } from "@/lib/auth-client"
 import { Loader2 } from "lucide-react"
+import {
+  PreviewPanelProvider,
+  PreviewPanel,
+  PreviewTrigger,
+} from "@/components/preview-panel"
 
 export function DashboardLayout() {
   const { data: session, isPending, error } = authClient.useSession()
@@ -20,17 +25,21 @@ export function DashboardLayout() {
   }
 
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <main className="w-full">
-        <div className="flex h-16 items-center px-4 border-b">
-            <SidebarTrigger />
-            <div className="ml-4 font-semibold">Panel</div>
-        </div>
-        <div className="p-4 md:p-8">
-            <Outlet />
-        </div>
-      </main>
-    </SidebarProvider>
+    <PreviewPanelProvider>
+      <SidebarProvider>
+        <AppSidebar />
+        <main className="w-full">
+          <div className="flex h-16 items-center px-4 border-b">
+              <SidebarTrigger />
+              <div className="ml-4 font-semibold">Panel</div>
+          </div>
+          <div className="p-4 md:p-8">
+              <Outlet />
+          </div>
+        </main>
+        <PreviewTrigger />
+        <PreviewPanel />
+      </SidebarProvider>
+    </PreviewPanelProvider>
   )
 }
