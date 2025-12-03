@@ -1,5 +1,5 @@
 import { streamObject } from "ai";
-import { openai } from "@ai-sdk/openai";
+import { fireworks } from "@ai-sdk/fireworks";
 import { aiResponseSchema } from "./schema";
 import { buildRecommendationsPrompt } from "./prompt";
 import type { HealthSurveyResponseData } from "../../db/schema/health-survey";
@@ -23,7 +23,7 @@ export function generateRecommendationsStream(
 
   // streamObject returns synchronously - no await needed
   const result = streamObject({
-    model: openai("gpt-4o"),
+    model: fireworks("accounts/fireworks/models/deepseek-v3p2"),
     schema: aiResponseSchema,
     prompt,
   });
@@ -42,7 +42,7 @@ export async function generateRecommendations(
 
   // streamObject returns synchronously
   const result = streamObject({
-    model: openai("gpt-4o"),
+    model: fireworks("accounts/fireworks/models/deepseek-v3p2"),
     schema: aiResponseSchema,
     prompt,
   });

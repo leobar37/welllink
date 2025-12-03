@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5300";
+
 async function fetchAssetUrl(assetId: string) {
-  const response = await fetch(`http://localhost:5300/api/assets/${assetId}`, {
-    credentials: 'include',
+  const response = await fetch(`${API_URL}/api/assets/${assetId}`, {
+    credentials: "include",
   });
 
   if (!response.ok) {
@@ -16,7 +18,7 @@ async function fetchAssetUrl(assetId: string) {
 export function useAssetUrl(assetId?: string | null) {
   return useQuery({
     queryKey: ["asset-url", assetId],
-    queryFn: () => assetId ? fetchAssetUrl(assetId) : Promise.resolve(null),
+    queryFn: () => (assetId ? fetchAssetUrl(assetId) : Promise.resolve(null)),
     enabled: !!assetId,
     staleTime: Infinity, // Asset URLs don't change
   });

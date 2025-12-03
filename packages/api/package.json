@@ -13,7 +13,7 @@
     "db:reset-seed": "bun run src/db/reset.ts && bun run src/db/seed.ts"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^2.0.76",
+    "@ai-sdk/fireworks": "^1.0.9",
     "@elysiajs/cors": "^1.4.0",
     "@supabase/supabase-js": "^2.86.0",
     "ai": "^5.0.106",

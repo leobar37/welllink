@@ -2,20 +2,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "../db";
 import * as schema from "../db/schema";
-
-// Get trusted origins from environment variable or use defaults
-const getTrustedOrigins = (): string[] => {
-  const envOrigins = process.env.CORS_ORIGIN;
-  if (envOrigins) {
-    return envOrigins.split(",").map((origin) => origin.trim());
-  }
-  // Default development origins
-  return [
-    "http://localhost:5176",
-    "http://localhost:5175",
-    "http://localhost:5174",
-  ];
-};
+import { getAllowedOrigins } from "../config/cors";
 
 // Get base URL from environment or use default
 const getBaseURL = (): string => {
@@ -28,7 +15,7 @@ const isProduction = process.env.NODE_ENV === "production";
 console.log("🔐 [Auth] Initializing Better Auth");
 console.log(`   Environment: ${process.env.NODE_ENV || "development"}`);
 console.log(`   Base URL: ${getBaseURL()}`);
-console.log(`   Trusted Origins: ${getTrustedOrigins().join(", ")}`);
+console.log(`   Trusted Origins: ${getAllowedOrigins().join(", ")}`);
 
 export const auth = betterAuth({
   baseURL: getBaseURL(),
@@ -64,12 +51,13 @@ export const auth = betterAuth({
       sameSite: isProduction ? "none" : "lax", // "none" for cross-site in production
       secure: isProduction, // Required when sameSite is "none"
       httpOnly: true,
+      partitioned: isProduction, // Required for third-party cookies (CHIPS)
     },
     crossSubDomainCookies: {
       enabled: false, // Not needed for cross-origin (different domains)
     },
   },
   // Set trusted origins for CORS
-  trustedOrigins: getTrustedOrigins(),
+  trustedOrigins: getAllowedOrigins(),
   socialProviders: {}, // No social providers for now
 });

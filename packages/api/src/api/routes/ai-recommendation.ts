@@ -8,7 +8,9 @@ import {
 } from "../../services/ai";
 import type { HealthSurveyResponseData } from "../../db/schema/health-survey";
 
-export const aiRecommendationRoutes = new Elysia({ prefix: "/ai-recommendations" })
+export const aiRecommendationRoutes = new Elysia({
+  prefix: "/ai-recommendations",
+})
   .use(errorMiddleware)
   .use(servicesPlugin)
   .use(authGuard)
@@ -26,7 +28,7 @@ export const aiRecommendationRoutes = new Elysia({ prefix: "/ai-recommendations"
       const surveyResponse =
         await services.healthSurveyRepository.findOneByProfile(
           params.surveyResponseId,
-          profileId
+          profileId,
         );
 
       if (!surveyResponse) {
@@ -45,7 +47,7 @@ export const aiRecommendationRoutes = new Elysia({ prefix: "/ai-recommendations"
 
       // Return the text stream response for streaming to client
       return result.toTextStreamResponse();
-    }
+    },
   )
   // Generate recommendations for a survey response (non-streaming, saves to DB)
   .post(
@@ -63,7 +65,7 @@ export const aiRecommendationRoutes = new Elysia({ prefix: "/ai-recommendations"
       const surveyResponse =
         await services.healthSurveyRepository.findOneByProfile(
           params.surveyResponseId,
-          profileId
+          profileId,
         );
 
       if (!surveyResponse) {
@@ -94,7 +96,7 @@ export const aiRecommendationRoutes = new Elysia({ prefix: "/ai-recommendations"
 
       set.status = 201;
       return recommendation;
-    }
+    },
   )
   // Save recommendations after streaming (called from frontend onFinish)
   .post(
@@ -107,28 +109,30 @@ export const aiRecommendationRoutes = new Elysia({ prefix: "/ai-recommendations"
       }
 
       // Check if recommendation already exists for this survey
-      const existing = await services.aiRecommendationService.getRecommendationBySurvey(
-        params.surveyResponseId
-      );
+      const existing =
+        await services.aiRecommendationService.getRecommendationBySurvey(
+          params.surveyResponseId,
+        );
 
       if (existing) {
         // Update existing
         // For now, delete and recreate (simpler)
         await services.aiRecommendationService.deleteRecommendation(
           existing.id,
-          profileId
+          profileId,
         );
       }
 
       // Save new recommendation
-      const recommendation = await services.aiRecommendationService.createRecommendation({
-        profileId,
-        surveyResponseId: params.surveyResponseId,
-        recommendations: body.clientRecommendations,
-        advisorNotes: body.advisorNotes,
-        aiModel: "gpt-4o",
-        processingTimeMs: body.processingTimeMs || 0,
-      });
+      const recommendation =
+        await services.aiRecommendationService.createRecommendation({
+          profileId,
+          surveyResponseId: params.surveyResponseId,
+          recommendations: body.clientRecommendations,
+          advisorNotes: body.advisorNotes,
+          aiModel: "gpt-4o",
+          processingTimeMs: body.processingTimeMs || 0,
+        });
 
       set.status = 201;
       return recommendation;
@@ -139,7 +143,7 @@ export const aiRecommendationRoutes = new Elysia({ prefix: "/ai-recommendations"
         advisorNotes: t.Any(),
         processingTimeMs: t.Optional(t.Number()),
       }),
-    }
+    },
   )
   // Get all recommendations for a profile
   .get("/", async ({ query, services, set }) => {
@@ -159,7 +163,7 @@ export const aiRecommendationRoutes = new Elysia({ prefix: "/ai-recommendations"
     }
     try {
       return await services.aiRecommendationService.getLatestRecommendation(
-        profileId
+        profileId,
       );
     } catch {
       set.status = 404;
@@ -170,7 +174,7 @@ export const aiRecommendationRoutes = new Elysia({ prefix: "/ai-recommendations"
   .get("/survey/:surveyResponseId", async ({ params, services, set }) => {
     const recommendation =
       await services.aiRecommendationService.getRecommendationBySurvey(
-        params.surveyResponseId
+        params.surveyResponseId,
       );
     if (!recommendation) {
       set.status = 404;
@@ -197,7 +201,7 @@ export const aiRecommendationRoutes = new Elysia({ prefix: "/ai-recommendations"
     try {
       return await services.aiRecommendationService.getRecommendationByProfile(
         params.id,
-        profileId
+        profileId,
       );
     } catch {
       set.status = 404;
@@ -214,7 +218,7 @@ export const aiRecommendationRoutes = new Elysia({ prefix: "/ai-recommendations"
     try {
       await services.aiRecommendationService.deleteRecommendation(
         params.id,
-        profileId
+        profileId,
       );
       set.status = 204;
     } catch {
