@@ -1,6 +1,12 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
+import { setDefaultResultOrder } from "node:dns";
+
+// Force IPv4 DNS resolution BEFORE any database connection
+// This MUST happen before postgres() is called
+setDefaultResultOrder("ipv4first");
+console.log("🔧 [DB] DNS resolution set to prefer IPv4");
 
 // Validate DATABASE_URL before attempting connection
 const databaseUrl = process.env.DATABASE_URL;
