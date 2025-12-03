@@ -27,9 +27,7 @@ export default function SurveyRecommendationsRoute() {
     queryKey: ["survey", surveyId],
     queryFn: async () => {
       if (!surveyId) throw new Error("No survey ID");
-      const { data, error } = await api.api["health-survey"][":id"].get({
-        params: { id: surveyId },
-      });
+      const { data, error } = await api.api["health-survey"][surveyId].get();
       if (error) throw error;
       return data as SurveyDetail;
     },
@@ -68,7 +66,10 @@ export default function SurveyRecommendationsRoute() {
   const handleGenerate = () => {
     console.log("handleGenerate called", { surveyId, profileId: profile?.id });
     if (!surveyId || !profile?.id) {
-      console.error("Missing surveyId or profileId", { surveyId, profileId: profile?.id });
+      console.error("Missing surveyId or profileId", {
+        surveyId,
+        profileId: profile?.id,
+      });
       return;
     }
     console.log("Calling generate...");
@@ -99,7 +100,10 @@ export default function SurveyRecommendationsRoute() {
     console.error("Generation error:", generateError);
   }
 
-  console.log("Rendering main content with handleGenerate:", typeof handleGenerate);
+  console.log(
+    "Rendering main content with handleGenerate:",
+    typeof handleGenerate,
+  );
 
   return (
     <div className="space-y-6">

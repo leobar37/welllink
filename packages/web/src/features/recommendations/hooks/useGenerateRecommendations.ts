@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { experimental_useObject as useObject } from "@ai-sdk/react";
 import { aiResponseSchema, type AIResponse } from "../schema";
 
-const API_BASE = "http://localhost:5300";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5300";
 
 interface UseGenerateRecommendationsOptions {
   surveyResponseId: string;
@@ -15,7 +15,7 @@ interface UseGenerateRecommendationsOptions {
 async function saveRecommendations(
   surveyResponseId: string,
   profileId: string,
-  data: AIResponse
+  data: AIResponse,
 ): Promise<void> {
   const response = await fetch(
     `${API_BASE}/api/ai-recommendations/save/${surveyResponseId}?profileId=${profileId}`,
@@ -27,7 +27,7 @@ async function saveRecommendations(
         clientRecommendations: data.clientRecommendations,
         advisorNotes: data.advisorNotes,
       }),
-    }
+    },
   );
 
   if (!response.ok) {
@@ -37,13 +37,13 @@ async function saveRecommendations(
 
 // Load existing recommendations from the database
 async function loadRecommendations(
-  surveyResponseId: string
+  surveyResponseId: string,
 ): Promise<AIResponse | null> {
   const response = await fetch(
     `${API_BASE}/api/ai-recommendations/survey/${surveyResponseId}`,
     {
       credentials: "include",
-    }
+    },
   );
 
   if (response.status === 404) {
@@ -67,7 +67,8 @@ export function useGenerateRecommendations({
   onFinish,
   onError,
 }: UseGenerateRecommendationsOptions) {
-  const [savedRecommendations, setSavedRecommendations] = useState<AIResponse | null>(null);
+  const [savedRecommendations, setSavedRecommendations] =
+    useState<AIResponse | null>(null);
   const [isLoadingExisting, setIsLoadingExisting] = useState(true);
 
   // Load existing recommendations on mount
@@ -108,7 +109,7 @@ export function useGenerateRecommendations({
         }
       }
     },
-    [surveyResponseId, profileId, onFinish]
+    [surveyResponseId, profileId, onFinish],
   );
 
   const { object, submit, isLoading, stop, error } = useObject({
