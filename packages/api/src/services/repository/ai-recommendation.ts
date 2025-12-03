@@ -15,62 +15,64 @@ export class AIRecommendationRepository {
   }
 
   async findByProfile(profileId: string) {
-    return db.query.aiRecommendation.findMany({
-      where: eq(aiRecommendation.profileId, profileId),
-      orderBy: desc(aiRecommendation.createdAt),
-      with: {
-        surveyResponse: true,
-      },
-    });
+    // Use select instead of query builder to avoid relation issues
+    return db
+      .select()
+      .from(aiRecommendation)
+      .where(eq(aiRecommendation.profileId, profileId))
+      .orderBy(desc(aiRecommendation.createdAt));
   }
 
   async findOne(id: string) {
-    return db.query.aiRecommendation.findFirst({
-      where: eq(aiRecommendation.id, id),
-      with: {
-        surveyResponse: true,
-      },
-    });
+    const [result] = await db
+      .select()
+      .from(aiRecommendation)
+      .where(eq(aiRecommendation.id, id))
+      .limit(1);
+
+    return result;
   }
 
   async findOneByProfile(id: string, profileId: string) {
-    return db.query.aiRecommendation.findFirst({
-      where: and(
-        eq(aiRecommendation.id, id),
-        eq(aiRecommendation.profileId, profileId)
-      ),
-      with: {
-        surveyResponse: true,
-      },
-    });
+    const [result] = await db
+      .select()
+      .from(aiRecommendation)
+      .where(
+        and(
+          eq(aiRecommendation.id, id),
+          eq(aiRecommendation.profileId, profileId),
+        ),
+      )
+      .limit(1);
+
+    return result;
   }
 
   async findBySurveyResponse(surveyResponseId: string) {
-    return db.query.aiRecommendation.findFirst({
-      where: eq(aiRecommendation.surveyResponseId, surveyResponseId),
-      with: {
-        surveyResponse: true,
-      },
-    });
+    const [result] = await db
+      .select()
+      .from(aiRecommendation)
+      .where(eq(aiRecommendation.surveyResponseId, surveyResponseId))
+      .limit(1);
+
+    return result;
   }
 
   async findLatestByProfile(profileId: string) {
-    const recommendations = await db.query.aiRecommendation.findMany({
-      where: eq(aiRecommendation.profileId, profileId),
-      orderBy: desc(aiRecommendation.createdAt),
-      limit: 1,
-      with: {
-        surveyResponse: true,
-      },
-    });
+    const [result] = await db
+      .select()
+      .from(aiRecommendation)
+      .where(eq(aiRecommendation.profileId, profileId))
+      .orderBy(desc(aiRecommendation.createdAt))
+      .limit(1);
 
-    return recommendations[0] ?? null;
+    return result ?? null;
   }
 
   async update(
     id: string,
     profileId: string,
-    data: Partial<RecommendationInsert>
+    data: Partial<RecommendationInsert>,
   ) {
     const [recommendation] = await db
       .update(aiRecommendation)
@@ -78,8 +80,8 @@ export class AIRecommendationRepository {
       .where(
         and(
           eq(aiRecommendation.id, id),
-          eq(aiRecommendation.profileId, profileId)
-        )
+          eq(aiRecommendation.profileId, profileId),
+        ),
       )
       .returning();
 
@@ -92,8 +94,8 @@ export class AIRecommendationRepository {
       .where(
         and(
           eq(aiRecommendation.id, id),
-          eq(aiRecommendation.profileId, profileId)
-        )
+          eq(aiRecommendation.profileId, profileId),
+        ),
       )
       .returning();
 

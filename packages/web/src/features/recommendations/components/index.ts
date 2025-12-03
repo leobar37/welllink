@@ -5,6 +5,10 @@ export { RecommendationsView } from "./RecommendationsView";
 export { ClientTab } from "./ClientTab";
 export { AdvisorTab } from "./AdvisorTab";
 
+// Navigation
+export { SectionNav } from "./SectionNav";
+export type { Section } from "./SectionNav";
+
 // Client Cards (for PDF)
 export { WellnessScoreCard } from "./WellnessScoreCard";
 export { HydrationCard } from "./HydrationCard";

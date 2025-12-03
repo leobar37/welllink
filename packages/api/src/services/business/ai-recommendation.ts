@@ -23,7 +23,7 @@ interface CreateRecommendationData {
 export class AIRecommendationService {
   constructor(
     private aiRecommendationRepository: AIRecommendationRepository,
-    private healthSurveyRepository: HealthSurveyRepository
+    private healthSurveyRepository: HealthSurveyRepository,
   ) {}
 
   async getRecommendations(profileId: string): Promise<AIRecommendation[]> {
@@ -40,7 +40,7 @@ export class AIRecommendationService {
 
   async getRecommendationByProfile(
     id: string,
-    profileId: string
+    profileId: string,
   ): Promise<AIRecommendation> {
     const recommendation =
       await this.aiRecommendationRepository.findOneByProfile(id, profileId);
@@ -51,11 +51,13 @@ export class AIRecommendationService {
   }
 
   async getRecommendationBySurvey(
-    surveyResponseId: string
+    surveyResponseId: string,
   ): Promise<AIRecommendation | null> {
-    return this.aiRecommendationRepository.findBySurveyResponse(
-      surveyResponseId
-    );
+    const result =
+      await this.aiRecommendationRepository.findBySurveyResponse(
+        surveyResponseId,
+      );
+    return result ?? null;
   }
 
   async getLatestRecommendation(profileId: string): Promise<AIRecommendation> {
@@ -79,7 +81,7 @@ export class AIRecommendationService {
     // Verify survey response exists and belongs to profile
     const surveyResponse = await this.healthSurveyRepository.findOneByProfile(
       data.surveyResponseId,
-      data.profileId
+      data.profileId,
     );
     if (!surveyResponse) {
       throw new NotFoundException("Survey response not found");
@@ -88,7 +90,7 @@ export class AIRecommendationService {
     // Check if recommendation already exists for this survey
     const existingRecommendation =
       await this.aiRecommendationRepository.findBySurveyResponse(
-        data.surveyResponseId
+        data.surveyResponseId,
       );
     if (existingRecommendation) {
       // Update existing recommendation
@@ -101,7 +103,7 @@ export class AIRecommendationService {
           aiModel: data.aiModel,
           aiVersion: data.aiVersion,
           processingTimeMs: data.processingTimeMs,
-        }
+        },
       );
     }
 
@@ -119,7 +121,7 @@ export class AIRecommendationService {
   async updateRecommendation(
     id: string,
     profileId: string,
-    data: Partial<CreateRecommendationData>
+    data: Partial<CreateRecommendationData>,
   ) {
     const existingRecommendation =
       await this.aiRecommendationRepository.findOneByProfile(id, profileId);

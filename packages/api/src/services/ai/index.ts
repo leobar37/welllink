@@ -15,6 +15,8 @@ interface GenerateRecommendationsParams {
  *
  * Note: streamObject() returns synchronously, but its properties (.object, .usage, etc.)
  * are Promises that resolve when the stream completes.
+ *
+ * Uses a fine-tuned model specialized for Herbalife wellness recommendations.
  */
 export function generateRecommendationsStream(
   params: GenerateRecommendationsParams,
@@ -23,7 +25,7 @@ export function generateRecommendationsStream(
 
   // streamObject returns synchronously - no await needed
   const result = streamObject({
-    model: fireworks("accounts/fireworks/models/deepseek-v3p2"),
+    model: fireworks("accounts/leobar37/supervisedFineTuningJobs/krj8aa92"),
     schema: aiResponseSchema,
     prompt,
   });
@@ -34,6 +36,8 @@ export function generateRecommendationsStream(
 /**
  * Generate recommendations and wait for the complete result.
  * Use this when you need the full object (not streaming).
+ *
+ * Uses a fine-tuned model specialized for Herbalife wellness recommendations.
  */
 export async function generateRecommendations(
   params: GenerateRecommendationsParams,
@@ -42,7 +46,7 @@ export async function generateRecommendations(
 
   // streamObject returns synchronously
   const result = streamObject({
-    model: fireworks("accounts/fireworks/models/deepseek-v3p2"),
+    model: fireworks("accounts/leobar37/supervisedFineTuningJobs/krj8aa92"),
     schema: aiResponseSchema,
     prompt,
   });

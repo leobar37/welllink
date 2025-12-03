@@ -1,19 +1,16 @@
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-} from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import type { ClientRecommendations } from "../schema";
 
 // Define styles
 const styles = StyleSheet.create({
   page: {
     padding: 40,
+    paddingBottom: 60,
     fontFamily: "Helvetica",
     fontSize: 11,
     backgroundColor: "#ffffff",
+    display: "flex",
+    flexDirection: "column",
   },
   header: {
     textAlign: "center",
@@ -153,10 +150,7 @@ const styles = StyleSheet.create({
     fontSize: 9,
   },
   footer: {
-    position: "absolute",
-    bottom: 30,
-    left: 40,
-    right: 40,
+    marginTop: "auto",
     textAlign: "center",
     fontSize: 9,
     color: "#9ca3af",
@@ -170,6 +164,9 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     fontSize: 9,
     color: "#92400e",
+  },
+  content: {
+    flex: 1,
   },
 });
 
@@ -189,182 +186,230 @@ export function RecommendationsPDF({
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>BIENVENIDO AL RETO DE 7 DIAS</Text>
-          <Text style={styles.subtitle}>Proceso de Transformacion</Text>
-        </View>
-
-        {/* Client Info */}
-        <View style={styles.clientInfo}>
-          <Text style={styles.clientInfoItem}>Participante: {clientName}</Text>
-          <Text style={styles.clientInfoItem}>Fecha: {date}</Text>
-          <Text style={styles.clientInfoItem}>Asesor: {advisorName}</Text>
-        </View>
-
-        {/* Metrics Row */}
-        <View style={styles.metricsRow}>
-          <View style={styles.metricBox}>
-            <Text style={styles.metricValue}>{data.wellnessScore?.overall || "--"}</Text>
-            <Text style={styles.metricLabel}>Wellness Score</Text>
+        {/* Content wrapper */}
+        <View style={styles.content}>
+          {/* Header */}
+          <View style={styles.header} wrap={false}>
+            <Text style={styles.title}>BIENVENIDO AL RETO DE 7 DIAS</Text>
+            <Text style={styles.subtitle}>Proceso de Transformacion</Text>
           </View>
-          <View style={styles.metricBox}>
-            <Text style={styles.metricValue}>{data.bmi?.current?.toFixed(1) || "--"}</Text>
-            <Text style={styles.metricLabel}>IMC ({data.bmi?.category || ""})</Text>
+
+          {/* Client Info */}
+          <View style={styles.clientInfo} wrap={false}>
+            <Text style={styles.clientInfoItem}>
+              Participante: {clientName}
+            </Text>
+            <Text style={styles.clientInfoItem}>Fecha: {date}</Text>
+            <Text style={styles.clientInfoItem}>Asesor: {advisorName}</Text>
           </View>
-          <View style={styles.metricBox}>
-            <Text style={styles.metricValue}>{data.hydration?.dailyLiters || "--"}L</Text>
-            <Text style={styles.metricLabel}>Agua diaria</Text>
-          </View>
-        </View>
 
-        {/* Summary */}
-        {data.summary && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Resumen</Text>
-            <Text style={styles.listText}>{data.summary}</Text>
-          </View>
-        )}
-
-        {/* Hydration Schedule */}
-        {data.hydration?.schedule && data.hydration.schedule.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Hidratacion Diaria</Text>
-            <View style={styles.list}>
-              {data.hydration.schedule.map((item, index) => (
-                <View key={index} style={styles.listItem}>
-                  <Text style={styles.bullet}>•</Text>
-                  <Text style={styles.listText}>{item}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        )}
-
-        {/* Supplements Routine */}
-        {data.supplementsRoutine && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Tu Rutina Diaria del Reto</Text>
-
-            {/* Morning */}
-            {data.supplementsRoutine.morning && data.supplementsRoutine.morning.length > 0 && (
-              <View style={styles.supplementSection}>
-                <Text style={styles.supplementTime}>Al despertar (en ayunas)</Text>
-                {data.supplementsRoutine.morning.map((item, index) => (
-                  <View key={index} style={styles.supplementItem}>
-                    <Text style={styles.supplementName}>{item.product}</Text>
-                    <Text style={styles.supplementDose}>{item.dose}</Text>
-                    <Text style={styles.supplementBenefit}>{item.benefit}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
-
-            {/* Breakfast */}
-            {data.supplementsRoutine.breakfast && data.supplementsRoutine.breakfast.length > 0 && (
-              <View style={styles.supplementSection}>
-                <Text style={styles.supplementTime}>Con el desayuno</Text>
-                {data.supplementsRoutine.breakfast.map((item, index) => (
-                  <View key={index} style={styles.supplementItem}>
-                    <Text style={styles.supplementName}>{item.product}</Text>
-                    <Text style={styles.supplementDose}>{item.dose}</Text>
-                    <Text style={styles.supplementBenefit}>{item.benefit}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
-
-            {/* Evening */}
-            {data.supplementsRoutine.evening && data.supplementsRoutine.evening.length > 0 && (
-              <View style={styles.supplementSection}>
-                <Text style={styles.supplementTime}>Por la noche</Text>
-                {data.supplementsRoutine.evening.map((item, index) => (
-                  <View key={index} style={styles.supplementItem}>
-                    <Text style={styles.supplementName}>{item.product}</Text>
-                    <Text style={styles.supplementDose}>{item.dose}</Text>
-                    <Text style={styles.supplementBenefit}>{item.benefit}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* Diet - Two Columns */}
-        {data.diet && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Alimentacion Recomendada</Text>
-            <View style={styles.twoColumns}>
-              <View style={styles.column}>
-                <Text style={{ ...styles.listText, fontWeight: "bold", marginBottom: 5 }}>
-                  Incluir:
-                </Text>
-                <View style={styles.tagContainer}>
-                  {data.diet.recommended?.map((item, index) => (
-                    <Text key={index} style={styles.tagGreen}>
-                      {item}
-                    </Text>
-                  ))}
-                </View>
-              </View>
-              <View style={styles.column}>
-                <Text style={{ ...styles.listText, fontWeight: "bold", marginBottom: 5 }}>
-                  Evitar:
-                </Text>
-                <View style={styles.tagContainer}>
-                  {data.diet.avoid?.map((item, index) => (
-                    <Text key={index} style={styles.tagRed}>
-                      {item}
-                    </Text>
-                  ))}
-                </View>
-              </View>
-            </View>
-            {data.diet.mealFrequency && (
-              <Text style={{ ...styles.listText, marginTop: 8 }}>
-                Frecuencia: {data.diet.mealFrequency}
+          {/* Metrics Row */}
+          <View style={styles.metricsRow} wrap={false}>
+            <View style={styles.metricBox}>
+              <Text style={styles.metricValue}>
+                {data.wellnessScore?.overall || "--"}
               </Text>
-            )}
-          </View>
-        )}
-
-        {/* Exercise */}
-        {data.exercise && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Actividad Fisica</Text>
-            <View style={styles.list}>
-              {data.exercise.type && (
-                <View style={styles.listItem}>
-                  <Text style={styles.bullet}>•</Text>
-                  <Text style={styles.listText}>Tipo: {data.exercise.type}</Text>
-                </View>
-              )}
-              {data.exercise.intensity && (
-                <View style={styles.listItem}>
-                  <Text style={styles.bullet}>•</Text>
-                  <Text style={styles.listText}>Intensidad: {data.exercise.intensity}</Text>
-                </View>
-              )}
-              {data.exercise.frequency && (
-                <View style={styles.listItem}>
-                  <Text style={styles.bullet}>•</Text>
-                  <Text style={styles.listText}>Frecuencia: {data.exercise.frequency}</Text>
-                </View>
-              )}
+              <Text style={styles.metricLabel}>Wellness Score</Text>
+            </View>
+            <View style={styles.metricBox}>
+              <Text style={styles.metricValue}>
+                {data.bmi?.current?.toFixed(1) || "--"}
+              </Text>
+              <Text style={styles.metricLabel}>
+                IMC ({data.bmi?.category || ""})
+              </Text>
+            </View>
+            <View style={styles.metricBox}>
+              <Text style={styles.metricValue}>
+                {data.hydration?.dailyLiters || "--"}L
+              </Text>
+              <Text style={styles.metricLabel}>Agua diaria</Text>
             </View>
           </View>
-        )}
 
-        {/* Note */}
-        <View style={styles.note}>
-          <Text>
-            Este es un plan orientativo. Consulta a tu medico si tienes dudas. Tu asesor te
-            acompañara durante el reto.
-          </Text>
+          {/* Summary */}
+          {data.summary && (
+            <View style={styles.section} wrap={false}>
+              <Text style={styles.sectionTitle}>Resumen</Text>
+              <Text style={styles.listText}>{data.summary}</Text>
+            </View>
+          )}
+
+          {/* Hydration Schedule */}
+          {data.hydration?.schedule && data.hydration.schedule.length > 0 && (
+            <View style={styles.section} wrap={false}>
+              <Text style={styles.sectionTitle}>Hidratacion Diaria</Text>
+              <View style={styles.list}>
+                {data.hydration.schedule.map((item, index) => (
+                  <View key={index} style={styles.listItem}>
+                    <Text style={styles.bullet}>•</Text>
+                    <Text style={styles.listText}>{item}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+
+          {/* Supplements Routine */}
+          {data.supplementsRoutine && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Tu Rutina Diaria del Reto</Text>
+
+              {/* Morning */}
+              {data.supplementsRoutine.morning &&
+                data.supplementsRoutine.morning.length > 0 && (
+                  <View style={styles.supplementSection} wrap={false}>
+                    <Text style={styles.supplementTime}>
+                      Al despertar (en ayunas)
+                    </Text>
+                    {data.supplementsRoutine.morning.map((item, index) => (
+                      <View key={index} style={styles.supplementItem}>
+                        <Text style={styles.supplementName}>
+                          {item.product}
+                        </Text>
+                        <Text style={styles.supplementDose}>{item.dose}</Text>
+                        <Text style={styles.supplementBenefit}>
+                          {item.benefit}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+              {/* Breakfast */}
+              {data.supplementsRoutine.breakfast &&
+                data.supplementsRoutine.breakfast.length > 0 && (
+                  <View style={styles.supplementSection} wrap={false}>
+                    <Text style={styles.supplementTime}>Con el desayuno</Text>
+                    {data.supplementsRoutine.breakfast.map((item, index) => (
+                      <View key={index} style={styles.supplementItem}>
+                        <Text style={styles.supplementName}>
+                          {item.product}
+                        </Text>
+                        <Text style={styles.supplementDose}>{item.dose}</Text>
+                        <Text style={styles.supplementBenefit}>
+                          {item.benefit}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+              {/* Evening */}
+              {data.supplementsRoutine.evening &&
+                data.supplementsRoutine.evening.length > 0 && (
+                  <View style={styles.supplementSection} wrap={false}>
+                    <Text style={styles.supplementTime}>Por la noche</Text>
+                    {data.supplementsRoutine.evening.map((item, index) => (
+                      <View key={index} style={styles.supplementItem}>
+                        <Text style={styles.supplementName}>
+                          {item.product}
+                        </Text>
+                        <Text style={styles.supplementDose}>{item.dose}</Text>
+                        <Text style={styles.supplementBenefit}>
+                          {item.benefit}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+            </View>
+          )}
+
+          {/* Diet - Two Columns */}
+          {data.diet && (
+            <View style={styles.section} wrap={false}>
+              <Text style={styles.sectionTitle}>Alimentacion Recomendada</Text>
+              <View style={styles.twoColumns}>
+                <View style={styles.column}>
+                  <Text
+                    style={{
+                      ...styles.listText,
+                      fontWeight: "bold",
+                      marginBottom: 5,
+                    }}
+                  >
+                    Incluir:
+                  </Text>
+                  <View style={styles.tagContainer}>
+                    {data.diet.recommended?.map((item, index) => (
+                      <Text key={index} style={styles.tagGreen}>
+                        {item}
+                      </Text>
+                    ))}
+                  </View>
+                </View>
+                <View style={styles.column}>
+                  <Text
+                    style={{
+                      ...styles.listText,
+                      fontWeight: "bold",
+                      marginBottom: 5,
+                    }}
+                  >
+                    Evitar:
+                  </Text>
+                  <View style={styles.tagContainer}>
+                    {data.diet.avoid?.map((item, index) => (
+                      <Text key={index} style={styles.tagRed}>
+                        {item}
+                      </Text>
+                    ))}
+                  </View>
+                </View>
+              </View>
+              {data.diet.mealFrequency && (
+                <Text style={{ ...styles.listText, marginTop: 8 }}>
+                  Frecuencia: {data.diet.mealFrequency}
+                </Text>
+              )}
+            </View>
+          )}
+
+          {/* Exercise */}
+          {data.exercise && (
+            <View style={styles.section} wrap={false}>
+              <Text style={styles.sectionTitle}>Actividad Fisica</Text>
+              <View style={styles.list}>
+                {data.exercise.type && (
+                  <View style={styles.listItem}>
+                    <Text style={styles.bullet}>•</Text>
+                    <Text style={styles.listText}>
+                      Tipo: {data.exercise.type}
+                    </Text>
+                  </View>
+                )}
+                {data.exercise.intensity && (
+                  <View style={styles.listItem}>
+                    <Text style={styles.bullet}>•</Text>
+                    <Text style={styles.listText}>
+                      Intensidad: {data.exercise.intensity}
+                    </Text>
+                  </View>
+                )}
+                {data.exercise.frequency && (
+                  <View style={styles.listItem}>
+                    <Text style={styles.bullet}>•</Text>
+                    <Text style={styles.listText}>
+                      Frecuencia: {data.exercise.frequency}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </View>
+          )}
+
+          {/* Note */}
+          <View style={styles.note} wrap={false}>
+            <Text>
+              Este es un plan orientativo. Consulta a tu medico si tienes dudas.
+              Tu asesor te acompañara durante el reto.
+            </Text>
+          </View>
         </View>
 
-        {/* Footer */}
-        <View style={styles.footer}>
+        {/* Footer - now flows with content */}
+        <View style={styles.footer} wrap={false}>
           <Text>EXITO EN TU TRANSFORMACION!</Text>
         </View>
       </Page>

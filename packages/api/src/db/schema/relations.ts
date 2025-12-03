@@ -81,7 +81,7 @@ export const profileCustomizationRelations = relations(
       fields: [profileCustomization.profileId],
       references: [profile.id],
     }),
-  })
+  }),
 );
 
 // Social Link relations
@@ -102,7 +102,7 @@ export const healthSurveyResponseRelations = relations(
       references: [profile.id],
     }),
     aiRecommendations: many(aiRecommendation),
-  })
+  }),
 );
 
 // AI Recommendation relations
@@ -113,11 +113,13 @@ export const aiRecommendationRelations = relations(
       fields: [aiRecommendation.profileId],
       references: [profile.id],
     }),
-    surveyResponse: one(healthSurveyResponse, {
-      fields: [aiRecommendation.surveyResponseId],
-      references: [healthSurveyResponse.id],
-    }),
-  })
+    // COMMENTED OUT: This relation causes SQL errors with Drizzle query builder
+    // Use manual joins if you need surveyResponse data
+    // surveyResponse: one(healthSurveyResponse, {
+    //   fields: [aiRecommendation.surveyResponseId],
+    //   references: [healthSurveyResponse.id],
+    // }),
+  }),
 );
 
 // Story Section relations
