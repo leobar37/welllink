@@ -5,6 +5,69 @@ interface SurveyDataForPrompt {
   responses: HealthSurveyResponseData;
 }
 
+// JSON Schema structure explicitly defined to guide the model
+const RESPONSE_SCHEMA = `{
+  "clientRecommendations": {
+    "hydration": {
+      "dailyLiters": number,
+      "formula": string,
+      "schedule": string[],
+      "alerts": string[],
+      "comparison": string
+    },
+    "bmi": {
+      "current": number,
+      "category": string,
+      "healthyRange": { "min": number, "max": number },
+      "currentWeight": number,
+      "targetWeight": number,
+      "weightToLose": number
+    },
+    "prioritizedConditions": [
+      { "name": string, "severity": "alta"|"media"|"baja", "category": string, "relatedTo": string[] }
+    ],
+    "diet": {
+      "avoid": string[],
+      "recommended": string[],
+      "supplements": string[],
+      "mealFrequency": string
+    },
+    "exercise": {
+      "type": string,
+      "intensity": string,
+      "frequency": string,
+      "precautions": string[]
+    },
+    "wellnessScore": {
+      "overall": number (0-100),
+      "byCategory": { [category]: number },
+      "trend": string
+    },
+    "riskFactors": [
+      { "factor": string, "action": string }
+    ],
+    "supplementsRoutine": {
+      "morning": [{ "product": string, "dose": string, "benefit": string }],
+      "breakfast": [{ "product": string, "dose": string, "benefit": string }],
+      "evening": [{ "product": string, "dose": string, "benefit": string }] (optional)
+    },
+    "summary": string
+  },
+  "advisorNotes": {
+    "precautions": string[],
+    "weeklyPlan": {
+      "day1": string, "day2": string, "day3": string, "day4": string,
+      "day5": string, "day6": string, "day7": string
+    },
+    "conversationTopics": string[],
+    "realisticGoals": string[],
+    "alertSigns": string[],
+    "followUpSchedule": {
+      "day1": string, "day3": string, "day5": string, "day7": string
+    }
+  }
+}`;
+
 export function buildRecommendationsPrompt(data: SurveyDataForPrompt): string {
   const { visitorName, responses } = data;
   const { measurements, conditions, habits } = responses;
@@ -89,5 +152,15 @@ Genera dos bloques de información:
 4. El wellness score debe reflejar realísticamente las condiciones
 5. Las notas del asesor deben ser prácticas y accionables
 6. Relaciona los suplementos con las condiciones específicas del usuario
-7. Si el usuario tiene problemas digestivos, ajusta la rutina (ej: tomar después del desayuno, no en ayunas)`;
+7. Si el usuario tiene problemas digestivos, ajusta la rutina (ej: tomar después del desayuno, no en ayunas)
+
+## FORMATO DE RESPUESTA OBLIGATORIO
+
+IMPORTANTE: Debes responder ÚNICAMENTE con un objeto JSON válido que siga EXACTAMENTE esta estructura:
+
+${RESPONSE_SCHEMA}
+
+- Usa los nombres de propiedades EXACTOS en inglés como se muestra (bmi, hydration, morning, etc.)
+- No añadas propiedades adicionales
+- No uses nombres en español para las propiedades`;
 }

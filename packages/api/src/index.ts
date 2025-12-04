@@ -1,3 +1,7 @@
+// Load environment variables FIRST, before any imports that need them
+import { config } from "dotenv";
+config({ path: ".env" });
+
 import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { setDefaultResultOrder } from "node:dns";

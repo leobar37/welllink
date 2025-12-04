@@ -1,19 +1,25 @@
-import { useState } from "react"
-import { Loader2, ExternalLink, RefreshCw } from "lucide-react"
-import { useProfile } from "@/hooks/use-profile"
-import { usePreviewPanel } from "./preview-context"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { Loader2, ExternalLink, RefreshCw } from "lucide-react";
+import { useProfile } from "@/hooks/use-profile";
+import { usePreviewPanel } from "./preview-context";
+import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetDescription,
-} from "@/components/ui/sheet"
+} from "@/components/ui/sheet";
 
-function PreviewIframe({ username, refreshKey }: { username: string; refreshKey: number }) {
-  const [isLoading, setIsLoading] = useState(true)
-  const profileUrl = `/${username}?preview=1&t=${refreshKey}`
+function PreviewIframe({
+  username,
+  refreshKey,
+}: {
+  username: string;
+  refreshKey: number;
+}) {
+  const [isLoading, setIsLoading] = useState(true);
+  const profileUrl = `/${username}?preview=1&t=${refreshKey}`;
 
   return (
     <>
@@ -29,29 +35,32 @@ function PreviewIframe({ username, refreshKey }: { username: string; refreshKey:
         title="Vista previa del perfil"
       />
     </>
-  )
+  );
 }
 
 export function PreviewPanel() {
-  const { isOpen, close, refreshKey, refresh } = usePreviewPanel()
-  const { profile } = useProfile()
+  const { isOpen, close, refreshKey, refresh } = usePreviewPanel();
+  const { profile } = useProfile();
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && close()}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-md flex flex-col p-0"
+        className="w-full sm:max-w-lg flex flex-col p-0"
       >
         <SheetHeader className="px-6 py-4 border-b shrink-0">
           <div className="flex items-center justify-between">
             <div>
               <SheetTitle>Vista Previa</SheetTitle>
-              <SheetDescription>
-                Así se ve tu perfil público
-              </SheetDescription>
+              <SheetDescription>Así se ve tu perfil público</SheetDescription>
             </div>
             <div className="flex gap-2">
-              <Button variant="ghost" size="icon" onClick={refresh} title="Recargar">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={refresh}
+                title="Recargar"
+              >
                 <RefreshCw className="h-4 w-4" />
               </Button>
               {profile?.username && (
@@ -73,7 +82,7 @@ export function PreviewPanel() {
         <div className="flex-1 overflow-hidden">
           {/* Phone frame mockup */}
           <div className="h-full p-4 flex justify-center">
-            <div className="relative w-full max-w-[320px] h-full min-h-[500px]">
+            <div className="relative w-full max-w-[375px] h-full min-h-[500px]">
               {/* Phone bezel */}
               <div className="absolute inset-0 rounded-[2.5rem] border-[8px] border-foreground/10 bg-background shadow-xl overflow-hidden">
                 {/* Notch */}
@@ -98,5 +107,5 @@ export function PreviewPanel() {
         </div>
       </SheetContent>
     </Sheet>
-  )
+  );
 }

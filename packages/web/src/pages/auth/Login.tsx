@@ -26,6 +26,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const loginSchema = z.object({
   email: z.string().email("Correo electrónico inválido"),
@@ -38,11 +39,18 @@ export function Login() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
+  // Dev-only: Auto-fill with seed credentials
+  const isDev = import.meta.env.DEV;
+  const DEV_CREDENTIALS = {
+    email: "maria.rodriguez@example.com",
+    password: "182@Alfk3458",
+  };
+
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: isDev ? DEV_CREDENTIALS.email : "",
+      password: isDev ? DEV_CREDENTIALS.password : "",
     },
   });
 
@@ -60,8 +68,8 @@ export function Login() {
       }
 
       toast.success("Sesión iniciada correctamente");
-      if (data?.redirect && data.redirectTo) {
-        window.location.href = data.redirectTo;
+      if (data?.redirect && data.url) {
+        window.location.href = data.url;
         return;
       }
       navigate("/dashboard", { replace: true });
@@ -82,6 +90,14 @@ export function Login() {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {isDev && (
+          <Alert className="mb-4">
+            <AlertDescription>
+              <strong>Modo Dev:</strong> Credenciales de prueba precargadas
+              (seed)
+            </AlertDescription>
+          </Alert>
+        )}
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
