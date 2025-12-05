@@ -103,9 +103,10 @@ export class AIRecommendationRepository {
   }
 
   async countByProfile(profileId: string) {
-    const recommendations = await db.query.aiRecommendation.findMany({
-      where: eq(aiRecommendation.profileId, profileId),
-    });
+    const recommendations = await db
+      .select()
+      .from(aiRecommendation)
+      .where(eq(aiRecommendation.profileId, profileId));
     return recommendations.length;
   }
 }
