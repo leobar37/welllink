@@ -54,7 +54,7 @@ type SurveyResponse = {
   id: string;
   createdAt: string;
   visitorName?: string | null;
-  visitorWhatsapp?: string | null;
+  visitorPhone?: string | null;
   responses?: {
     goal?: string | null;
   } | null;
@@ -88,8 +88,10 @@ export function SurveyResults() {
   // Filtrar datos
   const filteredData = useMemo(() => {
     return surveys.filter((survey) => {
-      const statusMatch = statusFilter === "all" || survey.status === statusFilter;
-      const goalMatch = goalFilter === "all" || survey.responses?.goal === goalFilter;
+      const statusMatch =
+        statusFilter === "all" || survey.status === statusFilter;
+      const goalMatch =
+        goalFilter === "all" || survey.responses?.goal === goalFilter;
       return statusMatch && goalMatch;
     });
   }, [surveys, statusFilter, goalFilter]);
@@ -103,7 +105,9 @@ export function SurveyResults() {
           return (
             <Button
               variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
               className="h-8 px-2 lg:px-3"
             >
               Fecha
@@ -113,11 +117,7 @@ export function SurveyResults() {
         },
         cell: ({ row }) => {
           const date = new Date(row.getValue("createdAt"));
-          return (
-            <div className="text-sm">
-              {format(date, "MMM d, yyyy")}
-            </div>
-          );
+          return <div className="text-sm">{format(date, "MMM d, yyyy")}</div>;
         },
       },
       {
@@ -126,7 +126,9 @@ export function SurveyResults() {
           return (
             <Button
               variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
               className="h-8 px-2 lg:px-3"
             >
               Nombre
@@ -137,9 +139,7 @@ export function SurveyResults() {
         cell: ({ row }) => {
           const name = row.getValue("visitorName") as string;
           return (
-            <div className="font-medium text-sm">
-              {name || "Sin nombre"}
-            </div>
+            <div className="font-medium text-sm">{name || "Sin nombre"}</div>
           );
         },
       },
@@ -149,7 +149,9 @@ export function SurveyResults() {
           return (
             <Button
               variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
               className="h-8 px-2 lg:px-3"
             >
               Objetivo
@@ -167,20 +169,20 @@ export function SurveyResults() {
         },
       },
       {
-        accessorKey: "visitorWhatsapp",
+        accessorKey: "visitorPhone",
         header: "WhatsApp",
         cell: ({ row }) => {
-          const whatsapp = row.getValue("visitorWhatsapp") as string;
+          const phone = row.getValue("visitorPhone") as string;
           return (
             <div className="text-sm">
-              {whatsapp ? (
+              {phone ? (
                 <a
-                  href={`https://wa.me/${whatsapp.replace(/\D/g, "")}`}
+                  href={`https://wa.me/${phone.replace(/\D/g, "")}`}
                   target="_blank"
                   rel="noreferrer"
                   className="text-primary hover:underline"
                 >
-                  {whatsapp}
+                  {phone}
                 </a>
               ) : (
                 "-"
@@ -195,7 +197,9 @@ export function SurveyResults() {
           return (
             <Button
               variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
               className="h-8 px-2 lg:px-3"
             >
               Estado
@@ -206,9 +210,7 @@ export function SurveyResults() {
         cell: ({ row }) => {
           const status = row.getValue("status") as string;
           return (
-            <Badge
-              variant={status === "new" ? "default" : "outline"}
-            >
+            <Badge variant={status === "new" ? "default" : "outline"}>
               {status || "Nuevo"}
             </Badge>
           );
@@ -222,7 +224,11 @@ export function SurveyResults() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate(`/dashboard/surveys/${row.original.id}/recommendations`)}
+              onClick={() =>
+                navigate(
+                  `/dashboard/surveys/${row.original.id}/recommendations`,
+                )
+              }
             >
               <Sparkles className="h-4 w-4 mr-1" />
               IA
@@ -231,7 +237,7 @@ export function SurveyResults() {
         },
       },
     ],
-    [navigate]
+    [navigate],
   );
 
   // Configurar tabla
@@ -320,13 +326,18 @@ export function SurveyResults() {
                               {row.original.visitorName || "Sin nombre"}
                             </ItemTitle>
                             <ItemDescription>
-                              {format(new Date(row.original.createdAt), "MMM d, yyyy")}
+                              {format(
+                                new Date(row.original.createdAt),
+                                "MMM d, yyyy",
+                              )}
                             </ItemDescription>
                           </ItemContent>
                           <ItemActions>
                             <Badge
                               variant={
-                                row.original.status === "new" ? "default" : "outline"
+                                row.original.status === "new"
+                                  ? "default"
+                                  : "outline"
                               }
                               className="shrink-0"
                             >
@@ -348,16 +359,18 @@ export function SurveyResults() {
                           </Badge>
                         </div>
 
-                        {row.original.visitorWhatsapp && (
+                        {row.original.visitorPhone && (
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium">WhatsApp:</span>
+                            <span className="text-sm font-medium">
+                              WhatsApp:
+                            </span>
                             <a
-                              href={`https://wa.me/${row.original.visitorWhatsapp.replace(/\D/g, "")}`}
+                              href={`https://wa.me/${row.original.visitorPhone.replace(/\D/g, "")}`}
                               target="_blank"
                               rel="noreferrer"
                               className="text-sm text-primary hover:underline"
                             >
-                              {row.original.visitorWhatsapp}
+                              {row.original.visitorPhone}
                             </a>
                           </div>
                         )}
@@ -367,7 +380,11 @@ export function SurveyResults() {
                             variant="outline"
                             size="sm"
                             className="w-full"
-                            onClick={() => navigate(`/dashboard/surveys/${row.original.id}/recommendations`)}
+                            onClick={() =>
+                              navigate(
+                                `/dashboard/surveys/${row.original.id}/recommendations`,
+                              )
+                            }
                           >
                             <Sparkles className="h-4 w-4 mr-2" />
                             Análisis IA
@@ -384,7 +401,8 @@ export function SurveyResults() {
               )}
 
               {/* Paginación Móvil */}
-              {table.getFilteredRowModel().rows.length > table.getState().pagination.pageSize && (
+              {table.getFilteredRowModel().rows.length >
+                table.getState().pagination.pageSize && (
                 <div className="flex items-center justify-between text-sm pt-4">
                   <span className="text-muted-foreground">
                     {table.getRowModel().rows.length} de{" "}
@@ -410,22 +428,23 @@ export function SurveyResults() {
                     {table.getHeaderGroups().map((headerGroup) => (
                       <TableRow key={headerGroup.id}>
                         {headerGroup.headers.map((header) => (
-                          <TableHead key={header.id} className="whitespace-nowrap">
-                            {header.isPlaceholder
-                              ? null
-                              : header.column.getCanSort()
-                              ? (
-                                  <div className="flex items-center">
-                                    {flexRender(
-                                      header.column.columnDef.header,
-                                      header.getContext()
-                                    )}
-                                  </div>
-                                )
-                                : flexRender(
-                                    header.column.columnDef.header,
-                                    header.getContext()
-                                  )}
+                          <TableHead
+                            key={header.id}
+                            className="whitespace-nowrap"
+                          >
+                            {header.isPlaceholder ? null : header.column.getCanSort() ? (
+                              <div className="flex items-center">
+                                {flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext(),
+                                )}
+                              </div>
+                            ) : (
+                              flexRender(
+                                header.column.columnDef.header,
+                                header.getContext(),
+                              )
+                            )}
                           </TableHead>
                         ))}
                       </TableRow>
@@ -439,10 +458,13 @@ export function SurveyResults() {
                           data-state={row.getIsSelected() && "selected"}
                         >
                           {row.getVisibleCells().map((cell) => (
-                            <TableCell key={cell.id} className="whitespace-nowrap">
+                            <TableCell
+                              key={cell.id}
+                              className="whitespace-nowrap"
+                            >
                               {flexRender(
                                 cell.column.columnDef.cell,
-                                cell.getContext()
+                                cell.getContext(),
                               )}
                             </TableCell>
                           ))}
@@ -474,7 +496,7 @@ export function SurveyResults() {
                     ? `${Math.min(
                         (table.getState().pagination.pageIndex + 1) *
                           table.getState().pagination.pageSize,
-                        table.getFilteredRowModel().rows.length
+                        table.getFilteredRowModel().rows.length,
                       )}`
                     : "0"}{" "}
                   de {table.getFilteredRowModel().rows.length} resultados
@@ -486,7 +508,9 @@ export function SurveyResults() {
                     onValueChange={(value) => table.setPageSize(Number(value))}
                   >
                     <SelectTrigger className="h-8 w-[70px]">
-                      <SelectValue placeholder={table.getState().pagination.pageSize} />
+                      <SelectValue
+                        placeholder={table.getState().pagination.pageSize}
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="10">10</SelectItem>
@@ -530,5 +554,4 @@ export function SurveyResults() {
 }
 
 // Helper para renderizado flexible
-import { type Renderer } from "@tanstack/react-table";
 import { flexRender } from "@tanstack/react-table";

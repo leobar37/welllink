@@ -17,6 +17,13 @@ async function saveRecommendations(
   profileId: string,
   data: AIResponse,
 ): Promise<void> {
+  console.log("[saveRecommendations] Starting save process", {
+    surveyResponseId,
+    profileId,
+    hasClientRecommendations: !!data.clientRecommendations,
+    hasAdvisorNotes: !!data.advisorNotes,
+  });
+
   const response = await fetch(
     `${API_BASE}/api/ai-recommendations/save/${surveyResponseId}?profileId=${profileId}`,
     {
@@ -31,14 +38,25 @@ async function saveRecommendations(
   );
 
   if (!response.ok) {
-    throw new Error("Failed to save recommendations");
+    const errorText = await response.text();
+    console.error("[saveRecommendations] Failed to save", {
+      status: response.status,
+      statusText: response.statusText,
+      error: errorText,
+    });
+    throw new Error(`Failed to save recommendations: ${errorText}`);
   }
+
+  const savedData = await response.json();
+  console.log("[saveRecommendations] Successfully saved", savedData);
 }
 
 // Load existing recommendations from the database
 async function loadRecommendations(
   surveyResponseId: string,
 ): Promise<AIResponse | null> {
+  console.log("[loadRecommendations] Loading for survey", surveyResponseId);
+
   const response = await fetch(
     `${API_BASE}/api/ai-recommendations/survey/${surveyResponseId}`,
     {
@@ -47,14 +65,25 @@ async function loadRecommendations(
   );
 
   if (response.status === 404) {
+    console.log("[loadRecommendations] No existing recommendations found (404)");
     return null;
   }
 
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error("[loadRecommendations] Failed to load", {
+      status: response.status,
+      error: errorText,
+    });
     throw new Error("Failed to load recommendations");
   }
 
   const data = await response.json();
+  console.log("[loadRecommendations] Loaded successfully", {
+    hasRecommendations: !!data.recommendations,
+    hasAdvisorNotes: !!data.advisorNotes,
+  });
+
   return {
     clientRecommendations: data.recommendations,
     advisorNotes: data.advisorNotes,
@@ -94,19 +123,27 @@ export function useGenerateRecommendations({
 
   const handleFinish = useCallback(
     async (event: { object?: AIResponse }) => {
+      console.log("[handleFinish] Called with event:", {
+        hasObject: !!event.object,
+        surveyResponseId,
+        profileId,
+      });
+
       if (event.object) {
         // Save to database
         try {
           await saveRecommendations(surveyResponseId, profileId, event.object);
           setSavedRecommendations(event.object);
-          console.log("Recommendations saved successfully");
+          console.log("[handleFinish] Recommendations saved successfully");
         } catch (err) {
-          console.error("Error saving recommendations:", err);
+          console.error("[handleFinish] Error saving recommendations:", err);
         }
 
         if (onFinish) {
           onFinish(event.object);
         }
+      } else {
+        console.warn("[handleFinish] No object in event, skipping save");
       }
     },
     [surveyResponseId, profileId, onFinish],
