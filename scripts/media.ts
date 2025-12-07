@@ -7,7 +7,7 @@ import { existsSync } from "node:fs";
 import Replicate from "replicate";
 
 const replicate = new Replicate({
-  auth: "r8_eTYKH9wjcmoUdl7ZP8mPz5hL9x9D47y284Dlk",
+  auth: "",
 });
 
 // Helper function to handle local files and URLs
