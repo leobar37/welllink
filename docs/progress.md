@@ -194,18 +194,21 @@ All TypeScript errors have been fixed:
 ### ✅ Completed - Core Architecture & Dashboard
 
 #### 1. Infrastructure
+
 - [x] Setup React Router v7 with Layouts (`AuthLayout`, `DashboardLayout`, `PublicLayout`)
 - [x] Configure Type-safe API client (`edenTreaty`)
 - [x] Implement Responsive Design System (`useBreakpoint`, `ResponsiveDialog`, `shadcn/ui`)
 - [x] Integrate `better-auth` client for session management
 
 #### 2. Authentication & Onboarding
+
 - [x] Implement Login Page with form validation
 - [x] Implement Register Page with form validation
 - [x] Implement Onboarding Wizard (4 steps: Welcome, Profile, Avatar, Socials, Completion)
 - [x] Connect Onboarding state to backend API
 
 #### 3. Dashboard Features
+
 - [x] **Overview**: Real-time stats fetching (Views, Clicks)
 - [x] **Edit Profile**: Profile form with Avatar upload
 - [x] **Features**: Toggle system for enabling/disabling modules
@@ -213,6 +216,7 @@ All TypeScript errors have been fixed:
 - [x] **Settings**: Password management and Sign out
 
 #### 4. Public Profile
+
 - [x] Dynamic profile routing `/:username`
 - [x] Public data fetching via Eden Treaty
 - [x] Mobile-first design for "Link-in-bio" experience
@@ -220,16 +224,19 @@ All TypeScript errors have been fixed:
 ### 🚧 In Progress / Missing
 
 #### 1. Data Fetching Optimization
+
 - [ ] Install & Configure **TanStack Query** (currently using raw `useEffect`)
 - [ ] Refactor `DashboardOverview`, `EditProfile`, `QRTools` to use `useQuery`
 - [ ] Implement optimistic updates for toggles and form submissions
 
 #### 2. Health Survey Feature (Module 04)
+
 - [ ] **Visitor View**: Public-facing survey form (`/s/:surveyId` or modal)
 - [ ] **Dashboard View**: List of received survey responses
 - [ ] **Response Detail**: View individual survey answers
 
 #### 3. Backend Integration Gaps
+
 - [ ] Connect Frontend QR Tools to Backend QR API (`/api/qr/*`) instead of client-side generation
 - [ ] Implement "Appointments" feature placeholder
 
@@ -329,13 +336,13 @@ CREATE TABLE qr_download (
 
 #### API Endpoints
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| GET | `/api/qr/public/:username` | No | Get QR code by username |
-| GET | `/api/qr/public/:username/card` | No | Get virtual card data by username |
-| GET | `/api/qr/profiles/:profileId` | Yes | Get QR code for owned profile |
-| GET | `/api/qr/profiles/:profileId/download` | Yes | Download QR as file (PNG/SVG) |
-| GET | `/api/qr/profiles/:profileId/card` | Yes | Get virtual card data for profile |
+| Method | Endpoint                               | Auth | Description                       |
+| ------ | -------------------------------------- | ---- | --------------------------------- |
+| GET    | `/api/qr/public/:username`             | No   | Get QR code by username           |
+| GET    | `/api/qr/public/:username/card`        | No   | Get virtual card data by username |
+| GET    | `/api/qr/profiles/:profileId`          | Yes  | Get QR code for owned profile     |
+| GET    | `/api/qr/profiles/:profileId/download` | Yes  | Download QR as file (PNG/SVG)     |
+| GET    | `/api/qr/profiles/:profileId/card`     | Yes  | Get virtual card data for profile |
 
 #### Query Parameters
 
@@ -401,5 +408,81 @@ PUBLIC_URL=https://wellnesslink.com  # Base URL for QR codes
 
 ---
 
-_Last Updated: 2025-11-30_
-_Agent: Claude - QR & Virtual Card Implementation_
+## WhatsApp CTA Feature Configuration
+
+### ✅ Completed - WhatsApp Call-to-Action Feature
+
+#### Modified Files
+
+- `src/db/schema/profile.ts` - Extended `FeaturesConfig` interface with `whatsappCta`
+- `src/api/routes/profiles.ts` - Added validation for `whatsappCta` in features-config endpoint
+- `src/services/business/profile.ts` - No changes needed (already handles merge correctly)
+
+#### Documentation Created
+
+- `docs/whatsapp-cta-implementation.md` - Complete implementation guide for frontend
+- `test-whatsapp-cta.sh` - Test script for API endpoints
+
+#### Schema Changes
+
+```typescript
+export interface FeaturesConfig {
+  healthSurvey?: {
+    enabled: boolean;
+    buttonText: string;
+  };
+  tuHistoria?: {
+    enabled: boolean;
+    buttonText: string;
+  };
+  whatsappCta?: {
+    enabled: boolean;
+    buttonText: string;
+  };
+}
+```
+
+#### API Endpoint
+
+```typescript
+PATCH /api/profiles/:id/features-config
+{
+  "whatsappCta": {
+    "enabled": boolean,
+    "buttonText": string (max 100 chars)
+  }
+}
+```
+
+#### Default Values
+
+- `enabled`: `false` (disabled by default)
+- `buttonText`: `"Escríbeme por WhatsApp"`
+
+#### Display Logic
+
+The WhatsApp CTA button should only be displayed when:
+
+1. `profile.featuresConfig.whatsappCta?.enabled === true` **AND**
+2. `profile.whatsappNumber` exists and is not empty
+
+#### Validation
+
+- ✅ TypeScript compiles without errors in modified files
+- ✅ Schema validation added for `whatsappCta` (optional field)
+- ✅ `buttonText` max length: 100 characters
+- ✅ Pattern consistent with existing features (`healthSurvey`, `tuHistoria`)
+- ✅ Server imports successfully
+- ✅ No migration needed (jsonb field allows new properties)
+
+#### Frontend Next Steps
+
+1. Create `WhatsAppCTA` component in `components/public-profile/`
+2. Add WhatsApp settings panel in dashboard
+3. Update `use-profile` hook if needed for features config
+4. Add integration tests
+
+---
+
+_Last Updated: 2025-12-07_
+_Agent: Claude - WhatsApp CTA Feature Configuration_

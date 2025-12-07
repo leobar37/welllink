@@ -27,6 +27,15 @@ export class AssetRepository {
     return result;
   }
 
+  // Método para acceso público sin filtro de userId
+  async findById(id: string) {
+    const result = await db.query.asset.findFirst({
+      where: eq(asset.id, id),
+    });
+
+    return result;
+  }
+
   async findByUser(ctx: RequestContext, userId?: string) {
     return db.query.asset.findMany({
       where: eq(asset.userId, userId || ctx.userId),
@@ -45,7 +54,7 @@ export class AssetRepository {
   async update(
     ctx: RequestContext,
     id: string,
-    data: Partial<AssetInsertWithoutUser>
+    data: Partial<AssetInsertWithoutUser>,
   ) {
     const [result] = await db
       .update(asset)

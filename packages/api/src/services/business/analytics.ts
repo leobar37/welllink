@@ -4,6 +4,14 @@ import { startOfDay, endOfDay, subDays } from "date-fns";
 
 type ViewSource = "qr" | "direct_link" | "referral";
 
+export interface RecentActivityItem {
+  type: "view" | "click";
+  timestamp: Date;
+  source?: string;
+  platform?: string;
+  metadata?: any;
+}
+
 export class AnalyticsService {
   constructor(private analyticsRepository: AnalyticsRepository) {}
 
@@ -310,7 +318,8 @@ export class AnalyticsService {
     // Calculate QR effectiveness (scans vs total profile views)
     const qrScans = trafficBySource["qr"] || 0;
     const directLinks = trafficBySource["direct_link"] || 0;
-    const totalViews = qrScans + directLinks + (trafficBySource["referral"] || 0);
+    const totalViews =
+      qrScans + directLinks + (trafficBySource["referral"] || 0);
     const qrEffectiveness = totalViews > 0 ? (qrScans / totalViews) * 100 : 0;
 
     return {
@@ -328,5 +337,49 @@ export class AnalyticsService {
       qrEffectiveness: Math.round(qrEffectiveness * 100) / 100,
       period: { days, startDate, endDate },
     };
+  }
+
+  async getRecentActivity(
+    ctx: RequestContext,
+    profileId: string,
+    limit: number = 15,
+  ): Promise<RecentActivityItem[]> {
+    const { views, clicks } = await this.analyticsRepository.getRecentActivity(
+      ctx,
+      profileId,
+      limit,
+    );
+
+    // Transform views to activity items
+    const viewItems: RecentActivityItem[] = views.map((view) => ({
+      type: "view" as const,
+      timestamp: view.viewedAt,
+      source: view.source,
+      metadata: {
+        referrer: view.referrer,
+        userAgent: view.userAgent,
+      },
+    }));
+
+    // Transform clicks to activity items
+    const clickItems: RecentActivityItem[] = clicks.map((click) => ({
+      type: "click" as const,
+      timestamp: click.clickedAt,
+      platform: click.socialLink.platform,
+      metadata: {
+        socialLinkId: click.socialLinkId,
+        url: click.socialLink.url,
+      },
+    }));
+
+    // Combine and sort by timestamp descending
+    const combined = [...viewItems, ...clickItems];
+    combined.sort(
+      (a: RecentActivityItem, b: RecentActivityItem) =>
+        b.timestamp.getTime() - a.timestamp.getTime(),
+    );
+
+    // Return top limit items
+    return combined.slice(0, limit);
   }
 }

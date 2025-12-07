@@ -1,6 +1,34 @@
 import { Elysia } from "elysia";
 import { HttpException } from "../utils/http-exceptions";
 
+/**
+ * Elysia validation error structure
+ */
+interface ElysiaValidationError {
+  type: "validation";
+  on: "body" | "query" | "params" | "headers";
+  property?: string;
+  message?: string;
+  summary?: string;
+  errors?: Array<{
+    path: string;
+    message: string;
+    value?: any;
+  }>;
+}
+
+/**
+ * Type guard for Elysia validation errors
+ */
+function isElysiaValidationError(error: any): error is ElysiaValidationError {
+  return (
+    error &&
+    typeof error === "object" &&
+    "type" in error &&
+    error.type === "validation"
+  );
+}
+
 export const errorMiddleware = new Elysia({ name: "error" }).onError(
   ({ error, set }) => {
     // Handle custom HttpExceptions
@@ -12,7 +40,19 @@ export const errorMiddleware = new Elysia({ name: "error" }).onError(
       };
     }
 
-    // Handle validation errors from Zod or Elysia
+    // Handle Elysia validation errors (TypeBox/Elysia schema validation)
+    if (isElysiaValidationError(error)) {
+      set.status = 400;
+      return {
+        error: "Validation failed",
+        details: error.summary || error.message || "Invalid request data",
+        code: "VALIDATION_ERROR",
+        field: error.property,
+        on: error.on,
+      };
+    }
+
+    // Handle validation errors from Zod or other libraries
     if (
       error &&
       typeof error === "object" &&

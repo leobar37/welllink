@@ -1,22 +1,50 @@
-import { Leaf } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { ArrowLeft, Leaf } from "lucide-react";
+import { Link } from "react-router";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 interface StepIntroProps {
-  advisorName: string
-  advisorAvatar?: string | null
+  advisorName: string;
+  advisorAvatar?: string | null;
+  username: string;
 }
 
-export function StepIntro({ advisorName, advisorAvatar }: StepIntroProps) {
+export function StepIntro({
+  advisorName,
+  advisorAvatar,
+  username,
+}: StepIntroProps) {
   const initials = advisorName
     .split(" ")
     .map((n) => n[0])
     .join("")
     .toUpperCase()
-    .slice(0, 2)
+    .slice(0, 2);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+      {/* Back to profile link */}
+      <div className="w-full max-w-md mb-4 pt-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          asChild
+          className="text-muted-foreground"
+        >
+          <Link to={`/${username}`}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Volver al perfil
+          </Link>
+        </Button>
+      </div>
+
       <Card className="w-full max-w-md text-center border-0 shadow-none bg-transparent">
         <CardHeader className="space-y-6 pb-4">
           {/* Wellness Icon */}
@@ -38,7 +66,9 @@ export function StepIntro({ advisorName, advisorAvatar }: StepIntroProps) {
           {/* Advisor info */}
           <div className="flex items-center justify-center gap-3 p-4 bg-muted/50 rounded-lg">
             <Avatar className="h-12 w-12 border-2 border-primary/20">
-              {advisorAvatar && <AvatarImage src={advisorAvatar} alt={advisorName} />}
+              {advisorAvatar && (
+                <AvatarImage src={advisorAvatar} alt={advisorName} />
+              )}
               <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                 {initials}
               </AvatarFallback>
@@ -73,5 +103,5 @@ export function StepIntro({ advisorName, advisorAvatar }: StepIntroProps) {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

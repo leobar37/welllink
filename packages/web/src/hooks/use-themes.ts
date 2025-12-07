@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { THEMES, type ThemeDefinition } from "@/lib/themes";
+import { extractErrorMessage } from "@/lib/error-handler";
 
 interface ProfileThemeResponse {
   themeId: string;
@@ -61,26 +62,41 @@ export function useUpdateProfileTheme(profileId?: string) {
     },
     onMutate: async (themeId: string) => {
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ["profile-theme", profileId] });
+      await queryClient.cancelQueries({
+        queryKey: ["profile-theme", profileId],
+      });
 
       // Snapshot previous value
-      const previousTheme = queryClient.getQueryData<ProfileThemeResponse>(["profile-theme", profileId]);
+      const previousTheme = queryClient.getQueryData<ProfileThemeResponse>([
+        "profile-theme",
+        profileId,
+      ]);
 
       // Optimistically update
-      queryClient.setQueryData<ProfileThemeResponse>(["profile-theme", profileId], (old) => {
-        if (!old) return old;
-        return { ...old, themeId };
-      });
+      queryClient.setQueryData<ProfileThemeResponse>(
+        ["profile-theme", profileId],
+        (old) => {
+          if (!old) return old;
+          return { ...old, themeId };
+        },
+      );
 
       return { previousTheme };
     },
-    onError: (err, _themeId, context) => {
+    onError: (err: unknown, _themeId, context) => {
       // Rollback on error
       if (context?.previousTheme) {
-        queryClient.setQueryData(["profile-theme", profileId], context.previousTheme);
+        queryClient.setQueryData(
+          ["profile-theme", profileId],
+          context.previousTheme,
+        );
       }
-      console.error(err);
-      toast.error("Error al actualizar el tema");
+      console.error("Theme update error:", err);
+      const errorMessage = extractErrorMessage(
+        err,
+        "Error al actualizar el tema",
+      );
+      toast.error(errorMessage);
     },
     onSettled: () => {
       // Refetch after mutation settles

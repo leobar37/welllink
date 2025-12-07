@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,26 +8,26 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { useThemeContainer } from "@/components/public-profile/theme-provider"
-import { WizardProvider, useWizard, useSurveyDraft } from "./WizardContext"
-import { SurveyProgress } from "./SurveyProgress"
-import { SurveyNavigation } from "./SurveyNavigation"
-import { StepIntro } from "../steps/StepIntro"
-import { StepPersonalData } from "../steps/StepPersonalData"
-import { StepMeasurements } from "../steps/StepMeasurements"
-import { StepConditions } from "../steps/StepConditions"
-import { StepHabits } from "../steps/StepHabits"
-import { StepSummary } from "../steps/StepSummary"
-import { CATEGORY_ORDER } from "@/lib/survey/constants"
-import { Loader2 } from "lucide-react"
+} from "@/components/ui/alert-dialog";
+import { useThemeContainer } from "@/components/public-profile/theme-provider";
+import { WizardProvider, useWizard, useSurveyDraft } from "./WizardContext";
+import { SurveyProgress } from "./SurveyProgress";
+import { SurveyNavigation } from "./SurveyNavigation";
+import { StepIntro } from "../steps/StepIntro";
+import { StepPersonalData } from "../steps/StepPersonalData";
+import { StepMeasurements } from "../steps/StepMeasurements";
+import { StepConditions } from "../steps/StepConditions";
+import { StepHabits } from "../steps/StepHabits";
+import { StepSummary } from "../steps/StepSummary";
+import { CATEGORY_ORDER } from "@/lib/survey/constants";
+import { Loader2 } from "lucide-react";
 
 interface SurveyWizardProps {
-  username: string
-  profileId: string
-  advisorName: string
-  advisorAvatar?: string | null
-  advisorWhatsapp: string
+  username: string;
+  profileId: string;
+  advisorName: string;
+  advisorAvatar?: string | null;
+  advisorWhatsapp: string;
 }
 
 export function SurveyWizard(props: SurveyWizardProps) {
@@ -35,7 +35,7 @@ export function SurveyWizard(props: SurveyWizardProps) {
     <WizardProvider username={props.username}>
       <SurveyWizardContent {...props} />
     </WizardProvider>
-  )
+  );
 }
 
 function SurveyWizardContent({
@@ -45,35 +45,35 @@ function SurveyWizardContent({
   advisorAvatar,
   advisorWhatsapp,
 }: SurveyWizardProps) {
-  const { state, restoreDraft, nextStep } = useWizard()
-  const { hasDraft, draft } = useSurveyDraft(username)
-  const [showDraftDialog, setShowDraftDialog] = useState(false)
-  const [initialized, setInitialized] = useState(false)
-  const themeContainer = useThemeContainer()
+  const { state, restoreDraft, nextStep } = useWizard();
+  const { hasDraft, draft } = useSurveyDraft(username);
+  const [showDraftDialog, setShowDraftDialog] = useState(false);
+  const [initialized, setInitialized] = useState(false);
+  const themeContainer = useThemeContainer();
 
   // Check for draft on mount
   useEffect(() => {
     if (hasDraft && draft && !initialized) {
-      setShowDraftDialog(true)
+      setShowDraftDialog(true);
     } else {
-      setInitialized(true)
+      setInitialized(true);
     }
-  }, [hasDraft, draft, initialized])
+  }, [hasDraft, draft, initialized]);
 
   // Handle resume draft
   const handleResumeDraft = () => {
     if (draft) {
-      restoreDraft(draft)
+      restoreDraft(draft);
     }
-    setShowDraftDialog(false)
-    setInitialized(true)
-  }
+    setShowDraftDialog(false);
+    setInitialized(true);
+  };
 
   // Handle start fresh
   const handleStartFresh = () => {
-    setShowDraftDialog(false)
-    setInitialized(true)
-  }
+    setShowDraftDialog(false);
+    setInitialized(true);
+  };
 
   // Show loading while checking draft
   if (!initialized && !showDraftDialog) {
@@ -81,43 +81,47 @@ function SurveyWizardContent({
       <div className="min-h-full flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
-    )
+    );
   }
 
   // Render current step
   const renderStep = () => {
-    const { currentStep } = state
+    const { currentStep } = state;
 
     // Step 0: Intro
     if (currentStep === 0) {
       return (
         <>
-          <StepIntro advisorName={advisorName} advisorAvatar={advisorAvatar} />
+          <StepIntro
+            advisorName={advisorName}
+            advisorAvatar={advisorAvatar}
+            username={username}
+          />
           <SurveyNavigation onSubmit={nextStep} />
         </>
-      )
+      );
     }
 
     // Step 1: Personal Data
     if (currentStep === 1) {
-      return <StepPersonalData />
+      return <StepPersonalData />;
     }
 
     // Step 2: Measurements
     if (currentStep === 2) {
-      return <StepMeasurements />
+      return <StepMeasurements />;
     }
 
     // Steps 3-10: Health Conditions (8 categories)
     if (currentStep >= 3 && currentStep <= 10) {
-      const categoryIndex = currentStep - 3
-      const category = CATEGORY_ORDER[categoryIndex]
-      return <StepConditions category={category} />
+      const categoryIndex = currentStep - 3;
+      const category = CATEGORY_ORDER[categoryIndex];
+      return <StepConditions category={category} />;
     }
 
     // Step 11: Habits
     if (currentStep === 11) {
-      return <StepHabits />
+      return <StepHabits />;
     }
 
     // Step 12: Summary
@@ -126,15 +130,16 @@ function SurveyWizardContent({
         <StepSummary
           profileId={profileId}
           advisorWhatsapp={advisorWhatsapp}
+          username={username}
         />
-      )
+      );
     }
 
-    return null
-  }
+    return null;
+  };
 
   return (
-    <div className="bg-background flex flex-col min-h-full">
+    <div className="flex flex-col flex-1 min-h-screen">
       {/* Draft Recovery Dialog */}
       <AlertDialog open={showDraftDialog} onOpenChange={setShowDraftDialog}>
         <AlertDialogContent container={themeContainer}>
@@ -169,5 +174,5 @@ function SurveyWizardContent({
         </div>
       </main>
     </div>
-  )
+  );
 }

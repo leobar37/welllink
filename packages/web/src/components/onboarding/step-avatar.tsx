@@ -1,58 +1,73 @@
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { toast } from "sonner"
-import { Loader2, Upload } from "lucide-react"
-import { api } from "@/lib/api"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "sonner";
+import { Loader2, Upload } from "lucide-react";
+import { api } from "@/lib/api";
 
 type StepAvatarPayload = {
-  fileId?: string | null
-}
+  fileId?: string | null;
+};
 
-export function StepAvatar({ onNext }: { onNext: (data: StepAvatarPayload) => void }) {
-  const [uploading, setUploading] = useState(false)
-  const [preview, setPreview] = useState<string | null>(null)
-  const [fileId, setFileId] = useState<string | null>(null)
+export function StepAvatar({
+  onNext,
+}: {
+  onNext: (data: StepAvatarPayload) => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [fileId, setFileId] = useState<string | null>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
     // Preview
-    const reader = new FileReader()
-    reader.onload = () => setPreview(reader.result as string)
-    reader.readAsDataURL(file)
+    const reader = new FileReader();
+    reader.onload = () => setPreview(reader.result as string);
+    reader.readAsDataURL(file);
 
     // Upload
-    setUploading(true)
+    setUploading(true);
     try {
       const { data, error } = await api.api.upload.post({
         file: file,
-        type: 'avatar'
-      })
+        type: "avatar",
+      });
 
       if (error) {
-        toast.error("Error al subir la imagen")
-        console.error(error)
-        return
+        toast.error("Error al subir la imagen");
+        console.error(error);
+        return;
       }
 
       if (data) {
-        setFileId(data.id)
-        toast.success("Imagen subida")
+        setFileId(data.id);
+        // Update preview with the actual uploaded image URL
+        setPreview(data.url);
+        toast.success("Imagen subida");
+        // Auto-save: trigger profile update immediately
+        onNext({ fileId: data.id });
       }
     } catch (err) {
-      console.error(err)
-      toast.error("Error al subir la imagen")
+      console.error(err);
+      toast.error("Error al subir la imagen");
     } finally {
-      setUploading(false)
+      setUploading(false);
     }
-  }
+  };
 
   const handleSubmit = () => {
-    onNext({ fileId })
-  }
+    onNext({ fileId });
+  };
 
   return (
     <Card>
@@ -67,26 +82,26 @@ export function StepAvatar({ onNext }: { onNext: (data: StepAvatarPayload) => vo
           <AvatarImage src={preview || ""} />
           <AvatarFallback className="text-4xl">?</AvatarFallback>
         </Avatar>
-        
+
         <div className="w-full max-w-xs">
-            <label htmlFor="avatar-upload" className="cursor-pointer w-full">
-                <div className="flex items-center justify-center w-full h-12 px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none hover:border-gray-400 focus:outline-none">
-                    <span className="flex items-center space-x-2">
-                        <Upload className="w-5 h-5 text-gray-600" />
-                        <span className="font-medium text-gray-600">
-                            {uploading ? "Subiendo..." : "Clic para subir"}
-                        </span>
-                    </span>
-                    <input 
-                        id="avatar-upload" 
-                        type="file" 
-                        className="hidden" 
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        disabled={uploading}
-                    />
-                </div>
-            </label>
+          <label htmlFor="avatar-upload" className="cursor-pointer w-full">
+            <div className="flex items-center justify-center w-full h-12 px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none hover:border-gray-400 focus:outline-none">
+              <span className="flex items-center space-x-2">
+                <Upload className="w-5 h-5 text-gray-600" />
+                <span className="font-medium text-gray-600">
+                  {uploading ? "Subiendo..." : "Clic para subir"}
+                </span>
+              </span>
+              <input
+                id="avatar-upload"
+                type="file"
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileChange}
+                disabled={uploading}
+              />
+            </div>
+          </label>
         </div>
       </CardContent>
       <CardFooter className="flex justify-between">
@@ -99,5 +114,5 @@ export function StepAvatar({ onNext }: { onNext: (data: StepAvatarPayload) => vo
         </Button>
       </CardFooter>
     </Card>
-  )
+  );
 }

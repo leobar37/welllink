@@ -25,6 +25,31 @@ const updateAssetSchema = z.object({
 export const assetRoutes = new Elysia({ prefix: "/assets" })
   .use(errorMiddleware)
   .use(servicesPlugin)
+  // Ruta pública para servir assets (ej: avatares en perfiles públicos)
+  .get("/:id/public", async ({ params, services, set }) => {
+    // Usar el repository directamente para evitar validación de userId
+    const asset = await services.assetRepository.findById(params.id);
+
+    if (!asset) {
+      set.status = 404;
+      return { error: "Asset not found" };
+    }
+
+    try {
+      const blob = await services.storage.download(asset.path);
+      const buffer = await blob.arrayBuffer();
+
+      set.headers["Content-Type"] = asset.mimeType;
+      set.headers["Content-Disposition"] =
+        `inline; filename="${asset.filename}"`;
+      set.headers["Cache-Control"] = "public, max-age=31536000"; // Cache por 1 año
+
+      return Buffer.from(buffer);
+    } catch (error) {
+      set.status = 404;
+      return { error: "Asset file not found in storage" };
+    }
+  })
   .use(authGuard)
   .get("/", async ({ ctx, services, query }) => {
     const userId = query.userId as string;
@@ -110,11 +135,7 @@ export const assetRoutes = new Elysia({ prefix: "/assets" })
   })
   .put("/:id", async ({ params, body, ctx, services }) => {
     const data = updateAssetSchema.parse(body);
-    const asset = await services.assetService.updateAsset(
-      ctx,
-      params.id,
-      data,
-    );
+    const asset = await services.assetService.updateAsset(ctx, params.id, data);
     return {
       ...asset,
       url: asset ? services.storage.getPublicUrl(asset.path) : null,

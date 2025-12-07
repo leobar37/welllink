@@ -2,11 +2,9 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import type {
-  TuHistoriaSection,
-  TuHistoriaStory,
-} from "@/lib/types";
-import { getAssetPublicUrl, trackStoryEvent } from "@/lib/tu-historia";
+import type { TuHistoriaSection, TuHistoriaStory } from "@/lib/types";
+import { trackStoryEvent } from "@/lib/tu-historia";
+import { useAssetUrl } from "@/hooks/use-asset-url";
 import {
   ArrowLeft,
   ChevronLeft,
@@ -36,6 +34,10 @@ export function TuHistoriaViewer({
   const [showText, setShowText] = useState(false);
 
   const activeStory = stories[activeIndex];
+
+  // Fetch asset URLs using the hook
+  const { data: beforeUrl } = useAssetUrl(activeStory?.beforeAssetId);
+  const { data: afterUrl } = useAssetUrl(activeStory?.afterAssetId);
 
   useEffect(() => {
     if (!profileId) return;
@@ -74,9 +76,6 @@ export function TuHistoriaViewer({
     setSliderValue(50);
     setActiveIndex(index);
   };
-
-  const beforeUrl = getAssetPublicUrl(activeStory?.beforeAssetId);
-  const afterUrl = getAssetPublicUrl(activeStory?.afterAssetId);
 
   const ctaLabel = section.ctaLabel || "Contáctame";
 
@@ -164,9 +163,7 @@ export function TuHistoriaViewer({
                 min={0}
                 max={100}
                 value={sliderValue}
-                onChange={(event) =>
-                  setSliderValue(Number(event.target.value))
-                }
+                onChange={(event) => setSliderValue(Number(event.target.value))}
                 className="h-1 flex-1 cursor-pointer appearance-none rounded-full bg-muted"
               />
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -217,12 +214,7 @@ export function TuHistoriaViewer({
         </div>
 
         {section.ctaUrl && (
-          <Button
-            className="w-full"
-            size="lg"
-            asChild
-            onClick={handleCtaClick}
-          >
+          <Button className="w-full" size="lg" asChild onClick={handleCtaClick}>
             <a href={section.ctaUrl} target="_blank" rel="noreferrer">
               {ctaLabel}
             </a>

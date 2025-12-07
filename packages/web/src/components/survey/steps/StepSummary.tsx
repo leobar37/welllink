@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { CheckCircle2, ChevronDown, ChevronUp, Edit2 } from "lucide-react";
+import { Link } from "react-router";
 import {
   Card,
   CardContent,
@@ -33,9 +34,14 @@ import type { HealthSurveyFormData } from "@/lib/survey/schema";
 interface StepSummaryProps {
   profileId: string;
   advisorWhatsapp: string;
+  username: string;
 }
 
-export function StepSummary({ profileId, advisorWhatsapp }: StepSummaryProps) {
+export function StepSummary({
+  profileId,
+  advisorWhatsapp,
+  username,
+}: StepSummaryProps) {
   const { state, goToStep, setSubmitting, setSubmitted, setError } =
     useWizard();
   const [openSections, setOpenSections] = useState<string[]>(["conditions"]);
@@ -111,7 +117,7 @@ export function StepSummary({ profileId, advisorWhatsapp }: StepSummaryProps) {
   if (state.isSubmitted) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
-        <Card className="w-full max-w-md text-center border-0 shadow-none">
+        <Card className="w-full max-w-md text-center border-0 shadow-none bg-transparent">
           <CardHeader className="space-y-4">
             <div className="mx-auto bg-green-100 dark:bg-green-900/30 p-4 rounded-full w-fit">
               <CheckCircle2 className="h-12 w-12 text-green-600 dark:text-green-500" />
@@ -134,6 +140,9 @@ export function StepSummary({ profileId, advisorWhatsapp }: StepSummaryProps) {
             >
               Saludar por WhatsApp
             </Button>
+            <Button variant="default" asChild className="w-full mt-3">
+              <Link to={`/${username}`}>Volver al inicio</Link>
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -143,7 +152,7 @@ export function StepSummary({ profileId, advisorWhatsapp }: StepSummaryProps) {
   return (
     <div className="flex flex-col min-h-[calc(100vh-120px)]">
       <div className="flex-1 px-4 py-6 overflow-y-auto">
-        <Card className="max-w-lg mx-auto border-0 shadow-none">
+        <Card className="max-w-lg mx-auto border-0 shadow-none bg-transparent">
           <CardHeader className="px-0 pb-4">
             <CardTitle className="text-xl">Tu evaluación está lista</CardTitle>
             <CardDescription>

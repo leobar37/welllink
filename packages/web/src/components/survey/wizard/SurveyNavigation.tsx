@@ -52,7 +52,7 @@ export function SurveyNavigation({
   };
 
   return (
-    <footer className="sticky bottom-0 bg-background/95 backdrop-blur-sm border-t">
+    <footer className="sticky bottom-0 bg-background/95 backdrop-blur-sm">
       <div className="max-w-lg mx-auto px-4 py-4">
         <Button
           type={formId ? "submit" : "button"}

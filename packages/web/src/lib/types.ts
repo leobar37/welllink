@@ -36,7 +36,17 @@ export interface TuHistoriaFeature extends BaseFeature<{
   type: "tu-historia";
 }
 
-export type Feature = HealthSurveyFeature | TuHistoriaFeature | BaseFeature;
+export interface WhatsAppCtaFeature extends BaseFeature<{
+  buttonText?: string;
+}> {
+  type: "whatsapp-cta";
+}
+
+export type Feature =
+  | HealthSurveyFeature
+  | TuHistoriaFeature
+  | WhatsAppCtaFeature
+  | BaseFeature;
 
 export interface PublicProfileData {
   profile: Profile;

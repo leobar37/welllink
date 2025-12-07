@@ -20,6 +20,10 @@ const rangeQuerySchema = z.object({
   days: z.coerce.number().default(30),
 });
 
+const recentActivityQuerySchema = z.object({
+  limit: z.coerce.number().default(15),
+});
+
 export const analyticsRoutes = new Elysia({ prefix: "/analytics" })
   .use(errorMiddleware)
   .use(servicesPlugin)
@@ -101,5 +105,16 @@ export const analyticsRoutes = new Elysia({ prefix: "/analytics" })
     async ({ params, query, ctx, services }) => {
       const { days } = rangeQuerySchema.parse(query);
       return services.analyticsService.getQRStats(ctx!, params.profileId, days);
+    },
+  )
+  .get(
+    "/profiles/:profileId/recent-activity",
+    async ({ params, query, ctx, services }) => {
+      const { limit } = recentActivityQuerySchema.parse(query);
+      return services.analyticsService.getRecentActivity(
+        ctx!,
+        params.profileId,
+        limit,
+      );
     },
   );

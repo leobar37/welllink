@@ -48,7 +48,7 @@ export const profileRoutes = new Elysia({ prefix: "/profiles" })
     },
     {
       body: t.Object({
-        username: t.String({ pattern: "^[a-z0-9-]+$" }),
+        username: t.String({ pattern: "^[a-z0-9_-]+$" }),
         displayName: t.String({ minLength: 1 }),
         title: t.Optional(t.String({ minLength: 1 })),
         bio: t.Optional(t.String()),
@@ -75,7 +75,7 @@ export const profileRoutes = new Elysia({ prefix: "/profiles" })
     },
     {
       body: t.Object({
-        username: t.Optional(t.String({ pattern: "^[a-z0-9-]+$" })),
+        username: t.Optional(t.String({ pattern: "^[a-z0-9_-]+$" })),
         displayName: t.Optional(t.String({ minLength: 1 })),
         title: t.Optional(t.String({ minLength: 1 })),
         bio: t.Optional(t.String()),
@@ -106,6 +106,12 @@ export const profileRoutes = new Elysia({ prefix: "/profiles" })
           }),
         ),
         tuHistoria: t.Optional(
+          t.Object({
+            enabled: t.Boolean(),
+            buttonText: t.String({ maxLength: 100 }),
+          }),
+        ),
+        whatsappCta: t.Optional(
           t.Object({
             enabled: t.Boolean(),
             buttonText: t.String({ maxLength: 100 }),

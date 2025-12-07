@@ -35,7 +35,7 @@ import { socialLinkRoutes } from "./api/routes/social-links";
 import { storiesRoutes } from "./api/routes/stories";
 import { themeRoutes } from "./api/routes/themes";
 import { aiRecommendationRoutes } from "./api/routes/ai-recommendation";
-import { LocalStorageStrategy } from "./services/storage/local.storage";
+import { createStorageStrategy } from "./services/storage";
 
 const modules = [
   { id: "02", name: "Public Profile" },
@@ -59,9 +59,19 @@ const app = new Elysia()
   // File serving route for uploaded assets
   .get("/api/files/:path", async ({ params, set }) => {
     try {
-      const storageService = new LocalStorageStrategy();
+      const storageService = await createStorageStrategy();
       await storageService.initialize();
 
+      // If using Supabase, redirect to public URL (more efficient)
+      const provider = process.env.STORAGE_PROVIDER || "local";
+      if (provider === "supabase") {
+        const publicUrl = storageService.getPublicUrl(params.path);
+        set.redirect = publicUrl;
+        set.status = 302; // Temporary redirect
+        return;
+      }
+
+      // For local storage, serve the file directly
       const blob = await storageService.download(params.path);
 
       // Set appropriate content type based on file extension

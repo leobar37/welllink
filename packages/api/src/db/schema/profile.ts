@@ -20,6 +20,10 @@ export interface FeaturesConfig {
     enabled: boolean;
     buttonText: string;
   };
+  whatsappCta?: {
+    enabled: boolean;
+    buttonText: string;
+  };
 }
 import { user } from "./auth";
 import { asset } from "./asset";
@@ -42,7 +46,9 @@ export const profile = pgTable(
       onDelete: "set null",
     }),
     whatsappNumber: varchar("whatsapp_number", { length: 20 }),
-    featuresConfig: jsonb("features_config").$type<FeaturesConfig>().default({}),
+    featuresConfig: jsonb("features_config")
+      .$type<FeaturesConfig>()
+      .default({}),
     isDefault: boolean("is_default").notNull().default(true),
     isPublished: boolean("is_published").notNull().default(false),
     onboardingStep: integer("onboarding_step").notNull().default(0),
@@ -56,7 +62,7 @@ export const profile = pgTable(
   (table) => [
     index("profile_user_id_idx").on(table.userId),
     index("profile_username_idx").on(table.username),
-  ]
+  ],
 );
 
 export type Profile = typeof profile.$inferSelect;

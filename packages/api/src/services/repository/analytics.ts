@@ -309,10 +309,7 @@ export class AnalyticsRepository {
       .select({ count: count() })
       .from(profileView)
       .where(
-        and(
-          eq(profileView.profileId, profileId),
-          eq(profileView.source, "qr"),
-        ),
+        and(eq(profileView.profileId, profileId), eq(profileView.source, "qr")),
       );
 
     return result?.count || 0;
@@ -338,5 +335,56 @@ export class AnalyticsRepository {
       .groupBy(profileView.source);
 
     return results;
+  }
+
+  async getRecentActivity(
+    ctx: RequestContext,
+    profileId: string,
+    limit: number = 15,
+  ) {
+    // Verify profile ownership
+    const foundProfile = await db.query.profile.findFirst({
+      where: and(eq(profile.id, profileId), eq(profile.userId, ctx.userId)),
+    });
+
+    if (!foundProfile) {
+      throw new Error("Profile not found or access denied");
+    }
+
+    // Get all social links for this profile
+    const profileSocialLinks = await db.query.socialLink.findMany({
+      where: eq(socialLink.profileId, profileId),
+    });
+
+    // Fetch latest profile views
+    const views = await db.query.profileView.findMany({
+      where: eq(profileView.profileId, profileId),
+      orderBy: desc(profileView.viewedAt),
+      limit,
+    });
+
+    // Fetch latest social clicks if there are social links
+    let clicks: Array<
+      typeof socialClick.$inferSelect & {
+        socialLink: typeof socialLink.$inferSelect;
+      }
+    > = [];
+
+    if (profileSocialLinks.length > 0) {
+      const socialLinkIds = profileSocialLinks.map(
+        (link: typeof socialLink.$inferSelect) => link.id,
+      );
+
+      clicks = await db.query.socialClick.findMany({
+        where: inArray(socialClick.socialLinkId, socialLinkIds),
+        with: {
+          socialLink: true,
+        },
+        orderBy: desc(socialClick.clickedAt),
+        limit,
+      });
+    }
+
+    return { views, clicks };
   }
 }
