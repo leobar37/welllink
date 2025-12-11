@@ -1,14 +1,15 @@
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { Link, useNavigate } from "react-router"
-import { toast } from "sonner"
-import { Loader2 } from "lucide-react"
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Link, useNavigate } from "react-router";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
-import { authClient } from "@/lib/auth-client"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { authClient } from "@/lib/auth-client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import {
   Form,
   FormControl,
@@ -16,7 +17,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 import {
   Card,
   CardContent,
@@ -24,19 +25,19 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 
 const registerSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
   email: z.string().email("Correo electrónico inválido"),
   password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
-})
+});
 
-type RegisterValues = z.infer<typeof registerSchema>
+type RegisterValues = z.infer<typeof registerSchema>;
 
 export function Register() {
-  const navigate = useNavigate()
-  const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
@@ -45,29 +46,29 @@ export function Register() {
       email: "",
       password: "",
     },
-  })
+  });
 
   async function onSubmit(values: RegisterValues) {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       const { error } = await authClient.signUp.email({
         email: values.email,
         password: values.password,
         name: values.name,
-      })
+      });
 
       if (error) {
-        toast.error(error.message ?? "Algo salió mal")
-        return
+        toast.error(error.message ?? "Algo salió mal");
+        return;
       }
 
-      toast.success("Cuenta creada exitosamente")
-      navigate("/onboarding")
+      toast.success("Cuenta creada exitosamente");
+      navigate("/onboarding");
     } catch (err) {
-      console.error(err)
-      toast.error("Error al crear la cuenta")
+      console.error(err);
+      toast.error("Error al crear la cuenta");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -81,7 +82,10 @@ export function Register() {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 sm:space-y-6"
+          >
             <FormField
               control={form.control}
               name="name"
@@ -127,11 +131,7 @@ export function Register() {
                 <FormItem>
                   <FormLabel>Contraseña</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      autoComplete="new-password"
-                      {...field}
-                    />
+                    <PasswordInput autoComplete="new-password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -157,5 +157,5 @@ export function Register() {
         </p>
       </CardFooter>
     </Card>
-  )
+  );
 }

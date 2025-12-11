@@ -44,6 +44,10 @@ export class OnboardingService {
     const profiles = await this.profileService.getProfiles(ctx);
     const hasProfiles = profiles.length > 0;
 
+    // Get onboarding step from profile if exists
+    const currentOnboardingStep = hasProfiles ? profiles[0]?.onboardingStep || 0 : 0;
+    const onboardingCompletedAt = hasProfiles ? profiles[0]?.onboardingCompletedAt : null;
+
     // Build onboarding steps based on user state
     const steps: OnboardingStep[] = [
       {
@@ -52,7 +56,7 @@ export class OnboardingService {
         title: "Welcome to Wellness Link",
         description: "Let's set up your profile to connect with others.",
         type: "profile",
-        completed: false,
+        completed: currentOnboardingStep > 0, // Welcome is completed if user has moved beyond step 0
         skipped: false,
       },
       {
@@ -111,12 +115,17 @@ export class OnboardingService {
       }
     }
 
+    // Mark steps as completed based on onboardingStep progress
+    for (let i = 0; i < currentOnboardingStep && i < steps.length; i++) {
+      if (steps[i].id !== "upload_avatar") { // Avatar has its own logic
+        steps[i].completed = true;
+      }
+    }
+
     const completedSteps = steps.filter((step) => step.completed).length;
     const totalSteps = steps.length;
-    const currentStepIndex = steps.findIndex(
-      (step) => !step.completed && !step.skipped,
-    );
-    const currentStep = Math.max(0, currentStepIndex);
+    const currentStepIndex = onboardingCompletedAt ? steps.length : currentOnboardingStep;
+    const currentStep = Math.min(currentStepIndex, totalSteps - 1);
 
     // Calculate estimated time remaining (2 minutes per incomplete step)
     const incompleteSteps = totalSteps - completedSteps;
@@ -130,6 +139,7 @@ export class OnboardingService {
       percentage: Math.round((completedSteps / totalSteps) * 100),
       steps,
       startedAt: new Date(),
+      completedAt: onboardingCompletedAt || undefined,
       estimatedTimeRemaining,
     };
   }
@@ -175,6 +185,37 @@ export class OnboardingService {
       await this.handleThemeCustomization(ctx, data.stepData as ThemeData);
     }
 
+    // Find the next step index
+    const stepIndex = progress.steps.findIndex((s) => s.id === stepId);
+    const nextStepIndex = Math.min(stepIndex + 1, progress.steps.length - 1);
+
+    // Get or create profile to update onboarding step
+    let profiles = await this.profileService.getProfiles(ctx);
+
+    // Create a temporary profile if none exists (for onboarding tracking)
+    if (profiles.length === 0) {
+      // Create a placeholder profile just for tracking onboarding progress
+      const tempProfile = await this.profileService.createProfile(ctx, {
+        username: `temp-${ctx.userId.slice(0, 8)}`,
+        displayName: "Usuario",
+        title: "Usuario",
+        bio: "",
+      });
+      profiles = [tempProfile];
+    }
+
+    // Persist onboarding progress in database
+    if (profiles.length > 0) {
+      const profile = profiles[0];
+      const isCompleted = nextStepIndex >= progress.steps.length - 1;
+
+      await this.profileService.updateProfile(ctx, profile.id, {
+        onboardingStep: nextStepIndex,
+        onboardingCompletedAt: isCompleted ? new Date() : null,
+      });
+    }
+
+    // Return fresh progress with persisted state
     return this.getOnboardingProgress(ctx);
   }
 
@@ -268,12 +309,26 @@ export class OnboardingService {
     ctx: RequestContext,
     profileData: ProfileCreationData,
   ): Promise<void> {
-    await this.profileService.createProfile(ctx, {
-      username: profileData.slug,
-      displayName: profileData.name,
-      title: profileData.name,
-      bio: profileData.bio,
-    });
+    const profiles = await this.profileService.getProfiles(ctx);
+
+    if (profiles.length > 0) {
+      // Update existing profile (might be the temp one created earlier)
+      const profile = profiles[0];
+      await this.profileService.updateProfile(ctx, profile.id, {
+        username: profileData.slug,
+        displayName: profileData.name,
+        title: profileData.name,
+        bio: profileData.bio || "",
+      });
+    } else {
+      // Create new profile if none exists
+      await this.profileService.createProfile(ctx, {
+        username: profileData.slug,
+        displayName: profileData.name,
+        title: profileData.name,
+        bio: profileData.bio || "",
+      });
+    }
   }
 
   private async handleAvatarUpload(

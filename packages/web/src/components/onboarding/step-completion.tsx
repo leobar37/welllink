@@ -4,8 +4,18 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { CheckCircle2 } from "lucide-react"
 import { Logo } from "@/components/ui/logo"
 
-export function StepCompletion() {
+export function StepCompletion({ onNext, isLoading }: {
+  onNext: () => void
+  isLoading?: boolean
+}) {
   const navigate = useNavigate()
+
+  const handleFinish = async () => {
+    // First complete the onboarding
+    await onNext()
+    // Then navigate to dashboard
+    navigate("/dashboard")
+  }
 
   return (
     <Card>
@@ -24,7 +34,7 @@ export function StepCompletion() {
         </p>
       </CardContent>
       <CardFooter>
-        <Button onClick={() => navigate("/dashboard")} className="w-full" size="lg">
+        <Button onClick={handleFinish} className="w-full" size="lg" disabled={isLoading}>
           Ir al Panel
         </Button>
       </CardFooter>

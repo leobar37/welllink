@@ -37,8 +37,8 @@ FROM nginx:alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy built static files from builder stage
-# React Router builds to .react-router/client by default
-COPY --from=builder /app/.react-router/client /usr/share/nginx/html
+# React Router v7 builds to build/client by default
+COPY --from=builder /app/build/client /usr/share/nginx/html
 
 # Expose port (Dokploy will map this)
 EXPOSE 3000

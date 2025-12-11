@@ -35,7 +35,7 @@ export function StepCreateProfile({ onNext }: { onNext: (data: ProfileValues) =>
       </CardHeader>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onNext)}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pb-6">
             <FormField
               control={form.control}
               name="name"

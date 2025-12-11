@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Logo } from "@/components/ui/logo"
+import { Loader2 } from "lucide-react"
 
-export function StepWelcome({ onNext }: { onNext: () => void }) {
+export function StepWelcome({ onNext, isLoading }: { onNext: () => void; isLoading?: boolean }) {
   return (
     <Card>
       <CardHeader className="text-center">
@@ -17,7 +18,8 @@ export function StepWelcome({ onNext }: { onNext: () => void }) {
         </p>
       </CardContent>
       <CardFooter>
-        <Button onClick={() => onNext()} className="w-full" size="lg">
+        <Button onClick={() => onNext()} className="w-full" size="lg" disabled={isLoading}>
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Comenzar
         </Button>
       </CardFooter>
