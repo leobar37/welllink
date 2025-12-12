@@ -15,6 +15,9 @@ export * from "./story-section";
 export * from "./story";
 export * from "./story-event";
 export * from "./ai-recommendation";
+export * from "./whatsapp-config";
+export * from "./whatsapp-message";
+export * from "./whatsapp-template";
 
 // Relations
 export * from "./relations";

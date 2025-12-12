@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router";
 import type { Feature } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, MessageCircle } from "lucide-react";
+import { useWhatsApp } from "@/hooks/use-whatsapp";
 
 interface ActionButtonsProps {
   features: Feature[];
@@ -13,6 +14,7 @@ export function ActionButtons({
   whatsappNumber,
 }: ActionButtonsProps) {
   const { username } = useParams<{ username: string }>();
+  const { config } = useWhatsApp();
   const activeFeatures = features.filter((f) => f.isEnabled);
 
   // No buttons to show
@@ -42,8 +44,8 @@ export function ActionButtons({
         const isInternalLink = link.startsWith("/");
         const isWhatsAppCta = feature.type === "whatsapp-cta";
 
-        // Don't render WhatsApp CTA if no phone number configured
-        if (isWhatsAppCta && !whatsappNumber) {
+        // Don't render WhatsApp CTA if no phone number configured or not connected
+        if (isWhatsAppCta && (!whatsappNumber || !config.isConnected)) {
           return null;
         }
 

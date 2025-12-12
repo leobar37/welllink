@@ -12,6 +12,9 @@ import { AnalyticsRepository } from "../services/repository/analytics";
 import { StorySectionRepository } from "../services/repository/story-section";
 import { StoryRepository } from "../services/repository/story";
 import { StoryEventRepository } from "../services/repository/story-event";
+import { WhatsAppConfigRepository } from "../services/repository/whatsapp-config";
+import { WhatsAppMessageRepository } from "../services/repository/whatsapp-message";
+import { WhatsAppTemplateRepository } from "../services/repository/whatsapp-template";
 import { AssetService } from "../services/business/asset";
 import { CDNService } from "../services/business/cdn";
 import { ProfileService } from "../services/business/profile";
@@ -20,6 +23,12 @@ import { HealthSurveyService } from "../services/business/health-survey";
 import { AIRecommendationService } from "../services/business/ai-recommendation";
 import { AnalyticsService } from "../services/business/analytics";
 import { StoryService } from "../services/business/story";
+import { EvolutionService } from "../services/business/evolution-api";
+import { WhatsAppConfigService } from "../services/business/whatsapp-config";
+import { WhatsAppService } from "../services/business/whatsapp";
+import { WhatsAppTemplateService } from "../services/business/whatsapp-template";
+import { getWhatsAppQueue } from "../services/queue/whatsapp-queue";
+import { getRedisConnection } from "../lib/redis";
 
 let storageInstance: StorageStrategy | null = null;
 let initialized = false;
@@ -50,6 +59,24 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     const storySectionRepository = new StorySectionRepository();
     const storyRepository = new StoryRepository();
     const storyEventRepository = new StoryEventRepository();
+    const whatsappConfigRepository = new WhatsAppConfigRepository();
+    const whatsappMessageRepository = new WhatsAppMessageRepository();
+    const whatsappTemplateRepository = new WhatsAppTemplateRepository();
+
+    // Evolution API service
+    const evolutionService = new EvolutionService({
+      baseUrl: process.env.EVOLUTION_API_URL || "http://localhost:8080",
+      apiKey: process.env.EVOLUTION_API_KEY || "",
+    });
+
+    // WhatsApp queue
+    const redisConnection = getRedisConnection();
+    const whatsappQueue = await getWhatsAppQueue(
+      redisConnection,
+      whatsappMessageRepository,
+      whatsappConfigRepository,
+      evolutionService
+    );
 
     // Services
     const assetService = new AssetService(assetRepository, storage);
@@ -76,10 +103,25 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
       profileRepository,
       assetRepository,
     );
+    const whatsappConfigService = new WhatsAppConfigService(
+      whatsappConfigRepository,
+      evolutionService
+    );
+    const whatsappService = new WhatsAppService(
+      whatsappMessageRepository,
+      whatsappConfigRepository,
+      evolutionService
+    );
+    const whatsappTemplateService = new WhatsAppTemplateService(
+      whatsappTemplateRepository,
+      whatsappConfigRepository,
+      evolutionService
+    );
 
     return {
       services: {
         storage,
+        redis: redisConnection,
         // Repositories
         assetRepository,
         profileRepository,
@@ -90,6 +132,9 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         storySectionRepository,
         storyRepository,
         storyEventRepository,
+        whatsappConfigRepository,
+        whatsappMessageRepository,
+        whatsappTemplateRepository,
         // Services
         assetService,
         cdnService,
@@ -99,6 +144,12 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         aiRecommendationService,
         analyticsService,
         storyService,
+        evolutionService,
+        whatsappConfigService,
+        whatsappService,
+        whatsappTemplateService,
+        // Queue
+        whatsappQueue,
       },
     };
   },

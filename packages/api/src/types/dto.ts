@@ -213,3 +213,84 @@ export interface TrackStoryEventData {
   eventType: StoryEventType;
   metadata?: Record<string, unknown>;
 }
+
+// =============================================================================
+// WhatsApp DTOs
+// =============================================================================
+
+import type { WhatsAppConfig } from "../db/schema/whatsapp-config";
+import type { TemplateCategory, TemplateComponent, TemplateVariable } from "../db/schema/whatsapp-template";
+
+export interface CreateWhatsAppConfigData {
+  profileId: string;
+  instanceName: string;
+  config: Partial<WhatsAppConfig["config"]>;
+}
+
+export interface UpdateWhatsAppConfigData {
+  instanceName?: string;
+  isEnabled?: boolean;
+  webhookUrl?: string;
+  config?: Partial<WhatsAppConfig["config"]>;
+}
+
+export interface CreateMessageData {
+  to: string;
+  content: string;
+  delay?: number;
+  presence?: string;
+  quotedMessage?: any;
+}
+
+export interface SendMediaData {
+  to: string;
+  mediatype: "image" | "video" | "document" | "audio";
+  media: string;
+  fileName?: string;
+  caption?: string;
+  mimetype?: string;
+  delay?: number;
+}
+
+export interface SendTemplateData {
+  to: string;
+  templateName: string;
+  components: Array<{
+    type: string;
+    parameters?: Array<{
+      type: string;
+      text?: string;
+      media?: {
+        link: string;
+      };
+      currency?: {
+        fallbackValue: string;
+        code: string;
+        amount_1000: number;
+      };
+      date_time?: {
+        fallbackValue: string;
+      };
+    }>;
+  }>;
+}
+
+export interface CreateTemplateData {
+  configId: string;
+  name: string;
+  displayName: string;
+  category: TemplateCategory;
+  language?: string;
+  components: TemplateComponent[];
+  variables?: TemplateVariable[];
+  submitToWhatsApp?: boolean;
+}
+
+export interface UpdateTemplateData {
+  name?: string;
+  displayName?: string;
+  category?: TemplateCategory;
+  language?: string;
+  components?: TemplateComponent[];
+  variables?: TemplateVariable[];
+}

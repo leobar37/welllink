@@ -4,44 +4,44 @@ import { z } from "zod";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Loader2, MessageCircle } from "lucide-react";
+import { Loader2, QrCode, Smartphone, Wifi, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useWhatsApp } from "@/hooks/use-whatsapp";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
-const whatsappCtaConfigSchema = z.object({
+const whatsappConfigSchema = z.object({
   buttonText: z
     .string()
     .min(1, "El texto del botón es requerido")
     .max(100, "El texto no puede exceder 100 caracteres"),
 });
 
-type WhatsAppCtaConfigForm = z.infer<typeof whatsappCtaConfigSchema>;
+type WhatsAppConfigForm = z.infer<typeof whatsappConfigSchema>;
 
-interface WhatsAppCtaConfigModalProps {
+interface WhatsAppConfigModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultValues?: {
     buttonText?: string;
   };
-  onSave: (data: WhatsAppCtaConfigForm) => Promise<void>;
+  onSave: (data: WhatsAppConfigForm) => Promise<void>;
   isLoading?: boolean;
 }
 
-export function WhatsAppCtaConfigModal({
+export function WhatsAppConfigModal({
   open,
   onOpenChange,
   defaultValues,
   onSave,
   isLoading = false,
-}: WhatsAppCtaConfigModalProps) {
+}: WhatsAppConfigModalProps) {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm<WhatsAppCtaConfigForm>({
-    resolver: zodResolver(whatsappCtaConfigSchema),
+  } = useForm<WhatsAppConfigForm>({
+    resolver: zodResolver(whatsappConfigSchema),
     defaultValues: {
       buttonText: defaultValues?.buttonText || "Escríbeme por WhatsApp",
     },
@@ -49,7 +49,7 @@ export function WhatsAppCtaConfigModal({
 
   const { config, connect, disconnect, refreshStatus, isLoading: connectionLoading } = useWhatsApp();
 
-  const onSubmit = async (data: WhatsAppCtaConfigForm) => {
+  const onSubmit = async (data: WhatsAppConfigForm) => {
     await onSave(data);
     onOpenChange(false);
   };
@@ -79,8 +79,8 @@ export function WhatsAppCtaConfigModal({
     <ResponsiveDialog
       open={open}
       onOpenChange={handleOpenChange}
-      title="Configurar WhatsApp CTA"
-      description="Personaliza el botón de contacto por WhatsApp en tu perfil"
+      title="Configurar WhatsApp"
+      description="Conecta tu cuenta de WhatsApp Business para enviar mensajes a tus clientes"
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Connection Status */}
@@ -95,7 +95,7 @@ export function WhatsAppCtaConfigModal({
             {config.isConnected ? (
               <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
                 <div className="flex items-center space-x-3">
-                  <MessageCircle className="h-5 w-5 text-green-600" />
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
                   <div>
                     <p className="font-medium text-green-900">Conectado</p>
                     <p className="text-sm text-green-700">
@@ -111,7 +111,7 @@ export function WhatsAppCtaConfigModal({
                   {connectionLoading ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
-                    <MessageCircle className="mr-2 h-4 w-4" />
+                    <Smartphone className="mr-2 h-4 w-4" />
                   )}
                   Desconectar
                 </Button>
@@ -120,7 +120,7 @@ export function WhatsAppCtaConfigModal({
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <MessageCircle className="h-5 w-5 text-yellow-600" />
+                    <QrCode className="h-5 w-5 text-yellow-600" />
                     <p className="text-sm font-medium text-yellow-900">
                       Escanea el código QR
                     </p>
@@ -152,7 +152,7 @@ export function WhatsAppCtaConfigModal({
             ) : (
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-center space-x-3">
-                  <MessageCircle className="h-5 w-5 text-gray-400" />
+                  <Wifi className="h-5 w-5 text-gray-400" />
                   <div>
                     <p className="font-medium text-gray-900">No conectado</p>
                     <p className="text-sm text-gray-600">
@@ -167,7 +167,7 @@ export function WhatsAppCtaConfigModal({
                   {connectionLoading ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
-                    <MessageCircle className="mr-2 h-4 w-4" />
+                    <Smartphone className="mr-2 h-4 w-4" />
                   )}
                   Conectar
                 </Button>
@@ -176,7 +176,7 @@ export function WhatsAppCtaConfigModal({
 
             {config.error && (
               <div className="flex items-center space-x-2 p-3 bg-red-50 rounded-lg">
-                <MessageCircle className="h-5 w-5 text-red-600" />
+                <AlertCircle className="h-5 w-5 text-red-600" />
                 <p className="text-sm text-red-700">{config.error}</p>
               </div>
             )}
@@ -195,7 +195,7 @@ export function WhatsAppCtaConfigModal({
             <div className="space-y-2">
               <Label htmlFor="buttonText">Texto del botón</Label>
               <div className="relative">
-                <MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <QrCode className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="buttonText"
                   placeholder="Escríbeme por WhatsApp"

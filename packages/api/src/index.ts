@@ -35,6 +35,7 @@ import { socialLinkRoutes } from "./api/routes/social-links";
 import { storiesRoutes } from "./api/routes/stories";
 import { themeRoutes } from "./api/routes/themes";
 import { aiRecommendationRoutes } from "./api/routes/ai-recommendation";
+import { whatsappRoutes } from "./api/routes/whatsapp";
 import { createStorageStrategy } from "./services/storage";
 
 const modules = [
@@ -128,7 +129,8 @@ const app = new Elysia()
       .use(socialLinkRoutes)
       .use(storiesRoutes)
       .use(themeRoutes)
-      .use(aiRecommendationRoutes),
+      .use(aiRecommendationRoutes)
+      .use(whatsappRoutes),
   )
   .listen({
     port: Number(process.env.PORT) || 5300,
