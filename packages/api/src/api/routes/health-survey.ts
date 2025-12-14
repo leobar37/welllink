@@ -53,6 +53,71 @@ export const healthSurveyRoutes = new Elysia({ prefix: "/health-survey" })
   .get("/:id", async ({ params, services }) => {
     return services.healthSurveyService.getSurveyResponse(params.id);
   })
+
+  // Create client from survey (Method 1 - explicit action)
+  .post(
+    "/:id/create-client",
+    async ({ params, query, set, ctx, services }) => {
+      const profileId = query.profileId as string;
+      if (!profileId) {
+        set.status = 400;
+        return { error: "profileId query parameter is required" };
+      }
+
+      // Get survey response
+      const survey = await services.healthSurveyService.getSurveyResponse(
+        params.id,
+      );
+
+      // Create client from survey using ClientService
+      const client = await services.clientService.createClientFromSurvey(
+        ctx!,
+        survey,
+        profileId,
+      );
+
+      set.status = 201;
+      return client;
+    },
+  )
+
+  // Bulk create clients from multiple surveys
+  .post(
+    "/bulk-create-clients",
+    async ({ body, query, set, ctx, services }) => {
+      const { surveyIds } = body;
+
+      const profileId = query.profileId as string;
+      if (!profileId) {
+        set.status = 400;
+        return { error: "profileId query parameter is required" };
+      }
+
+      const results = await Promise.allSettled(
+        surveyIds.map(async (surveyId: string) => {
+          const survey = await services.healthSurveyService.getSurveyResponse(
+            surveyId,
+          );
+          return services.clientService.createClientFromSurvey(ctx!, survey, profileId);
+        }),
+      );
+
+      const successful = results.filter((r) => r.status === "fulfilled").length;
+      const failed = results.filter((r) => r.status === "rejected").length;
+
+      set.status = 207; // Multi-Status
+      return {
+        successful,
+        failed,
+        total: surveyIds.length,
+      };
+    },
+    {
+      body: t.Object({
+        surveyIds: t.Array(t.String()),
+      }),
+    },
+  )
   .put(
     "/:id",
     async ({ params, body, query, services }) => {

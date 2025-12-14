@@ -30,6 +30,20 @@ import { WhatsAppTemplateService } from "../services/business/whatsapp-template"
 import { getWhatsAppQueue } from "../services/queue/whatsapp-queue";
 import { getRedisConnection } from "../lib/redis";
 
+// NEW IMPORTS
+import { ClientRepository } from "../services/repository/client";
+import { ClientNoteRepository } from "../services/repository/client-note";
+import { CampaignTemplateRepository } from "../services/repository/campaign-template";
+import { CampaignRepository } from "../services/repository/campaign";
+import { CampaignAudienceRepository } from "../services/repository/campaign-audience";
+
+import { ClientService } from "../services/business/client";
+import { CampaignTemplateService } from "../services/business/campaign-template";
+import { CampaignService } from "../services/business/campaign";
+import { TemplateVariablesService } from "../services/business/template-variables";
+
+import { getCampaignQueue } from "../services/queue/campaign-queue";
+
 let storageInstance: StorageStrategy | null = null;
 let initialized = false;
 
@@ -63,6 +77,13 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     const whatsappMessageRepository = new WhatsAppMessageRepository();
     const whatsappTemplateRepository = new WhatsAppTemplateRepository();
 
+    // NEW REPOSITORIES
+    const clientRepository = new ClientRepository();
+    const clientNoteRepository = new ClientNoteRepository();
+    const campaignTemplateRepository = new CampaignTemplateRepository();
+    const campaignRepository = new CampaignRepository();
+    const campaignAudienceRepository = new CampaignAudienceRepository();
+
     // Evolution API service
     const evolutionService = new EvolutionService({
       baseUrl: process.env.EVOLUTION_API_URL || "http://localhost:8080",
@@ -76,6 +97,20 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
       whatsappMessageRepository,
       whatsappConfigRepository,
       evolutionService
+    );
+
+    // NEW QUEUE: Campaign queue
+    const templateVariablesService = new TemplateVariablesService(
+      profileRepository,
+      clientRepository,
+    );
+
+    const campaignQueue = await getCampaignQueue(
+      redisConnection,
+      campaignRepository,
+      campaignAudienceRepository,
+      clientRepository,
+      templateVariablesService,
     );
 
     // Services
@@ -118,6 +153,23 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
       evolutionService
     );
 
+    // NEW SERVICES
+    const clientService = new ClientService(
+      clientRepository,
+      clientNoteRepository,
+    );
+
+    const campaignTemplateService = new CampaignTemplateService(
+      campaignTemplateRepository,
+    );
+
+    const campaignService = new CampaignService(
+      campaignRepository,
+      campaignAudienceRepository,
+      clientRepository,
+      templateVariablesService,
+    );
+
     return {
       services: {
         storage,
@@ -135,6 +187,12 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         whatsappConfigRepository,
         whatsappMessageRepository,
         whatsappTemplateRepository,
+        // NEW REPOSITORIES
+        clientRepository,
+        clientNoteRepository,
+        campaignTemplateRepository,
+        campaignRepository,
+        campaignAudienceRepository,
         // Services
         assetService,
         cdnService,
@@ -148,8 +206,14 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         whatsappConfigService,
         whatsappService,
         whatsappTemplateService,
-        // Queue
+        // NEW SERVICES
+        clientService,
+        campaignTemplateService,
+        campaignService,
+        templateVariablesService,
+        // Queues
         whatsappQueue,
+        campaignQueue, // NEW
       },
     };
   },

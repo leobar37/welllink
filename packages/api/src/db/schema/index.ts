@@ -19,5 +19,12 @@ export * from "./whatsapp-config";
 export * from "./whatsapp-message";
 export * from "./whatsapp-template";
 
+// NEW TABLES
+export * from "./client";
+export * from "./client-note";
+export * from "./campaign-template";
+export * from "./campaign";
+export * from "./campaign-audience";
+
 // Relations
 export * from "./relations";
