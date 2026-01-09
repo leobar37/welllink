@@ -2,7 +2,7 @@
 import { config } from "dotenv";
 config({ path: ".env" });
 
-import { Elysia } from "elysia";
+import { Elysia, redirect } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { setDefaultResultOrder } from "node:dns";
 
@@ -67,9 +67,8 @@ const app = new Elysia()
       const provider = process.env.STORAGE_PROVIDER || "local";
       if (provider === "supabase") {
         const publicUrl = storageService.getPublicUrl(params.path);
-        set.redirect = publicUrl;
-        set.status = 302; // Temporary redirect
-        return;
+        // Use inline redirect instead
+        return redirect(publicUrl);
       }
 
       // For local storage, serve the file directly

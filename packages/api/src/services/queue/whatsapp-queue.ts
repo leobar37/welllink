@@ -1,9 +1,9 @@
 import { Queue, Worker, Job, JobsOptions } from "bullmq";
-import type { WhatsAppMessage } from "../../db/schema/whatsapp-message";
 import { MessageStatus } from "../../db/schema/whatsapp-message";
 import { EvolutionService } from "../business/evolution-api";
 import { WhatsAppMessageRepository } from "../repository/whatsapp-message";
 import { WhatsAppConfigRepository } from "../repository/whatsapp-config";
+import { getBullMQRedisConnection } from "../../lib/redis";
 
 export interface WhatsAppQueueJobData {
   type: "send_message" | "send_media" | "send_template" | "retry_message";
@@ -21,14 +21,15 @@ export class WhatsAppQueueService {
   private evolutionService: EvolutionService;
 
   constructor(
-    redisConnection: any,
     messageRepository: WhatsAppMessageRepository,
     configRepository: WhatsAppConfigRepository,
-    evolutionService: EvolutionService
+    evolutionService: EvolutionService,
   ) {
     this.messageRepository = messageRepository;
     this.configRepository = configRepository;
     this.evolutionService = evolutionService;
+
+    const redisConnection = getBullMQRedisConnection();
 
     // Initialize queue
     this.messageQueue = new Queue("whatsapp-messages", {
@@ -53,7 +54,7 @@ export class WhatsAppQueueService {
       {
         connection: redisConnection,
         concurrency: 10,
-      }
+      },
     );
 
     // Setup event listeners
@@ -80,10 +81,14 @@ export class WhatsAppQueueService {
       template?: any;
       delay?: number;
     },
-    options: JobsOptions = {}
+    options: JobsOptions = {},
   ) {
     const jobData: WhatsAppQueueJobData = {
-      type: data.template ? "send_template" : data.media ? "send_media" : "send_message",
+      type: data.template
+        ? "send_template"
+        : data.media
+          ? "send_media"
+          : "send_message",
       messageId,
       configId,
       data,
@@ -99,7 +104,7 @@ export class WhatsAppQueueService {
     messageId: string,
     configId: string,
     retryCount: number = 0,
-    options: JobsOptions = {}
+    options: JobsOptions = {},
   ) {
     const jobData: WhatsAppQueueJobData = {
       type: "retry_message",
@@ -155,13 +160,19 @@ export class WhatsAppQueueService {
 
     try {
       // Get message from database
-      const message = await this.messageRepository.findOne({ userId: "" } as any, messageId);
+      const message = await this.messageRepository.findOne(
+        { userId: "" } as any,
+        messageId,
+      );
       if (!message) {
         throw new Error(`Message not found: ${messageId}`);
       }
 
       // Get config
-      const config = await this.configRepository.findOne({ userId: "" } as any, configId);
+      const config = await this.configRepository.findOne(
+        { userId: "" } as any,
+        configId,
+      );
       if (!config) {
         throw new Error(`Config not found: ${configId}`);
       }
@@ -192,11 +203,14 @@ export class WhatsAppQueueService {
           break;
 
         case "send_template":
-          result = await this.evolutionService.sendTemplate(config.instanceName, {
-            number: data.to,
-            templateName: data.template.templateName,
-            templateComponents: data.template.components,
-          });
+          result = await this.evolutionService.sendTemplate(
+            config.instanceName,
+            {
+              number: data.to,
+              templateName: data.template.templateName,
+              templateComponents: data.template.components,
+            },
+          );
           break;
 
         case "retry_message":
@@ -207,13 +221,16 @@ export class WhatsAppQueueService {
               text: message.content,
             });
           } else if (message.media) {
-            result = await this.evolutionService.sendMedia(config.instanceName, {
-              number: message.to,
-              mediatype: message.media.type,
-              media: message.media.url,
-              fileName: message.media.filename,
-              caption: message.media.caption,
-            });
+            result = await this.evolutionService.sendMedia(
+              config.instanceName,
+              {
+                number: message.to,
+                mediatype: message.media.type,
+                media: message.media.url,
+                fileName: message.media.filename,
+                caption: message.media.caption,
+              },
+            );
           }
           break;
 
@@ -247,17 +264,15 @@ export class WhatsAppQueueService {
 let queueInstance: WhatsAppQueueService | null = null;
 
 export async function getWhatsAppQueue(
-  redisConnection: any,
   messageRepository: WhatsAppMessageRepository,
   configRepository: WhatsAppConfigRepository,
-  evolutionService: EvolutionService
+  evolutionService: EvolutionService,
 ): Promise<WhatsAppQueueService> {
   if (!queueInstance) {
     queueInstance = new WhatsAppQueueService(
-      redisConnection,
       messageRepository,
       configRepository,
-      evolutionService
+      evolutionService,
     );
   }
   return queueInstance;

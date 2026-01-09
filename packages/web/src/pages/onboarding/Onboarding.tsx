@@ -49,7 +49,7 @@ export function Onboarding() {
 
   async function fetchProgress() {
     try {
-      const { data, error } = await api.api.onboarding.progress.get();
+      const { data, error } = await api.onboarding.progress.get();
       if (error) throw error;
       if (data) {
         setSteps(data.steps as OnboardingStep[]);
@@ -66,7 +66,7 @@ export function Onboarding() {
   async function updateStep(stepId: string, data: StepPayload) {
     setUpdatingStep(true);
     try {
-      const { data: resData, error } = await api.api.onboarding.step[
+      const { data: resData, error } = await api.onboarding.step[
         stepId
       ].put({
         completed: true,

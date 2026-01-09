@@ -93,7 +93,7 @@ export function TuHistoriaContent({
     queryKey: ["tu-historia", profileId],
     queryFn: async () => {
       if (!profileId) return null;
-      const { data, error } = await api.api.stories.profile[profileId].get();
+      const { data, error } = await api.stories.profile[profileId].get();
       if (error) throw error;
       return data as unknown as DashboardStoriesResponse;
     },
@@ -104,7 +104,7 @@ export function TuHistoriaContent({
     queryKey: ["tu-historia-metrics", profileId],
     queryFn: async () => {
       if (!profileId) return null;
-      const { data, error } = await api.api.stories.profile[
+      const { data, error } = await api.stories.profile[
         profileId
       ].metrics.get({
         $query: { days: "30" },
@@ -162,7 +162,7 @@ export function TuHistoriaContent({
         ctaUrl: whatsappUrl || null,
       };
       const { data, error } =
-        await api.api.stories.profile[profileId].config.put(payload);
+        await api.stories.profile[profileId].config.put(payload);
       if (error) throw error;
       return data;
     },
@@ -176,7 +176,7 @@ export function TuHistoriaContent({
   const createStoryMutation = useMutation({
     mutationFn: async (values: StoryFormValues) => {
       if (!profileId) throw new Error("Sin perfil");
-      const { data, error } = await api.api.stories.profile[profileId].post({
+      const { data, error } = await api.stories.profile[profileId].post({
         ...values,
         text: values.text || undefined,
       });
@@ -202,7 +202,7 @@ export function TuHistoriaContent({
       id: string;
       values: StoryFormValues;
     }) => {
-      const { data, error } = await api.api.stories[id].put({
+      const { data, error } = await api.stories[id].put({
         ...values,
         text: values.text || undefined,
       });
@@ -219,7 +219,7 @@ export function TuHistoriaContent({
 
   const deleteStoryMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await api.api.stories[id].delete();
+      const { error } = await api.stories[id].delete();
       if (error) throw error;
     },
     onSuccess: () => {
@@ -237,7 +237,7 @@ export function TuHistoriaContent({
       id: string;
       isPublished: boolean;
     }) => {
-      const { data, error } = await api.api.stories[id].publish.patch({
+      const { data, error } = await api.stories[id].publish.patch({
         isPublished,
       });
       if (error) throw error;
@@ -258,7 +258,7 @@ export function TuHistoriaContent({
   const reorderMutation = useMutation({
     mutationFn: async (items: Array<{ id: string; order: number }>) => {
       if (!profileId) throw new Error("Sin perfil");
-      const { error } = await api.api.stories.reorder.patch({
+      const { error } = await api.stories.reorder.patch({
         profileId,
         items,
       });
@@ -757,7 +757,7 @@ function ImageUploadField({
     if (!file) return;
     setUploading(true);
     try {
-      const { data, error } = await api.api.upload.post({
+      const { data, error } = await api.upload.post({
         file,
         type: "story-image",
       });

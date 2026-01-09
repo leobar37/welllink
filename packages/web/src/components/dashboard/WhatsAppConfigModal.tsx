@@ -1,10 +1,24 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { ResponsiveSheet } from "@/components/ui/responsive-sheet";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, QrCode, Smartphone, Wifi, AlertCircle, CheckCircle2 } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Loader2,
+  QrCode,
+  Smartphone,
+  Wifi,
+  AlertCircle,
+  CheckCircle2,
+  RefreshCw,
+} from "lucide-react";
 import { useWhatsApp } from "@/hooks/use-whatsapp";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -47,7 +61,18 @@ export function WhatsAppConfigModal({
     },
   });
 
-  const { config, connect, disconnect, refreshStatus, isLoading: connectionLoading } = useWhatsApp();
+  const {
+    config,
+    configs,
+    connect,
+    disconnect,
+    refreshStatus,
+    refreshConfigs,
+    isLoading: connectionLoading,
+  } = useWhatsApp();
+
+  // Get the first config or the active one
+  const activeConfigId = config.configId || configs[0]?.id;
 
   const onSubmit = async (data: WhatsAppConfigForm) => {
     await onSave(data);
@@ -59,24 +84,34 @@ export function WhatsAppConfigModal({
       reset({
         buttonText: defaultValues?.buttonText || "Escríbeme por WhatsApp",
       });
+      // Refresh configs when opening to trigger auto-creation if needed
+      refreshConfigs();
     }
     onOpenChange(newOpen);
   };
 
   const handleConnect = async () => {
-    await connect();
+    if (activeConfigId) {
+      await connect(activeConfigId);
+    }
   };
 
   const handleDisconnect = async () => {
-    await disconnect();
+    if (activeConfigId) {
+      await disconnect(activeConfigId);
+    }
   };
 
   const handleRefresh = async () => {
-    await refreshStatus();
+    if (activeConfigId) {
+      await refreshStatus(activeConfigId);
+    }
   };
 
+  const hasNoConfigs = configs.length === 0 && !config.configId && !connectionLoading;
+
   return (
-    <ResponsiveDialog
+    <ResponsiveSheet
       open={open}
       onOpenChange={handleOpenChange}
       title="Configurar WhatsApp"
@@ -92,7 +127,51 @@ export function WhatsAppConfigModal({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {config.isConnected ? (
+            {connectionLoading ? (
+              <div className="flex items-center justify-center p-8">
+                <div className="flex items-center space-x-3">
+                  <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                  <div>
+                    <p className="font-medium text-gray-900">
+                      Configurando WhatsApp
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Creando tu instancia de WhatsApp Business...
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : hasNoConfigs ? (
+              <div className="flex flex-col items-center justify-center p-8 bg-gray-50 rounded-lg">
+                <Smartphone className="h-12 w-12 text-gray-400 mb-4" />
+                <div className="text-center space-y-2 mb-6">
+                  <p className="font-medium text-gray-900">
+                    No tienes WhatsApp configurado
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Crea tu instancia para comenzar a enviar mensajes
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  onClick={refreshConfigs}
+                  disabled={connectionLoading}
+                  className="w-full sm:w-auto"
+                >
+                  {connectionLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creando configuración...
+                    </>
+                  ) : (
+                    <>
+                      <Smartphone className="mr-2 h-4 w-4" />
+                      Crear Configuración
+                    </>
+                  )}
+                </Button>
+              </div>
+            ) : config.isConnected ? (
               <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <CheckCircle2 className="h-5 w-5 text-green-600" />
@@ -104,6 +183,7 @@ export function WhatsAppConfigModal({
                   </div>
                 </div>
                 <Button
+                  type="button"
                   variant="outline"
                   onClick={handleDisconnect}
                   disabled={connectionLoading}
@@ -126,6 +206,7 @@ export function WhatsAppConfigModal({
                     </p>
                   </div>
                   <Button
+                    type="button"
                     variant="outline"
                     size="sm"
                     onClick={handleRefresh}
@@ -134,8 +215,9 @@ export function WhatsAppConfigModal({
                     {connectionLoading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      "Refrescar"
+                      <RefreshCw className="h-4 w-4 mr-1" />
                     )}
+                    Refrescar
                   </Button>
                 </div>
                 <div className="flex justify-center">
@@ -146,7 +228,8 @@ export function WhatsAppConfigModal({
                   />
                 </div>
                 <p className="text-center text-sm text-gray-600">
-                  Escanea este código con la app de WhatsApp Business para conectar tu cuenta
+                  Escanea este código con la app de WhatsApp Business para
+                  conectar tu cuenta
                 </p>
               </div>
             ) : (
@@ -161,8 +244,9 @@ export function WhatsAppConfigModal({
                   </div>
                 </div>
                 <Button
+                  type="button"
                   onClick={handleConnect}
-                  disabled={connectionLoading}
+                  disabled={connectionLoading || !activeConfigId}
                 >
                   {connectionLoading ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -188,7 +272,8 @@ export function WhatsAppConfigModal({
           <CardHeader>
             <CardTitle>Configuración del Botón</CardTitle>
             <CardDescription>
-              Personaliza el texto que aparece en el botón de WhatsApp en tu perfil
+              Personaliza el texto que aparece en el botón de WhatsApp en tu
+              perfil
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -220,6 +305,7 @@ export function WhatsAppConfigModal({
         {/* Action Buttons */}
         <div className="flex justify-end space-x-3 pt-4">
           <Button
+            type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting || connectionLoading}
@@ -242,6 +328,6 @@ export function WhatsAppConfigModal({
           </Button>
         </div>
       </form>
-    </ResponsiveDialog>
+    </ResponsiveSheet>
   );
 }

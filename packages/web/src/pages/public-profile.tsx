@@ -23,7 +23,7 @@ export function PublicProfilePage() {
       try {
         setLoading(true);
         const { data: profileData, error } =
-          await api.api.public.profiles[username].get();
+          await api.public.profiles[username].get();
 
         if (error) {
           throw new Error(

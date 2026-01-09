@@ -91,12 +91,10 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     });
 
     // WhatsApp queue
-    const redisConnection = getRedisConnection();
     const whatsappQueue = await getWhatsAppQueue(
-      redisConnection,
       whatsappMessageRepository,
       whatsappConfigRepository,
-      evolutionService
+      evolutionService,
     );
 
     // NEW QUEUE: Campaign queue
@@ -106,7 +104,6 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     );
 
     const campaignQueue = await getCampaignQueue(
-      redisConnection,
       campaignRepository,
       campaignAudienceRepository,
       clientRepository,
@@ -128,7 +125,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     const healthSurveyService = new HealthSurveyService(healthSurveyRepository);
     const aiRecommendationService = new AIRecommendationService(
       aiRecommendationRepository,
-      healthSurveyRepository
+      healthSurveyRepository,
     );
     const analyticsService = new AnalyticsService(analyticsRepository);
     const storyService = new StoryService(
@@ -140,17 +137,17 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     );
     const whatsappConfigService = new WhatsAppConfigService(
       whatsappConfigRepository,
-      evolutionService
+      evolutionService,
     );
     const whatsappService = new WhatsAppService(
       whatsappMessageRepository,
       whatsappConfigRepository,
-      evolutionService
+      evolutionService,
     );
     const whatsappTemplateService = new WhatsAppTemplateService(
       whatsappTemplateRepository,
       whatsappConfigRepository,
-      evolutionService
+      evolutionService,
     );
 
     // NEW SERVICES
@@ -173,7 +170,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     return {
       services: {
         storage,
-        redis: redisConnection,
+        redis: getRedisConnection(),
         // Repositories
         assetRepository,
         profileRepository,

@@ -1,11 +1,11 @@
 import { Queue, Worker, Job } from "bullmq";
-import type { Redis } from "ioredis";
 import { CampaignRepository } from "../repository/campaign";
 import { CampaignAudienceRepository } from "../repository/campaign-audience";
 import { ClientRepository } from "../repository/client";
 import { TemplateVariablesService } from "../business/template-variables";
 import { CampaignStatus, CampaignAudienceStatus } from "../../db/schema";
 import type { RequestContext } from "../../types/context";
+import { getBullMQRedisConnection } from "../../lib/redis";
 
 export interface CampaignQueueJobData {
   campaignId: string;
@@ -18,12 +18,13 @@ export class CampaignQueueService {
   private worker: Worker;
 
   constructor(
-    private redisConnection: Redis,
     private campaignRepository: CampaignRepository,
     private campaignAudienceRepository: CampaignAudienceRepository,
     private clientRepository: ClientRepository,
     private templateVariablesService: TemplateVariablesService,
   ) {
+    const redisConnection = getBullMQRedisConnection();
+
     // Initialize queue
     this.queue = new Queue("campaign-sending", {
       connection: redisConnection,
@@ -115,25 +116,30 @@ export class CampaignQueueService {
             }
 
             // Replace variables in message using the service with scopes
-            const personalizedMessage = await this.templateVariablesService.replaceVariables(
-              campaign.messageContent,
-              ctx,
-              [
-                { type: "client", entityId: client.id },
-                { type: "advisor" },
-                { type: "system" },
-              ],
-            );
+            const personalizedMessage =
+              await this.templateVariablesService.replaceVariables(
+                campaign.messageContent,
+                ctx,
+                [
+                  { type: "client", entityId: client.id },
+                  { type: "advisor" },
+                  { type: "system" },
+                ],
+              );
 
             // Note: This is where you'd integrate with the WhatsApp queue
             // For now, we'll just mark as sent
             // await this.whatsappQueue.addSendMessageJob(...);
 
             // Update audience member status
-            await this.campaignAudienceRepository.update(ctx, audienceMember.id, {
-              status: CampaignAudienceStatus.SENT,
-              sentAt: new Date(),
-            });
+            await this.campaignAudienceRepository.update(
+              ctx,
+              audienceMember.id,
+              {
+                status: CampaignAudienceStatus.SENT,
+                sentAt: new Date(),
+              },
+            );
 
             return { success: true };
           }),
@@ -202,7 +208,6 @@ export class CampaignQueueService {
 let campaignQueueInstance: CampaignQueueService | null = null;
 
 export async function getCampaignQueue(
-  redisConnection: Redis,
   campaignRepository: CampaignRepository,
   campaignAudienceRepository: CampaignAudienceRepository,
   clientRepository: ClientRepository,
@@ -210,7 +215,6 @@ export async function getCampaignQueue(
 ): Promise<CampaignQueueService> {
   if (!campaignQueueInstance) {
     campaignQueueInstance = new CampaignQueueService(
-      redisConnection,
       campaignRepository,
       campaignAudienceRepository,
       clientRepository,

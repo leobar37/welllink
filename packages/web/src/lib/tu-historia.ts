@@ -21,7 +21,7 @@ export const getAssetPublicUrl = (assetId?: string | null) => {
 
 export async function trackStoryEvent(payload: TrackStoryEventPayload) {
   try {
-    await api.api.stories.events.post(payload);
+    await api.stories.events.post(payload);
   } catch (error) {
     console.warn("No se pudo registrar el evento de historia", error);
   }

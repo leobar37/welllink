@@ -74,7 +74,7 @@ export function FeaturesList() {
     mutationFn: async (config: FeaturesConfig) => {
       if (!profile?.id) throw new Error("No profile found");
       const { data, error } =
-        await api.api.profiles[profile.id]["features-config"].patch(config);
+        await api.profiles[profile.id]["features-config"].patch(config);
       if (error) throw error;
       return data;
     },

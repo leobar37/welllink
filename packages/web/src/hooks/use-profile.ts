@@ -26,7 +26,7 @@ export function useProfile() {
   } = useQuery({
     queryKey: ["profiles"],
     queryFn: async () => {
-      const { data, error } = await api.api.profiles.get();
+      const { data, error } = await api.profiles.get();
       if (error) throw error;
       return data as unknown as Profile[];
     },
@@ -43,7 +43,7 @@ export function useProfile() {
       id: string;
       data: Partial<Profile>;
     }) => {
-      const { data: resData, error } = await api.api.profiles[id].put(data);
+      const { data: resData, error } = await api.profiles[id].put(data);
       if (error) throw error;
       return resData;
     },
@@ -60,7 +60,7 @@ export function useProfile() {
 
   const uploadAvatar = useMutation({
     mutationFn: async (file: File) => {
-      const { data, error } = await api.api.upload.post({
+      const { data, error } = await api.upload.post({
         file,
         type: "avatar",
       });
@@ -96,7 +96,7 @@ export function useProfileStats(profileId?: string) {
     queryKey: ["profile-stats", profileId],
     queryFn: async () => {
       if (!profileId) return null;
-      const { data, error } = await api.api.profiles[profileId].stats.get();
+      const { data, error } = await api.profiles[profileId].stats.get();
       if (error) throw error;
       return data;
     },

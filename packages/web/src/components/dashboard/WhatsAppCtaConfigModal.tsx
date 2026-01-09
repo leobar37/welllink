@@ -3,10 +3,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, MessageCircle } from "lucide-react";
+import { Loader2, MessageCircle, RefreshCw, AlertCircle } from "lucide-react";
 import { useWhatsApp } from "@/hooks/use-whatsapp";
 
 const whatsappCtaConfigSchema = z.object({
@@ -47,7 +53,17 @@ export function WhatsAppCtaConfigModal({
     },
   });
 
-  const { config, connect, disconnect, refreshStatus, isLoading: connectionLoading } = useWhatsApp();
+  const {
+    config,
+    configs,
+    connect,
+    disconnect,
+    refreshStatus,
+    isLoading: connectionLoading,
+  } = useWhatsApp();
+
+  // Get the first config or the active one
+  const activeConfigId = config.configId || configs[0]?.id;
 
   const onSubmit = async (data: WhatsAppCtaConfigForm) => {
     await onSave(data);
@@ -64,16 +80,24 @@ export function WhatsAppCtaConfigModal({
   };
 
   const handleConnect = async () => {
-    await connect();
+    if (activeConfigId) {
+      await connect(activeConfigId);
+    }
   };
 
   const handleDisconnect = async () => {
-    await disconnect();
+    if (activeConfigId) {
+      await disconnect(activeConfigId);
+    }
   };
 
   const handleRefresh = async () => {
-    await refreshStatus();
+    if (activeConfigId) {
+      await refreshStatus(activeConfigId);
+    }
   };
+
+  const hasNoConfigs = configs.length === 0 && !config.configId;
 
   return (
     <ResponsiveDialog
@@ -92,7 +116,22 @@ export function WhatsAppCtaConfigModal({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {config.isConnected ? (
+            {hasNoConfigs ? (
+              <div className="flex items-center justify-between p-4 bg-yellow-50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <AlertCircle className="h-5 w-5 text-yellow-600" />
+                  <div>
+                    <p className="font-medium text-yellow-900">
+                      Sin configuración
+                    </p>
+                    <p className="text-sm text-yellow-700">
+                      No tienes una instancia de WhatsApp configurada. Contacta
+                      al administrador.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : config.isConnected ? (
               <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <MessageCircle className="h-5 w-5 text-green-600" />
@@ -104,6 +143,7 @@ export function WhatsAppCtaConfigModal({
                   </div>
                 </div>
                 <Button
+                  type="button"
                   variant="outline"
                   onClick={handleDisconnect}
                   disabled={connectionLoading}
@@ -126,6 +166,7 @@ export function WhatsAppCtaConfigModal({
                     </p>
                   </div>
                   <Button
+                    type="button"
                     variant="outline"
                     size="sm"
                     onClick={handleRefresh}
@@ -134,8 +175,9 @@ export function WhatsAppCtaConfigModal({
                     {connectionLoading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      "Refrescar"
+                      <RefreshCw className="h-4 w-4 mr-1" />
                     )}
+                    Refrescar
                   </Button>
                 </div>
                 <div className="flex justify-center">
@@ -146,7 +188,8 @@ export function WhatsAppCtaConfigModal({
                   />
                 </div>
                 <p className="text-center text-sm text-gray-600">
-                  Escanea este código con la app de WhatsApp Business para conectar tu cuenta
+                  Escanea este código con la app de WhatsApp Business para
+                  conectar tu cuenta
                 </p>
               </div>
             ) : (
@@ -161,8 +204,9 @@ export function WhatsAppCtaConfigModal({
                   </div>
                 </div>
                 <Button
+                  type="button"
                   onClick={handleConnect}
-                  disabled={connectionLoading}
+                  disabled={connectionLoading || !activeConfigId}
                 >
                   {connectionLoading ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -176,7 +220,7 @@ export function WhatsAppCtaConfigModal({
 
             {config.error && (
               <div className="flex items-center space-x-2 p-3 bg-red-50 rounded-lg">
-                <MessageCircle className="h-5 w-5 text-red-600" />
+                <AlertCircle className="h-5 w-5 text-red-600" />
                 <p className="text-sm text-red-700">{config.error}</p>
               </div>
             )}
@@ -188,7 +232,8 @@ export function WhatsAppCtaConfigModal({
           <CardHeader>
             <CardTitle>Configuración del Botón</CardTitle>
             <CardDescription>
-              Personaliza el texto que aparece en el botón de WhatsApp en tu perfil
+              Personaliza el texto que aparece en el botón de WhatsApp en tu
+              perfil
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -220,6 +265,7 @@ export function WhatsAppCtaConfigModal({
         {/* Action Buttons */}
         <div className="flex justify-end space-x-3 pt-4">
           <Button
+            type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting || connectionLoading}

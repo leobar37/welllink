@@ -20,7 +20,7 @@ export default function PublicStoriesRoute() {
     queryKey: ["public-profile", username],
     queryFn: async () => {
       if (!username) throw new Error("Username requerido");
-      const { data, error } = await api.api.public.profiles[username].get();
+      const { data, error } = await api.public.profiles[username].get();
       if (error) throw error;
       return data as { profile: { id: string; displayName: string }; features: Feature[]; themeId?: string };
     },

@@ -1,20 +1,29 @@
-import { useState, useEffect, useCallback } from "react";
-import QRCode from "qrcode";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "sonner";
+import { api } from "@/lib/api";
 
 interface WhatsAppConfig {
   isConnected: boolean;
   instanceId?: string;
   qrCode?: string;
   error?: string;
+  configId?: string;
 }
 
 interface WhatsAppConnectionState {
   config: WhatsAppConfig;
   isLoading: boolean;
-  connect: () => Promise<void>;
-  disconnect: () => Promise<void>;
-  refreshStatus: () => Promise<void>;
+  connect: (configId: string) => Promise<void>;
+  disconnect: (configId: string) => Promise<void>;
+  refreshStatus: (configId: string) => Promise<void>;
+  refreshConfigs: () => Promise<void>;
+  configs: Array<{
+    id: string;
+    instanceName: string;
+    isConnected: boolean;
+    isEnabled: boolean;
+  }>;
+  fetchConfigs: () => Promise<void>;
 }
 
 export function useWhatsApp(): WhatsAppConnectionState {
@@ -23,170 +32,284 @@ export function useWhatsApp(): WhatsAppConnectionState {
     instanceId: undefined,
     qrCode: undefined,
     error: undefined,
+    configId: undefined,
   });
+  const [configs, setConfigs] = useState<WhatsAppConnectionState["configs"]>(
+    [],
+  );
   const [isLoading, setIsLoading] = useState(false);
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const fetchConfig = useCallback(async () => {
+  // Clear polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+      }
+    };
+  }, []);
+
+  const fetchConfigs = useCallback(async () => {
     try {
       setIsLoading(true);
-      // Simulate API call
-      const response = await new Promise<{ data: any; error: any }>((resolve) => {
-        setTimeout(() => {
-          resolve({
-            data: { isConnected: false, instanceId: "mock-instance", qrCode: "mock-qr-data" },
-            error: null,
-          });
-        }, 100);
-      });
-      
+      const response = await api.whatsapp.configs.get();
+
       if (response.error) {
+        console.error("Error fetching WhatsApp configs:", response.error);
+        setConfigs([]);
+        return;
+      }
+
+      const configsList = Array.isArray(response.data) ? response.data : [];
+
+      // If no configs exist, call get-or-create endpoint
+      if (configsList.length === 0) {
+        const createResponse = await api.whatsapp.configs["get-or-create"].get();
+        if (createResponse.error) {
+          console.error("Error creating WhatsApp config:", createResponse.error);
+          setConfigs([]);
+          return;
+        }
+
+        // Add the newly created config to the list
+        const newConfig = createResponse.data as any;
+        setConfigs([{
+          id: newConfig.id,
+          instanceName: newConfig.instanceName,
+          isConnected: newConfig.isConnected,
+          isEnabled: newConfig.isEnabled,
+        }]);
+
+        // Set it as the active config
+        setConfig({
+          isConnected: newConfig.isConnected,
+          instanceId: newConfig.instanceId,
+          qrCode: undefined,
+          error: undefined,
+          configId: newConfig.id,
+        });
+      } else {
+        // Normal flow - existing configs found
+        setConfigs(
+          configsList.map((c: any) => ({
+            id: c.id,
+            instanceName: c.instanceName,
+            isConnected: c.isConnected,
+            isEnabled: c.isEnabled,
+          })),
+        );
+
+        // If there's at least one config, set the first one as active
+        if (configsList.length > 0) {
+          const firstConfig = configsList[0];
+          setConfig({
+            isConnected: firstConfig.isConnected,
+            instanceId: firstConfig.instanceId,
+            qrCode: undefined,
+            error: undefined,
+            configId: firstConfig.id,
+          });
+        }
+      }
+    } catch (err: any) {
+      console.error("Error fetching WhatsApp configs:", err);
+      setConfigs([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const connect = useCallback(
+    async (configId: string) => {
+      try {
+        setIsLoading(true);
+        // Clear any existing polling
+        if (pollIntervalRef.current) {
+          clearInterval(pollIntervalRef.current);
+          pollIntervalRef.current = null;
+        }
+
+        const response = await api.whatsapp
+          .configs({ id: configId })
+          .connect.post();
+
+        if (response.error) {
+          const errorMessage =
+            typeof response.error === "object" && "message" in response.error
+              ? (response.error as any).message
+              : "Error al conectar WhatsApp";
+          toast.error(errorMessage);
+          setConfig((prev) => ({
+            ...prev,
+            error: errorMessage,
+          }));
+          return;
+        }
+
+        if (
+          response.data &&
+          typeof response.data === "object" &&
+          "qrcode" in response.data
+        ) {
+          const qrCodeData = (response.data as any).qrcode;
+
+          // The API returns base64 QR code
+          const qrCodeDataUrl = qrCodeData.startsWith("data:")
+            ? qrCodeData
+            : `data:image/png;base64,${qrCodeData}`;
+
+          setConfig({
+            isConnected: false,
+            instanceId: (response.data as any).instanceName,
+            qrCode: qrCodeDataUrl,
+            error: undefined,
+            configId,
+          });
+
+          toast.info("Escanea el código QR con la app de WhatsApp Business");
+
+          // Poll for connection status every 3 seconds
+          pollIntervalRef.current = setInterval(async () => {
+            try {
+              const statusResponse = await api.whatsapp
+                .configs({ id: configId })
+                .status.get();
+
+              if (statusResponse.error) {
+                return;
+              }
+
+              const statusData = statusResponse.data as any;
+              if (statusData?.isConnected) {
+                // Clear polling
+                if (pollIntervalRef.current) {
+                  clearInterval(pollIntervalRef.current);
+                  pollIntervalRef.current = null;
+                }
+
+                setConfig({
+                  isConnected: true,
+                  instanceId: statusData.instanceName || configId,
+                  qrCode: undefined,
+                  error: undefined,
+                  configId,
+                });
+
+                // Refresh configs list
+                await fetchConfigs();
+
+                toast.success("WhatsApp conectado exitosamente");
+              }
+            } catch (err) {
+              console.error("Error polling WhatsApp status:", err);
+            }
+          }, 3000);
+
+          // Clear interval after 5 minutes (QR code expires)
+          setTimeout(() => {
+            if (pollIntervalRef.current) {
+              clearInterval(pollIntervalRef.current);
+              pollIntervalRef.current = null;
+              setConfig((prev) => ({
+                ...prev,
+                qrCode: undefined,
+                error: "El código QR ha expirado. Intenta nuevamente.",
+              }));
+            }
+          }, 300000);
+        }
+      } catch (err: any) {
+        console.error("Error connecting WhatsApp:", err);
+        toast.error(err?.message || "Error al conectar WhatsApp");
+        setConfig((prev) => ({
+          ...prev,
+          error: err?.message || "Error al conectar WhatsApp",
+        }));
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [fetchConfigs],
+  );
+
+  const disconnect = useCallback(
+    async (configId: string) => {
+      try {
+        setIsLoading(true);
+        // Clear any polling
+        if (pollIntervalRef.current) {
+          clearInterval(pollIntervalRef.current);
+          pollIntervalRef.current = null;
+        }
+
+        const response = await api.whatsapp
+          .configs({ id: configId })
+          .disconnect.post();
+
+        if (response.error) {
+          const errorMessage =
+            typeof response.error === "object" && "message" in response.error
+              ? (response.error as any).message
+              : "Error al desconectar WhatsApp";
+          toast.error(errorMessage);
+          return;
+        }
+
         setConfig({
           isConnected: false,
           instanceId: undefined,
           qrCode: undefined,
-          error: response.error?.message || "Error desconocido",
-        });
-        return;
-      }
-
-      setConfig({
-        isConnected: response.data.isConnected,
-        instanceId: response.data.instanceId,
-        qrCode: response.data.qrCode,
-        error: undefined,
-      });
-    } catch (err: any) {
-      console.error("Error fetching WhatsApp config:", err);
-      setConfig({
-        isConnected: false,
-        instanceId: undefined,
-        qrCode: undefined,
-        error: err?.message || "Error al obtener la configuración de WhatsApp",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const connect = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      // Simulate API call
-      const response = await new Promise<{ data: any; error: any }>((resolve) => {
-        setTimeout(() => {
-          resolve({
-            data: { isConnected: false, instanceId: "mock-instance", qrCode: "mock-qr-data" },
-            error: null,
-          });
-        }, 100);
-      });
-      
-      if (response.error) {
-        toast.error(response.error?.message || "Error al conectar WhatsApp");
-        return;
-      }
-
-      if (response.data.qrCode) {
-        // Generate QR code from the data received
-        const qrCodeDataUrl = await QRCode.toDataURL(response.data.qrCode, {
-          width: 256,
-          margin: 2,
-          color: {
-            dark: "#000000",
-            light: "#FFFFFF",
-          },
-        });
-        
-        setConfig({
-          isConnected: false,
-          instanceId: response.data.instanceId,
-          qrCode: qrCodeDataUrl,
           error: undefined,
+          configId: undefined,
         });
-        
-        toast.info("Escanea el código QR con la app de WhatsApp Business");
-        
-        // Poll for connection status
-        const pollInterval = setInterval(async () => {
-          try {
-            const statusResponse = await new Promise<{ data: any; error: any }>((resolve) => {
-              setTimeout(() => {
-                resolve({
-                  data: { isConnected: true },
-                  error: null,
-                });
-              }, 100);
-            });
 
-            if (statusResponse.error) {
-              clearInterval(pollInterval);
-              return;
-            }
+        // Refresh configs list
+        await fetchConfigs();
 
-            if (statusResponse.data.isConnected) {
-              clearInterval(pollInterval);
-              setConfig({
-                isConnected: true,
-                instanceId: response.data.instanceId,
-                qrCode: undefined,
-                error: undefined,
-              });
-              toast.success("WhatsApp conectado exitosamente");
-            }
-          } catch (err) {
-            clearInterval(pollInterval);
-            console.error("Error polling WhatsApp status:", err);
-          }
-        }, 3000);
-
-        // Clear interval after 5 minutes
-        setTimeout(() => clearInterval(pollInterval), 300000);
+        toast.success("WhatsApp desconectado exitosamente");
+      } catch (err: any) {
+        console.error("Error disconnecting WhatsApp:", err);
+        toast.error(err?.message || "Error al desconectar WhatsApp");
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err: any) {
-      console.error("Error connecting WhatsApp:", err);
-      toast.error(err?.message || "Error al conectar WhatsApp");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    },
+    [fetchConfigs],
+  );
 
-  const disconnect = useCallback(async () => {
+  const refreshStatus = useCallback(async (configId: string) => {
     try {
       setIsLoading(true);
-      // Simulate API call
-      const response = await new Promise<{ error: any }>((resolve) => {
-        setTimeout(() => {
-          resolve({ error: null });
-        }, 100);
-      });
-      
+      const response = await api.whatsapp
+        .configs({ id: configId })
+        .status.get();
+
       if (response.error) {
-        toast.error(response.error?.message || "Error al desconectar WhatsApp");
+        console.error("Error refreshing status:", response.error);
         return;
       }
 
-      setConfig({
-        isConnected: false,
-        instanceId: undefined,
-        qrCode: undefined,
-        error: undefined,
-      });
-      toast.success("WhatsApp desconectado exitosamente");
+      const statusData = response.data as any;
+      setConfig((prev) => ({
+        ...prev,
+        isConnected: statusData?.isConnected ?? false,
+        configId,
+      }));
     } catch (err: any) {
-      console.error("Error disconnecting WhatsApp:", err);
-      toast.error(err?.message || "Error al desconectar WhatsApp");
+      console.error("Error refreshing WhatsApp status:", err);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  const refreshStatus = useCallback(async () => {
-    await fetchConfig();
-  }, [fetchConfig]);
+  const refreshConfigs = useCallback(async () => {
+    await fetchConfigs();
+  }, [fetchConfigs]);
 
+  // Fetch configs on mount
   useEffect(() => {
-    fetchConfig();
-  }, [fetchConfig]);
+    fetchConfigs();
+  }, [fetchConfigs]);
 
   return {
     config,
@@ -194,5 +317,8 @@ export function useWhatsApp(): WhatsAppConnectionState {
     connect,
     disconnect,
     refreshStatus,
+    refreshConfigs,
+    configs,
+    fetchConfigs,
   };
 }

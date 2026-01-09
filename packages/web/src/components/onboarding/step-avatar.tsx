@@ -38,7 +38,7 @@ export function StepAvatar({
     // Upload
     setUploading(true);
     try {
-      const { data, error } = await api.api.upload.post({
+      const { data, error } = await api.upload.post({
         file: file,
         type: "avatar",
       });

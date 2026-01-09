@@ -22,6 +22,13 @@
       "when": 1764682687603,
       "tag": "0002_eminent_big_bertha",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1765778819117,
+      "tag": "0003_legal_jean_grey",
+      "breakpoints": true
     }
   ]
 }

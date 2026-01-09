@@ -37,7 +37,7 @@ export function TuHistoriaPage() {
   const updateButtonText = useMutation({
     mutationFn: async (text: string) => {
       if (!profile?.id) throw new Error("No profile found");
-      const { data, error } = await api.api.profiles[profile.id][
+      const { data, error } = await api.profiles[profile.id][
         "features-config"
       ].patch({
         tuHistoria: {
