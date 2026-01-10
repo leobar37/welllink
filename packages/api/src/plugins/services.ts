@@ -37,6 +37,12 @@ import { CampaignTemplateRepository } from "../services/repository/campaign-temp
 import { CampaignRepository } from "../services/repository/campaign";
 import { CampaignAudienceRepository } from "../services/repository/campaign-audience";
 
+import { MedicalServiceRepository } from "../services/repository/medical-service";
+import { TimeSlotRepository } from "../services/repository/time-slot";
+import { ReservationRequestRepository } from "../services/repository/reservation-request";
+import { ReservationRepository } from "../services/repository/reservation";
+import { AvailabilityRuleRepository } from "../services/repository/availability-rule";
+
 import { ClientService } from "../services/business/client";
 import { CampaignTemplateService } from "../services/business/campaign-template";
 import { CampaignService } from "../services/business/campaign";
@@ -83,6 +89,12 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     const campaignTemplateRepository = new CampaignTemplateRepository();
     const campaignRepository = new CampaignRepository();
     const campaignAudienceRepository = new CampaignAudienceRepository();
+
+    const medicalServiceRepository = new MedicalServiceRepository();
+    const timeSlotRepository = new TimeSlotRepository();
+    const reservationRequestRepository = new ReservationRequestRepository();
+    const reservationRepository = new ReservationRepository();
+    const availabilityRuleRepository = new AvailabilityRuleRepository();
 
     // Evolution API service
     const evolutionService = new EvolutionService({
@@ -190,6 +202,11 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         campaignTemplateRepository,
         campaignRepository,
         campaignAudienceRepository,
+        medicalServiceRepository,
+        timeSlotRepository,
+        reservationRequestRepository,
+        reservationRepository,
+        availabilityRuleRepository,
         // Services
         assetService,
         cdnService,
