@@ -102,3 +102,89 @@ bun run media hailuo -p "Inspiring wellness video" -q pro -o promo.mp4
 - `docs/modules` — Module-by-module MVP scope.
 - `scripts/media.ts` — CLI script for multimedia content generation.
 - `docs/media-script.md` — Complete media script documentation.
+
+<skills_system priority="1">
+
+## Available Skills
+
+<!-- SKILLS_TABLE_START -->
+<usage>
+When users ask you to perform tasks, check if any of the available skills below can help complete the task more effectively. Skills provide specialized capabilities and domain knowledge.
+
+How to use skills:
+- Invoke: Bash("openskills read <skill-name>")
+- The skill content will load with detailed instructions on how to complete the task
+- Base directory provided in output for resolving bundled resources (references/, scripts/, assets/)
+
+Usage notes:
+- Only use skills listed in <available_skills> below
+- Do not invoke a skill that is already loaded in your context
+- Each skill invocation is stateless
+</usage>
+
+<available_skills>
+
+<skill>
+<name>link</name>
+<description>|</description>
+<location>project</location>
+</skill>
+
+<skill>
+<name>agent-maker</name>
+<description>|</description>
+<location>global</location>
+</skill>
+
+<skill>
+<name>ai-sdk-expert</name>
+<description>|</description>
+<location>global</location>
+</skill>
+
+<skill>
+<name>build-agents</name>
+<description>|</description>
+<location>global</location>
+</skill>
+
+<skill>
+<name>bun-elysia</name>
+<description>|</description>
+<location>global</location>
+</skill>
+
+<skill>
+<name>ccs-delegation</name>
+<description>>-</description>
+<location>global</location>
+</skill>
+
+<skill>
+<name>elena-testing-patterns</name>
+<description>|</description>
+<location>global</location>
+</skill>
+
+<skill>
+<name>frontend</name>
+<description>|</description>
+<location>global</location>
+</skill>
+
+<skill>
+<name>remotion-setup</name>
+<description>|</description>
+<location>global</location>
+</skill>
+
+<skill>
+<name>skill-maker</name>
+<description>Expert in creating, maintaining, and improving Claude Code Skills for web development. Specializes in SKILL.md configuration, skill lifecycle management, optimization, and troubleshooting. Use when creating, updating, or refactoring skills for React, Next.js, TypeScript, APIs, and modern web stack. Keywords - "create skill", "maintain skill", "update skill", "improve skill", "refactor skill", "web skill", "react skill", "nextjs skill", "api skill", "component skill"</description>
+<location>global</location>
+</skill>
+
+</available_skills>
+<!-- SKILLS_TABLE_END -->
+
+</skills_system>

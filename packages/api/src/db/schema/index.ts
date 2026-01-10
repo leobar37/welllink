@@ -19,6 +19,13 @@ export * from "./whatsapp-config";
 export * from "./whatsapp-message";
 export * from "./whatsapp-template";
 
+// MEDICAL RESERVATION TABLES
+export * from "./medical-service";
+export * from "./time-slot";
+export * from "./reservation-request";
+export * from "./reservation";
+export * from "./availability-rule";
+
 // NEW TABLES
 export * from "./client";
 export * from "./client-note";
