@@ -11,7 +11,7 @@ import { setDefaultResultOrder } from "node:dns";
 setDefaultResultOrder("ipv4first");
 
 import { auth } from "./lib/auth";
-import { getAllowedOrigins } from "./config/cors";
+import { getCorsOrigins } from "./config/cors";
 
 // Plugins
 import { servicesPlugin } from "./plugins/services";
@@ -32,7 +32,6 @@ import { onboardingRoutes } from "./api/routes/onboarding";
 import { publicRoutes } from "./api/routes/public";
 import { qrRoutes } from "./api/routes/qr";
 import { socialLinkRoutes } from "./api/routes/social-links";
-import { storiesRoutes } from "./api/routes/stories";
 import { themeRoutes } from "./api/routes/themes";
 import { reservationRoutes } from "./api/routes/reservations";
 import { aiRecommendationRoutes } from "./api/routes/ai-recommendation";
@@ -57,7 +56,7 @@ const app = new Elysia()
   // CORS - configurable via CORS_ORIGIN env variable
   .use(
     cors({
-      origin: getAllowedOrigins(),
+      origin: getCorsOrigins(),
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
@@ -132,7 +131,6 @@ const app = new Elysia()
       .use(publicRoutes)
       .use(qrRoutes)
       .use(socialLinkRoutes)
-      .use(storiesRoutes)
       .use(themeRoutes)
       .use(reservationRoutes)
       .use(aiRecommendationRoutes)

@@ -16,10 +16,6 @@ export interface FeaturesConfig {
     enabled: boolean;
     buttonText: string;
   };
-  tuHistoria?: {
-    enabled: boolean;
-    buttonText: string;
-  };
   whatsappCta?: {
     enabled: boolean;
     buttonText: string;

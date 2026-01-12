@@ -1,6 +1,6 @@
-# Wellness Link — PRD Funcional
+# Wellness Link — CRM para Médicos
 
-> Plataforma de tarjetas digitales para asesores de bienestar
+> Plataforma de gestión integral para profesionales de la salud
 
 ---
 
@@ -8,36 +8,37 @@
 
 ### ¿Qué es?
 
-Wellness Link es una plataforma web que permite a asesores de bienestar crear su tarjeta digital profesional con funcionalidades especializadas para captar y atender clientes.
+Wellness Link es una plataforma web CRM diseñada específicamente para médicos y profesionales de la salud que combina:
+- **Página de presentación profesional** con servicios, galería y información
+- **Agente de IA** para atención 24/7 vía WhatsApp y web
+- **Sistema de agendamiento de citas** con approval workflow
+- **Gestión de pacientes** con notas y historial
 
 ### ¿Para quién?
 
-Asesores de bienestar, nutricionistas, coaches de salud, y profesionales del wellness que necesitan una presencia digital profesional y herramientas para interactuar con potenciales clientes.
+Médicos generales, especialistas, dentistas, y profesionales de la salud que:
+- Necesitan una presencia digital profesional
+- Quieren automatizar la atención al paciente
+- Requieren gestionar su agenda y pacientes de forma eficiente
+- Desean un agente virtual que responda preguntas frecuentes
 
 ### Problema que resuelve
 
-Los asesores de bienestar actualmente:
-- Usan tarjetas físicas que se pierden o dañan
-- No tienen forma fácil de captar leads calificados
+Los médicos actualmente:
+- Pierden tiempo respondiendo las mismas preguntas repetitivas
+- No tienen sistema de citas centralizado
 - Dependen de múltiples herramientas desconectadas
-- Pierden oportunidades por no tener presencia digital profesional
+- No pueden atender pacientes fuera de horario
+- Pierden seguimiento de pacientes existentes
 
 ### Solución
 
-Una tarjeta digital con:
-- Perfil profesional siempre accesible
-- Features especializadas (encuestas de salud, agenda, etc.)
-- Resultados enviados directo a WhatsApp
-- QR para compartir en persona
-
-### Diferenciadores vs Linktree
-
-| Linktree | Wellness Link |
-|----------|---------------|
-| Links genéricos | Features especializadas para bienestar |
-| Sin interacción | Resultados enviados por WhatsApp |
-| Cualquier nicho | 100% enfocado en asesores de bienestar |
-| Solo links | QR + Card virtual imprimible |
+Una plataforma todo-en-uno con:
+- Página pública profesional siempre accesible
+- Agente IA que responde 24/7
+- Citas con confirmación automática
+- CRM para gestión de pacientes
+- Notificaciones por WhatsApp
 
 ---
 
@@ -45,159 +46,214 @@ Una tarjeta digital con:
 
 ### 2.1 🔐 Autenticación y Onboarding
 
-Registro e inicio de sesión de asesores.
+Registro e inicio de sesión de médicos.
 
 **Funcionalidades:**
 - Registro con email o Google
 - Verificación de cuenta
-- Onboarding guiado (3-4 pasos para completar perfil inicial)
+- Onboarding guiado (datos profesionales, especialidad, servicios iniciales)
 - Recuperación de contraseña
 
 ---
 
-### 2.2 👤 Perfil Público (Bio Link)
+### 2.2 👤 Página de Presentación Pública
 
-La tarjeta digital que ven los visitantes.
+La página web profesional que ven los pacientes.
 
-**Elementos del perfil:**
-- Foto de perfil
-- Nombre y título profesional
-- Bio corta (máx 160 caracteres)
-- Links a redes sociales (WhatsApp, Instagram, TikTok, Facebook, YouTube)
-- Botones de acción (features activas, ej: "Evalúate gratis")
+**Elementos:**
+- Foto de perfil profesional
+- Nombre y título/m特殊idad
+- Bio corta y credentials médicos
+- Lista de servicios con precios
+- Galería de fotos (consultorio, equipo, procedimientos)
+- Reseñas/Testimonios
+- Botones de acción (WhatsApp, Agendar Cita)
 
 **Barra de acciones (floating):**
-- 🔗 Compartir link (abre sheet nativo del dispositivo)
-- 📱 Mostrar QR (modal con código QR escaneable)
+- 🔗 Compartir link
+- 📱 Mostrar QR
 
 **URL pública:** `wellnesslink.com/{username}`
 
-**Flujo del QR:**
-```
-Asesor abre su perfil → Toca "Mostrar QR" → 
-Aparece modal con QR grande → Visitante escanea → 
-Se abre el perfil en el dispositivo del visitante
-```
-
 ---
 
-### 2.3 🎨 Temas (Post-MVP)
+### 2.3 🏥 Servicios Médicos
 
-Personalización del diseño de la tarjeta.
-
-**MVP:** Diseño único predeterminado para todos los usuarios.
-
-**Futuro:**
-- Temas prediseñados (5-10 opciones)
-- Selección con preview en vivo
-- Posible: colores y fuentes personalizadas (v2+)
-
----
-
-### 2.4 🧩 Features
-
-Sistema modular de funcionalidades que el asesor puede activar en su perfil.
-
-**Comportamiento:**
-- Cada feature se activa/desactiva con un toggle desde el dashboard
-- Al activar, aparece como botón en el perfil público
-- Texto del botón personalizable por feature
-
-> Ver sección 3 para el listado completo de features.
-
----
-
-### 2.5 📱 QR y Card Virtual
-
-Herramientas para compartir offline (desde Dashboard).
+Gestión de servicios y procedimientos.
 
 **Funcionalidades:**
-- Descargar QR en PNG/SVG (para imprimir)
-- Card virtual descargable (imagen tipo tarjeta de presentación)
-- Preview antes de descargar
-
-**Nota:** El QR también se puede mostrar en vivo desde el perfil público (ver módulo 2.2).
+- Crear/editar/eliminar servicios
+- Nombre, descripción, precio, duración
+- Categorías (consulta, procedimiento, paquete)
+- Estado (activo/inactivo)
 
 ---
 
-### 2.6 📊 Dashboard
+### 2.4 📸 Galería de Fotos
 
-Panel principal del asesor.
+Imágenes del consultorio y práctica médica.
 
-**Métricas visibles:**
-- Visitas al perfil (hoy, semana, mes)
-- Encuestas completadas
-- Clicks en redes sociales
-- Fuentes de tráfico (QR vs link directo)
+**Funcionalidades:**
+- Subir fotos del consultorio
+- Fotos del equipo médico
+- Imágenes de procedimientos (antes/después)
+- Gestión de albums
+- Foto principal (avatar del médico)
+
+---
+
+### 2.5 💬 Agente IA
+
+Asistente virtual para atención 24/7.
+
+**Canales:**
+- WhatsApp (Evolution API)
+- Web (chat en vivo en página pública)
+
+**Capacidades:**
+- Responder preguntas frecuentes
+- Proporcionar información sobre servicios y precios
+- Agendar citas via chat
+- Enviar recordatorios automáticos
+- Derivar al médico cuando sea necesario
+
+**Configuración:**
+- FAQ personalizada
+- Tono de respuesta
+- Información del consultorio
+- Palabras clave a evitar
+
+---
+
+### 2.6 📅 Sistema de Citas
+
+Agendamiento con approval workflow.
+
+**Flujo:**
+1. Paciente selecciona servicio y horario
+2. Envía solicitud
+3. Médico aprueba/rechaza/modifica
+4. Paciente recibe confirmación por WhatsApp
+5. Recordatorios automáticos (24h, 2h)
+
+**Características:**
+- Slots configurables con capacidad
+- Reglas de disponibilidad
+- Nivel de urgencia
+- Notificaciones automáticas
+
+---
+
+### 2.7 👥 Gestión de Pacientes (CRM)
+
+Base de datos de pacientes con notas y seguimiento.
+
+**Datos del paciente:**
+- Nombre, teléfono, email, fecha de nacimiento
+- Labels: Nuevo/Recurrente/VIP/Potencial/Inactivo
+- Notas médicas y preferencias
+- Historial de citas
+
+**Automatizaciones:**
+- Recordatorios post-consulta
+- Cumpleaños
+- Reactivación de pacientes inactivos
+
+---
+
+### 2.8 📊 Dashboard
+
+Panel principal del médico.
+
+**Métricas:**
+- Pacientes nuevos (semana/mes)
+- Citas agendadas
+- Tasa de respuesta del Agente IA
+- Pacientes inactivos
+- Ingresos estimados
 
 **Acciones rápidas:**
-- Ver mi perfil público
-- Copiar mi link
-- Descargar QR
-- Editar perfil
+- Ver página pública
+- Agendar nueva cita
+- Ver pacientes
+- Configurar Agente IA
 
 ---
 
-### 2.7 ⚙️ Configuración
+### 2.9 ⚙️ Configuración
 
-Ajustes de la cuenta.
+Ajustes de la cuenta y práctica.
 
 **Opciones:**
-- Cambiar username
-- Actualizar email/contraseña
-- Número de WhatsApp para recibir encuestas
-- Notificaciones (email cuando alguien completa encuesta)
+- Datos del perfil profesional
+- Configuración de WhatsApp Business
+- Configuración del Agente IA
+- Preferencias de notificaciones
+- Horarios de atención
 - Eliminar cuenta
 
 ---
 
 ## 3. Sistema de Features
 
-El sistema de features permite agregar funcionalidades modulares al perfil del asesor. Cada feature:
+El sistema de features permite agregar funcionalidades modulares al perfil público.
 
-- Se activa/desactiva desde el dashboard
-- Aparece como botón en el perfil público cuando está activa
-- Tiene configuración propia (texto del botón, opciones específicas)
+### Features Principales
 
-### Features MVP
+| # | Feature | Descripción | Texto default |
+|---|---------|-------------|---------------|
+| 1 | Encuesta de Salud | Evaluación inicial del paciente | "Evalúate gratis" |
+| 2 | Agente IA | Asistente virtual 24/7 | "Pregúntame" |
+| 3 | Agendar Cita | Sistema de reservas | "Agendar Cita" |
+| 4 | WhatsApp | Contacto directo | "Escríbeme" |
 
-| # | Feature | Descripción | Texto default | Documentación |
-|---|---------|-------------|---------------|---------------|
-| 1 | Encuesta de Salud | Test de Transformación 7 días → envía resultados por WhatsApp | "Evalúate gratis" | [feature-1-evaluation.md](./feature-1-evaluation.md) |
+### Features Opcionales
 
-### Features Futuras
-
-| # | Feature | Descripción | Prioridad |
-|---|---------|-------------|-----------|
-| 2 | Mi historia | Historias visuales con slider antes/después y CTA configurable para reforzar credibilidad | 🟡 Media |
-| 3 | Agenda de citas | Permitir agendar consultas con el asesor | 🟡 Media |
-| 4 | Testimonios | Mostrar reseñas de clientes satisfechos | 🟢 Baja |
+| # | Feature | Descripción |
+|---|---------|-------------|
+| 5 | Galería | Fotos del consultorio |
+| 6 | Testimonios | Reseñas de pacientes |
+| 7 | Servicios | Lista de servicios |
 
 ---
 
 ## 4. Resumen Visual de Módulos
 
 ```
-┌─────────────────────────────────────────────────┐
-│                 WELLNESS LINK                   │
-├─────────────────────────────────────────────────┤
-│                                                 │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐      │
-│  │   Auth   │  │ Dashboard│  │  Config  │      │
-│  │   2.1    │  │   2.6    │  │   2.7    │      │
-│  └──────────┘  └──────────┘  └──────────┘      │
-│                                                 │
-│  ┌──────────────────────────────────────┐      │
-│  │       Perfil Público (2.2)           │      │
-│  │  ┌─────────┐ ┌────────┐              │      │
-│  │  │Features │ │QR/Card │  ┌────────┐  │      │
-│  │  │  (2.4)  │ │ (2.5)  │  │ Temas  │  │      │
-│  │  └─────────┘ └────────┘  │ (2.3)  │  │      │
-│  │                          │(futuro)│  │      │
-│  │                          └────────┘  │      │
-│  └──────────────────────────────────────┘      │
-│                                                 │
-└─────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                    WELLNESS LINK                            │
+│                    CRM para Médicos                         │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
+│  │   Auth   │  │Dashboard │  │ Config   │  │ WhatsApp │   │
+│  │   2.1    │  │   2.8    │  │   2.9    │  │   2.9    │   │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘   │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │              Página Pública (2.2)                    │   │
+│  │  ┌─────────┐ ┌────────┐ ┌─────────┐ ┌─────────┐    │   │
+│  │  │Servicios│ │ Galeria│ │Testimonios│ │Features │    │   │
+│  │  │  (2.3)  │ │ (2.4)  │ │  (2.7)   │ │ (2.4)  │    │   │
+│  │  └─────────┘ └────────┘ └─────────┘ └─────────┘    │   │
+│  │       │                    │               │        │   │
+│  │       └────── Agente IA ───┴────── Citas ──┘        │   │
+│  │       (2.5)              (2.6)        │             │   │
+│  │                               │       │             │   │
+│  │                               └───────┴────────┐    │   │
+│  │                                           CRM  │    │   │
+│  │                                          (2.7) │    │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │                 Backend Services                     │   │
+│  │  ┌─────────┐ ┌─────────┐ ┌─────────────────────┐   │   │
+│  │  │WhatsApp │ │ Agente  │ │ Citas + CRM         │   │   │
+│  │  │   API   │ │   IA    │ │ (M10, M11)          │   │   │
+│  │  └─────────┘ └─────────┘ └─────────────────────┘   │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -206,19 +262,22 @@ El sistema de features permite agregar funcionalidades modulares al perfil del a
 
 | Módulo | Prioridad | Notas |
 |--------|-----------|-------|
-| Autenticación (2.1) | 🔴 Alta | Sin esto no hay producto |
-| Perfil Público (2.2) | 🔴 Alta | Core del producto |
-| Features (2.4) | 🔴 Alta | Diferenciador clave (inicia con encuesta) |
-| QR/Card (2.5) | 🟡 Media | Genera valor offline |
-| Dashboard (2.6) | 🟡 Media | Métricas básicas |
-| Configuración (2.7) | 🟢 Baja | Solo lo esencial |
-| Temas (2.3) | ⚪ Post-MVP | Diseño único en MVP |
+| Autenticación (2.1) | 🔴 Alta | Base del sistema |
+| Página Pública (2.2) | 🔴 Alta | Presencia digital |
+| Servicios (2.3) | 🔴 Alta | Core de la oferta |
+| Agente IA (2.5) | 🔴 Alta | Diferenciador clave |
+| Citas (2.6) | 🔴 Alta | Revenue driver |
+| CRM Pacientes (2.7) | 🟡 Media | Gestión de base |
+| Dashboard (2.8) | 🟡 Media | Métricas y acciones |
+| Configuración (2.9) | 🟡 Media | Personalización |
+| Galería (2.4) | 🟢 Baja | Complementario |
+| Testimonios | ⚪ Post-MVP | Social proof |
 
 ---
 
 ## 6. Flujos Principales
 
-### 6.1 Flujo de Registro (Asesor)
+### 6.1 Flujo de Registro (Médico)
 
 ```
 Landing page
@@ -230,55 +289,78 @@ Registro (email/Google)
 Verificación de email
     ↓
 Onboarding:
-  → Paso 1: Nombre y username
+  → Paso 1: Datos profesionales (nombre, especialidad, Cédula)
   → Paso 2: Foto de perfil
-  → Paso 3: Bio y título
-  → Paso 4: Redes sociales
-  → Paso 5: Número WhatsApp
+  → Paso 3: Servicios iniciales
+  → Paso 4: Configuración básica
     ↓
 Dashboard (perfil listo)
 ```
 
-### 6.2 Flujo del Visitante
+### 6.2 Flujo del Paciente (Agente IA)
 
 ```
-Escanea QR o recibe link
+Paciente envía WhatsApp o visita página web
     ↓
-Ve perfil público del asesor
+Agente IA responde automáticamente
     ↓
 Opciones:
-  → Ver redes sociales
-  → Contactar por WhatsApp
-  → Completar encuesta ("Evalúate gratis")
+  → Preguntar sobre servicios/precios → IA responde
+  → Agendar cita → IA verifica disponibilidad → Confirma
+  → Hablar con médico → Notificación al médico
     ↓
-Si completa encuesta → Resultados enviados al asesor por WhatsApp
+Si agenda → Confirmación por WhatsApp → Recordatorios automáticos
 ```
 
-### 6.3 Flujo de Compartir (Asesor)
+### 6.3 Flujo de Cita
 
 ```
-Asesor en persona con potencial cliente
+Paciente selecciona servicio en página
     ↓
-Abre su perfil en el celular
+Selecciona horario disponible
     ↓
-Toca "Mostrar QR"
+Ingresa datos de contacto
     ↓
-Modal con QR grande
+Envía solicitud
     ↓
-Cliente escanea con su celular
+Médico recibe notificación
     ↓
-Se abre el perfil en el dispositivo del cliente
+Aprueba/Rechaza/Modifica
     ↓
-Cliente puede completar encuesta o seguir redes
+Paciente recibe confirmación por WhatsApp
+    ↓
+Recordatorios automáticos (24h, 2h)
+    ↓
+Cita completada → Paciente agregado al CRM
 ```
 
 ---
 
-## 7. Próximos Pasos
+## 7. Diferenciadores
 
-1. ✅ Definir PRD global
-2. ✅ Documentar Feature 1 (Encuesta de Salud)
-3. ⏳ Crear historias de usuario por módulo
-4. ⏳ Diseñar wireframes/mockups
-5. ⏳ Definir stack técnico
-6. ⏳ Implementar MVP
+| Herramienta Genérica | Wellness Link |
+|---------------------|---------------|
+| Sin IA | Agente IA 24/7 |
+| Citas manuales | Agendamiento automatizado |
+| Sin CRM | Gestión completa de pacientes |
+| Solo web | WhatsApp + Web |
+| Genérico | 100% enfocado en médicos |
+
+---
+
+## 8. Métricas de Éxito
+
+- **Tasa de Respuesta IA**: % de consultas resueltas por IA
+- **Citas Agendadas via IA**: Conversión chat → cita
+- **Pacientes Nuevos**: Registros por mes
+- **Tasa de Retención**: Pacientes que regresan
+- **No-Show Rate**: Citas perdidas vs confirmadas
+
+---
+
+## 9. Próximos Pasos
+
+1. ⏳ Documentar módulos detallados (M10, M11, etc.)
+2. ⏳ Crear historias de usuario por módulo
+3. ⏳ Diseñar wireframes/mockups
+4. ⏳ Implementar MVP por fases

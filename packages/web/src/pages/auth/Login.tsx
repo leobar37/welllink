@@ -42,8 +42,8 @@ export function Login() {
   // Dev-only: Auto-fill with seed credentials
   const isDev = import.meta.env.DEV;
   const DEV_CREDENTIALS = {
-    email: "maria.rodriguez@example.com",
-    password: "182@Alfk3458",
+    email: "test@wellness.com",
+    password: "test123456",
   };
 
   const form = useForm<LoginValues>({

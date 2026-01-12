@@ -202,12 +202,17 @@ export class AnalyticsRepository {
   }
 
   // QR Downloads
-  async createQRDownload(data: { profileId: string; format: string }) {
+  async createQRDownload(data: {
+    profileId: string;
+    format: string;
+    source?: "qr" | "direct_link" | "referral";
+  }) {
     const [download] = await db
       .insert(qrDownload)
       .values({
         profileId: data.profileId,
         format: data.format,
+        source: data.source || "qr",
       })
       .returning();
     return download;

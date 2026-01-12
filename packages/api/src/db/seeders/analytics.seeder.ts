@@ -21,15 +21,18 @@ export async function seedAnalytics() {
   const analyticsRepository = new AnalyticsRepository();
 
   const mariaId = createdProfileIds.maria;
-  const carlosId = createdProfileIds.carlos;
-  const anaId = createdProfileIds.ana;
 
-  // Profile Views - María (más vistas porque está publicada)
+  if (!mariaId) {
+    console.log("  ⚠️  No profiles found, skipping analytics seeding");
+    return;
+  }
+
+  // Profile Views - María
   console.log("  📈 Seeding profile views...");
   let viewCount = 0;
 
-  // María - 45 views
-  for (let i = 0; i < 45; i++) {
+  // María - 35 views
+  for (let i = 0; i < 35; i++) {
     const sources = ["qr", "direct_link", "referral"] as const;
     await analyticsRepository.createProfileView({
       profileId: mariaId,
@@ -38,32 +41,6 @@ export async function seedAnalytics() {
       userAgent:
         "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15",
       viewedAt: generateRandomDate(Math.floor(Math.random() * 30)),
-    });
-    viewCount++;
-  }
-
-  // Carlos - 32 views
-  for (let i = 0; i < 32; i++) {
-    const sources = ["qr", "direct_link", "referral"] as const;
-    await analyticsRepository.createProfileView({
-      profileId: carlosId,
-      source: sources[Math.floor(Math.random() * 3)],
-      referrer: Math.random() > 0.6 ? "https://tiktok.com" : null,
-      userAgent: "Mozilla/5.0 (Linux; Android 12; SM-G991B) AppleWebKit/537.36",
-      viewedAt: generateRandomDate(Math.floor(Math.random() * 30)),
-    });
-    viewCount++;
-  }
-
-  // Ana - 8 views (pocas porque no está publicada)
-  for (let i = 0; i < 8; i++) {
-    await analyticsRepository.createProfileView({
-      profileId: anaId,
-      source: "direct_link",
-      referrer: null,
-      userAgent:
-        "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15",
-      viewedAt: generateRandomDate(Math.floor(Math.random() * 15)),
     });
     viewCount++;
   }
@@ -83,39 +60,10 @@ export async function seedAnalytics() {
   ];
 
   for (const link of mariaSocialLinks) {
-    for (let i = 0; i < link.clicks; i++) {
-      await analyticsRepository.createSocialClick({
-        socialLinkId: link.id,
-      });
-      clickCount++;
+    if (!link.id) {
+      console.log(`  ⚠️  Social link ID not found, skipping`);
+      continue;
     }
-  }
-
-  // Carlos's social clicks (YouTube y WhatsApp populares)
-  const carlosSocialLinks = [
-    { id: createdSocialLinkIds.carlosInstagram, clicks: 18 },
-    { id: createdSocialLinkIds.carlosYoutube, clicks: 22 },
-    { id: createdSocialLinkIds.carlosWhatsapp, clicks: 20 },
-    { id: createdSocialLinkIds.carlosTiktok, clicks: 12 },
-    { id: createdSocialLinkIds.carlosFacebook, clicks: 10 },
-  ];
-
-  for (const link of carlosSocialLinks) {
-    for (let i = 0; i < link.clicks; i++) {
-      await analyticsRepository.createSocialClick({
-        socialLinkId: link.id,
-      });
-      clickCount++;
-    }
-  }
-
-  // Ana's social clicks (pocos clicks)
-  const anaSocialLinks = [
-    { id: createdSocialLinkIds.anaInstagram, clicks: 5 },
-    { id: createdSocialLinkIds.anaWhatsapp, clicks: 3 },
-  ];
-
-  for (const link of anaSocialLinks) {
     for (let i = 0; i < link.clicks; i++) {
       await analyticsRepository.createSocialClick({
         socialLinkId: link.id,
@@ -154,30 +102,6 @@ export async function seedAnalytics() {
       profileId: mariaId,
       format: "svg" as const,
       downloadedAt: generateRandomDate(5),
-    },
-
-    // Carlos - algunos downloads
-    {
-      profileId: carlosId,
-      format: "png" as const,
-      downloadedAt: generateRandomDate(20),
-    },
-    {
-      profileId: carlosId,
-      format: "png" as const,
-      downloadedAt: generateRandomDate(12),
-    },
-    {
-      profileId: carlosId,
-      format: "svg" as const,
-      downloadedAt: generateRandomDate(7),
-    },
-
-    // Ana - solo 1 download de prueba
-    {
-      profileId: anaId,
-      format: "png" as const,
-      downloadedAt: generateRandomDate(3),
     },
   ];
 

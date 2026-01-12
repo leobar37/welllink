@@ -14,7 +14,7 @@ const PROFILE_DATA = [
     key: "maria",
     userId: SEED_USERS[0].id,
     username: "maria_wellness",
-    displayName: "María Rodríguez",
+    displayName: "María Test",
     title: "Coach de Bienestar y Nutrición",
     bio: "Ayudo a personas a encontrar su mejor versión a través de hábitos saludables y nutrición consciente 🌱",
     avatarKey: "mariaAvatar",
@@ -31,56 +31,6 @@ const PROFILE_DATA = [
       },
       tuHistoria: {
         enabled: true,
-        buttonText: "Mi historia",
-      },
-    },
-  },
-  {
-    key: "carlos",
-    userId: SEED_USERS[1].id,
-    username: "carlos_fitness",
-    displayName: "Carlos Mendoza",
-    title: "Entrenador Personal Certificado",
-    bio: "Transformo vidas a través del fitness y el entrenamiento funcional. ¡Tu mejor versión está a un paso! 💪",
-    avatarKey: "carlosAvatar",
-    coverKey: "carlosCover",
-    whatsappNumber: "+51976543210",
-    isDefault: true,
-    isPublished: true,
-    onboardingStep: 5,
-    onboardingCompletedAt: new Date("2024-11-20T14:00:00Z"),
-    featuresConfig: {
-      healthSurvey: {
-        enabled: true,
-        buttonText: "Evalúate gratis",
-      },
-      tuHistoria: {
-        enabled: true,
-        buttonText: "Historias reales",
-      },
-    },
-  },
-  {
-    key: "ana",
-    userId: SEED_USERS[2].id,
-    username: "ana_salud",
-    displayName: "Ana Silva",
-    title: "Especialista en Salud Holística",
-    bio: "Bienestar integral: mente, cuerpo y espíritu en armonía 🧘‍♀️✨",
-    avatarKey: "anaAvatar",
-    coverKey: "anaCover",
-    whatsappNumber: "+51965432109",
-    isDefault: true,
-    isPublished: false, // Ana aún no ha publicado su perfil
-    onboardingStep: 3, // Onboarding incompleto
-    onboardingCompletedAt: null,
-    featuresConfig: {
-      healthSurvey: {
-        enabled: false,
-        buttonText: "Evalúate gratis",
-      },
-      tuHistoria: {
-        enabled: false,
         buttonText: "Mi historia",
       },
     },

@@ -105,12 +105,6 @@ export const profileRoutes = new Elysia({ prefix: "/profiles" })
             buttonText: t.String({ maxLength: 100 }),
           }),
         ),
-        tuHistoria: t.Optional(
-          t.Object({
-            enabled: t.Boolean(),
-            buttonText: t.String({ maxLength: 100 }),
-          }),
-        ),
         whatsappCta: t.Optional(
           t.Object({
             enabled: t.Boolean(),

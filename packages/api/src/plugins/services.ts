@@ -9,9 +9,6 @@ import { SocialLinkRepository } from "../services/repository/social-link";
 import { HealthSurveyRepository } from "../services/repository/health-survey";
 import { AIRecommendationRepository } from "../services/repository/ai-recommendation";
 import { AnalyticsRepository } from "../services/repository/analytics";
-import { StorySectionRepository } from "../services/repository/story-section";
-import { StoryRepository } from "../services/repository/story";
-import { StoryEventRepository } from "../services/repository/story-event";
 import { WhatsAppConfigRepository } from "../services/repository/whatsapp-config";
 import { WhatsAppMessageRepository } from "../services/repository/whatsapp-message";
 import { WhatsAppTemplateRepository } from "../services/repository/whatsapp-template";
@@ -22,7 +19,6 @@ import { SocialLinkService } from "../services/business/social-link";
 import { HealthSurveyService } from "../services/business/health-survey";
 import { AIRecommendationService } from "../services/business/ai-recommendation";
 import { AnalyticsService } from "../services/business/analytics";
-import { StoryService } from "../services/business/story";
 import { EvolutionService } from "../services/business/evolution-api";
 import { WhatsAppConfigService } from "../services/business/whatsapp-config";
 import { WhatsAppService } from "../services/business/whatsapp";
@@ -80,9 +76,6 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     const healthSurveyRepository = new HealthSurveyRepository();
     const aiRecommendationRepository = new AIRecommendationRepository();
     const analyticsRepository = new AnalyticsRepository();
-    const storySectionRepository = new StorySectionRepository();
-    const storyRepository = new StoryRepository();
-    const storyEventRepository = new StoryEventRepository();
     const whatsappConfigRepository = new WhatsAppConfigRepository();
     const whatsappMessageRepository = new WhatsAppMessageRepository();
     const whatsappTemplateRepository = new WhatsAppTemplateRepository();
@@ -158,13 +151,6 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
       healthSurveyRepository,
     );
     const analyticsService = new AnalyticsService(analyticsRepository);
-    const storyService = new StoryService(
-      storySectionRepository,
-      storyRepository,
-      storyEventRepository,
-      profileRepository,
-      assetRepository,
-    );
     const whatsappConfigService = new WhatsAppConfigService(
       whatsappConfigRepository,
       evolutionService,
@@ -208,9 +194,6 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         healthSurveyRepository,
         aiRecommendationRepository,
         analyticsRepository,
-        storySectionRepository,
-        storyRepository,
-        storyEventRepository,
         whatsappConfigRepository,
         whatsappMessageRepository,
         whatsappTemplateRepository,
@@ -233,8 +216,6 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         healthSurveyService,
         aiRecommendationService,
         analyticsService,
-        storyService,
-        evolutionService,
         whatsappConfigService,
         whatsappService,
         whatsappTemplateService,

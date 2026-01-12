@@ -13,8 +13,6 @@ export async function seedHealthSurveys() {
   const healthSurveyRepository = new HealthSurveyRepository();
 
   const mariaId = createdProfileIds.maria;
-  const carlosId = createdProfileIds.carlos;
-  const anaId = createdProfileIds.ana;
 
   const surveys = [
     // Survey 1 - Para María (perfil de nutrición)
@@ -78,99 +76,6 @@ export async function seedHealthSurveys() {
         metadata: { version: "1.0" },
       } as HealthSurveyResponseData,
       whatsappSentAt: new Date("2024-11-28T10:00:00Z"),
-    },
-    // Survey 3 - Para Carlos (perfil de fitness)
-    {
-      userIndex: 1,
-      profileId: carlosId,
-      visitorName: "Sofía Ramírez",
-      visitorPhone: "+51934567890",
-      visitorEmail: "sofia.ramirez@example.com",
-      visitorWhatsapp: "+51934567890",
-      referredBy: "TikTok",
-      responses: {
-        measurements: { weight: 55, height: 160, age: 28 },
-        conditions: {
-          digestive: [],
-          cardiovascular: [],
-          energy: [],
-          immune: [],
-          muscular: ["Falta de tono muscular"],
-          hormonal: [],
-          skin: [],
-          other: [],
-        },
-        habits: {
-          waterIntake: "2-3 litros/día",
-          training: "sometimes",
-          nutrition: "yes",
-          familyHistory: "Ninguna relevante",
-        },
-        metadata: { version: "1.0" },
-      } as HealthSurveyResponseData,
-      whatsappSentAt: new Date("2024-11-27T18:45:00Z"),
-    },
-    // Survey 4 - Para Carlos
-    {
-      userIndex: 1,
-      profileId: carlosId,
-      visitorName: "Diego Torres",
-      visitorPhone: "+51945678901",
-      visitorEmail: null,
-      visitorWhatsapp: "+51945678901",
-      referredBy: "YouTube",
-      responses: {
-        measurements: { weight: 92, height: 182, age: 38 },
-        conditions: {
-          digestive: [],
-          cardiovascular: [],
-          energy: ["Fatiga crónica"],
-          immune: [],
-          muscular: ["Dolor en articulaciones", "Dolor de espalda"],
-          hormonal: [],
-          skin: [],
-          other: ["Sobrepeso"],
-        },
-        habits: {
-          waterIntake: "1-2 litros/día",
-          training: "no",
-          nutrition: "regular",
-          familyHistory: "Obesidad en familia",
-        },
-        metadata: { version: "1.0" },
-      } as HealthSurveyResponseData,
-      whatsappSentAt: null,
-    },
-    // Survey 5 - Para Ana (sin envío de WhatsApp)
-    {
-      userIndex: 2,
-      profileId: anaId,
-      visitorName: "Patricia Vega",
-      visitorPhone: "+51956789012",
-      visitorEmail: "patricia.vega@example.com",
-      visitorWhatsapp: null,
-      referredBy: "Link directo",
-      responses: {
-        measurements: { weight: 62, height: 168, age: 35 },
-        conditions: {
-          digestive: ["Hinchazón"],
-          cardiovascular: [],
-          energy: ["Dificultad para concentrarse", "Insomnio"],
-          immune: [],
-          muscular: [],
-          hormonal: ["Irregularidad menstrual"],
-          skin: [],
-          other: [],
-        },
-        habits: {
-          waterIntake: "1-2 litros/día",
-          training: "yes",
-          nutrition: "yes",
-          familyHistory: "Ninguna relevante",
-        },
-        metadata: { version: "1.0" },
-      } as HealthSurveyResponseData,
-      whatsappSentAt: null,
     },
   ];
 

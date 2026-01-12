@@ -12,10 +12,12 @@ const getBaseURL = (): string => {
 // Check if we're in production
 const isProduction = process.env.NODE_ENV === "production";
 
+const allowedOrigins = getAllowedOrigins();
+
 console.log("🔐 [Auth] Initializing Better Auth");
 console.log(`   Environment: ${process.env.NODE_ENV || "development"}`);
 console.log(`   Base URL: ${getBaseURL()}`);
-console.log(`   Trusted Origins: ${getAllowedOrigins().join(", ")}`);
+console.log(`   Trusted Origins: ${allowedOrigins === true ? "any (dev mode)" : allowedOrigins.join(", ")}`);
 
 export const auth = betterAuth({
   baseURL: getBaseURL(),
@@ -58,6 +60,6 @@ export const auth = betterAuth({
     },
   },
   // Set trusted origins for CORS
-  trustedOrigins: getAllowedOrigins(),
+  trustedOrigins: allowedOrigins,
   socialProviders: {}, // No social providers for now
 });

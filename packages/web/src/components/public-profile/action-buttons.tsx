@@ -25,9 +25,6 @@ export function ActionButtons({
     if (feature.type === "health-survey") {
       return `/${username}/survey`;
     }
-    if (feature.type === "tu-historia") {
-      return `/${username}/historia`;
-    }
     if (feature.type === "whatsapp-cta" && whatsappNumber) {
       // Clean phone number and create WhatsApp link
       const cleanPhone = whatsappNumber.replace(/[^\d+]/g, "");

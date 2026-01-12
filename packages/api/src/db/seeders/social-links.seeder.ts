@@ -43,66 +43,6 @@ const SOCIAL_LINK_DATA = [
     url: "https://facebook.com/mariawellness",
     displayOrder: 4,
   },
-
-  // Carlos's social links
-  {
-    key: "carlosInstagram",
-    profileKey: "carlos",
-    userIndex: 1,
-    platform: "instagram" as const,
-    url: "https://instagram.com/carlos_fitness",
-    displayOrder: 1,
-  },
-  {
-    key: "carlosYoutube",
-    profileKey: "carlos",
-    userIndex: 1,
-    platform: "youtube" as const,
-    url: "https://youtube.com/@carlosfitness",
-    displayOrder: 2,
-  },
-  {
-    key: "carlosWhatsapp",
-    profileKey: "carlos",
-    userIndex: 1,
-    platform: "whatsapp" as const,
-    url: "https://wa.me/51976543210",
-    displayOrder: 3,
-  },
-  {
-    key: "carlosTiktok",
-    profileKey: "carlos",
-    userIndex: 1,
-    platform: "tiktok" as const,
-    url: "https://tiktok.com/@carlos_fitness",
-    displayOrder: 4,
-  },
-  {
-    key: "carlosFacebook",
-    profileKey: "carlos",
-    userIndex: 1,
-    platform: "facebook" as const,
-    url: "https://facebook.com/carlosfitnesspro",
-    displayOrder: 5,
-  },
-
-  // Ana's social links (solo 2 porque está en onboarding)
-  {
-    key: "anaInstagram",
-    profileKey: "ana",
-    userIndex: 2,
-    platform: "instagram" as const,
-    url: "https://instagram.com/ana_salud",
-    displayOrder: 1,
-  },
-  {
-    key: "anaWhatsapp",
-    profileKey: "ana",
-    userIndex: 2,
-    platform: "whatsapp" as const,
-    url: "https://wa.me/51965432109",
-    displayOrder: 2,
-  },
 ];
 
 export async function seedSocialLinks() {

@@ -18,7 +18,7 @@ export const profileView = pgTable(
   (table) => [
     index("profile_view_profile_id_idx").on(table.profileId),
     index("profile_view_viewed_at_idx").on(table.profileId, table.viewedAt),
-  ]
+  ],
 );
 
 export const socialClick = pgTable(
@@ -34,9 +34,9 @@ export const socialClick = pgTable(
     index("social_click_social_link_id_idx").on(table.socialLinkId),
     index("social_click_clicked_at_idx").on(
       table.socialLinkId,
-      table.clickedAt
+      table.clickedAt,
     ),
-  ]
+  ],
 );
 
 export const qrDownload = pgTable(
@@ -46,6 +46,7 @@ export const qrDownload = pgTable(
     profileId: uuid("profile_id")
       .notNull()
       .references(() => profile.id, { onDelete: "cascade" }),
+    source: viewSourceEnum("source").notNull().default("qr"),
     format: varchar("format", { length: 10 }).notNull(), // 'png' or 'svg'
     downloadedAt: timestamp("downloaded_at").notNull().defaultNow(),
   },
@@ -55,6 +56,7 @@ export const qrDownload = pgTable(
       table.profileId,
       table.downloadedAt,
     ),
+    index("qr_download_source_idx").on(table.source),
   ],
 );
 

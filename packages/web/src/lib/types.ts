@@ -1,8 +1,6 @@
 import type {
   Profile as DbProfile,
   SocialLink as DbSocialLink,
-  Story as DbStory,
-  StorySection as DbStorySection,
 } from "../../../api/src/db/schema";
 
 // Extend the DB profile with properties returned by the API (e.g. computed avatarUrl)
@@ -11,9 +9,6 @@ export type Profile = DbProfile & {
 };
 
 export type SocialLink = DbSocialLink;
-
-export type TuHistoriaStory = DbStory;
-export type TuHistoriaSection = DbStorySection;
 
 interface BaseFeature<Config = Record<string, unknown>> {
   id: string;
@@ -28,14 +23,6 @@ export interface HealthSurveyFeature extends BaseFeature<{
   type: "health-survey";
 }
 
-export interface TuHistoriaFeature extends BaseFeature<{
-  buttonText?: string;
-  section: TuHistoriaSection | null;
-  stories: TuHistoriaStory[];
-}> {
-  type: "tu-historia";
-}
-
 export interface WhatsAppCtaFeature extends BaseFeature<{
   buttonText?: string;
 }> {
@@ -44,7 +31,6 @@ export interface WhatsAppCtaFeature extends BaseFeature<{
 
 export type Feature =
   | HealthSurveyFeature
-  | TuHistoriaFeature
   | WhatsAppCtaFeature
   | BaseFeature;
 

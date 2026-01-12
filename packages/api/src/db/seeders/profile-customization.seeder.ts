@@ -16,19 +16,14 @@ export async function seedProfileCustomizations() {
       fontFamily: "Inter",
       buttonStyle: "rounded",
     },
-    {
-      profileId: createdProfileIds.carlos,
-      themeId: "fitness",
-      primaryColor: "#F59E0B", // Orange/Amber
-      backgroundColor: "#FEF3C7",
-      textColor: "#78350F",
-      fontFamily: "Poppins",
-      buttonStyle: "rounded",
-    },
-    // Ana no tiene customization aún (onboarding incompleto)
   ];
 
   for (const customData of customizations) {
+    if (!customData.profileId) {
+      console.log(`  ⚠️  Profile ID not found, skipping customization`);
+      continue;
+    }
+
     // Check if customization already exists (idempotent)
     const existingCustom = await db.query.profileCustomization.findFirst({
       where: eq(profileCustomization.profileId, customData.profileId),

@@ -11,7 +11,6 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
-  FileText,
   Settings2,
   Loader2,
   Sparkles,
@@ -20,19 +19,10 @@ import {
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useProfile } from "@/hooks/use-profile";
-import { SurveyConfigModal } from "@/components/dashboard/SurveyConfigModal";
 import { WhatsAppCtaConfigModal } from "@/components/dashboard/WhatsAppCtaConfigModal";
 import { useNavigate } from "react-router";
 
 interface FeaturesConfig {
-  healthSurvey?: {
-    enabled: boolean;
-    buttonText: string;
-  };
-  tuHistoria?: {
-    enabled: boolean;
-    buttonText: string;
-  };
   whatsappCta?: {
     enabled: boolean;
     buttonText: string;
@@ -46,7 +36,6 @@ interface ProfileWithFeatures {
 }
 
 export function FeaturesList() {
-  const [configModalOpen, setConfigModalOpen] = useState(false);
   const [whatsappCtaModalOpen, setWhatsappCtaModalOpen] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -56,14 +45,6 @@ export function FeaturesList() {
 
   // Get features config from profile
   const featuresConfig = profile?.featuresConfig || {};
-  const healthSurveyConfig = featuresConfig.healthSurvey || {
-    enabled: true,
-    buttonText: "Evalúate gratis",
-  };
-  const tuHistoriaConfig = featuresConfig.tuHistoria || {
-    enabled: false,
-    buttonText: "Mi historia",
-  };
   const whatsappCtaConfig = featuresConfig.whatsappCta || {
     enabled: false,
     buttonText: "Escríbeme por WhatsApp",
@@ -87,44 +68,6 @@ export function FeaturesList() {
     },
   });
 
-  const toggleHealthSurvey = async () => {
-    const newEnabled = !healthSurveyConfig.enabled;
-    updateFeaturesConfig.mutate(
-      {
-        healthSurvey: {
-          ...healthSurveyConfig,
-          enabled: newEnabled,
-        },
-      },
-      {
-        onSuccess: () => {
-          toast.success(
-            `Encuesta de salud ${newEnabled ? "activada" : "desactivada"}`,
-          );
-        },
-      },
-    );
-  };
-
-  const toggleTuHistoria = async () => {
-    const newEnabled = !tuHistoriaConfig.enabled;
-    updateFeaturesConfig.mutate(
-      {
-        tuHistoria: {
-          ...tuHistoriaConfig,
-          enabled: newEnabled,
-        },
-      },
-      {
-        onSuccess: () => {
-          toast.success(
-            `"Mi historia" ${newEnabled ? "activada" : "desactivada"}`,
-          );
-        },
-      },
-    );
-  };
-
   const toggleWhatsappCta = async () => {
     // Check if whatsappNumber is configured
     if (!profile?.whatsappNumber) {
@@ -147,22 +90,6 @@ export function FeaturesList() {
           toast.success(
             `WhatsApp CTA ${newEnabled ? "activado" : "desactivado"}`,
           );
-        },
-      },
-    );
-  };
-
-  const handleSaveConfig = async (data: { buttonText: string }) => {
-    updateFeaturesConfig.mutate(
-      {
-        healthSurvey: {
-          ...healthSurveyConfig,
-          buttonText: data.buttonText,
-        },
-      },
-      {
-        onSuccess: () => {
-          toast.success("Configuración guardada");
         },
       },
     );
@@ -196,26 +123,6 @@ export function FeaturesList() {
       configurable: true,
       onConfigure: () => setWhatsappCtaModalOpen(true),
       requiresWhatsapp: true,
-    },
-    {
-      id: "health-survey",
-      name: "Encuesta de Salud",
-      description:
-        "Prueba de transformación de 7 días que envía resultados por WhatsApp.",
-      enabled: healthSurveyConfig.enabled,
-      icon: FileText,
-      configurable: true,
-      onConfigure: () => setConfigModalOpen(true),
-    },
-    {
-      id: "tu-historia",
-      name: "Mi historia",
-      description:
-        "Comparte historias visuales con antes/después y un CTA personalizado.",
-      enabled: tuHistoriaConfig.enabled,
-      icon: Sparkles,
-      configurable: true,
-      onConfigure: () => navigate("/dashboard/tu-historia"),
     },
     {
       id: "appointments",
@@ -272,14 +179,6 @@ export function FeaturesList() {
                       toggleWhatsappCta();
                       return;
                     }
-                    if (feature.id === "health-survey") {
-                      toggleHealthSurvey();
-                      return;
-                    }
-                    if (feature.id === "tu-historia") {
-                      toggleTuHistoria();
-                      return;
-                    }
                   }}
                   disabled={
                     feature.comingSoon || updateFeaturesConfig.isPending
@@ -311,16 +210,6 @@ export function FeaturesList() {
           </Card>
         ))}
       </div>
-
-      <SurveyConfigModal
-        open={configModalOpen}
-        onOpenChange={setConfigModalOpen}
-        defaultValues={{
-          buttonText: healthSurveyConfig.buttonText,
-        }}
-        onSave={handleSaveConfig}
-        isLoading={updateFeaturesConfig.isPending}
-      />
 
       <WhatsAppCtaConfigModal
         open={whatsappCtaModalOpen}

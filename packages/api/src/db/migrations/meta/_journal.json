@@ -36,6 +36,13 @@
       "when": 1768009610999,
       "tag": "0004_conscious_giant_man",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1768250386456,
+      "tag": "0005_exotic_sentinels",
+      "breakpoints": true
     }
   ]
 }
