@@ -2,6 +2,7 @@ import {
   Navbar,
   HeroSection,
   FeaturesSection,
+  AgentExplanation,
   CTASection,
   Footer,
 } from "@/components/landing";
@@ -13,6 +14,7 @@ export function LandingPage() {
       <main>
         <HeroSection />
         <FeaturesSection />
+        <AgentExplanation />
         <CTASection />
       </main>
       <Footer />

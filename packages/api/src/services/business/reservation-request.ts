@@ -6,6 +6,7 @@ import { ReservationRequestRepository } from "../repository/reservation-request"
 import { TimeSlotRepository } from "../repository/time-slot";
 import { MedicalServiceRepository } from "../repository/medical-service";
 import type { NewReservationRequest } from "../../db/schema/reservation-request";
+import { sendMedicalEvent } from "../../lib/inngest-client";
 
 export interface CreateReservationRequestData {
   slotId: string;
@@ -92,8 +93,25 @@ export class ReservationRequestService {
     const createdRequest =
       await this.reservationRequestRepository.create(request);
 
-    // Update slot status to pending approval
     await this.timeSlotRepository.updateStatus(slotId, "pending_approval");
+
+    await sendMedicalEvent("reservation/request-created", {
+      requestId: createdRequest.id,
+      profileId: createdRequest.profileId,
+      slotId: createdRequest.slotId,
+      serviceId: createdRequest.serviceId,
+      patientName: createdRequest.patientName,
+      patientPhone: createdRequest.patientPhone,
+      patientEmail: createdRequest.patientEmail,
+      chiefComplaint: createdRequest.chiefComplaint,
+      symptoms: createdRequest.symptoms,
+      medicalHistory: createdRequest.medicalHistory,
+      currentMedications: createdRequest.currentMedications,
+      allergies: createdRequest.allergies,
+      urgencyLevel: createdRequest.urgencyLevel,
+      requestedTime: createdRequest.requestedTime.toISOString(),
+      expiresAt: createdRequest.expiresAt.toISOString(),
+    });
 
     return {
       request: createdRequest,

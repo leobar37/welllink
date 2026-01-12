@@ -6,6 +6,7 @@ import { ReservationRequestRepository } from "../repository/reservation-request"
 import { TimeSlotRepository } from "../repository/time-slot";
 import { ReservationRepository } from "../repository/reservation";
 import type { NewReservation } from "../../db/schema/reservation";
+import { sendMedicalEvent } from "../../lib/inngest-client";
 
 export interface ApproveRequestData {
   requestId: string;
@@ -118,6 +119,30 @@ export class ApprovalService {
     await this.timeSlotRepository.updateStatus(finalSlotId, "reserved");
     await this.timeSlotRepository.incrementReservations(finalSlotId);
 
+    const changesData = changes
+      ? {
+          originalTime: slot.startTime.toISOString(),
+          newTime:
+            changes.timeSlotId && changes.timeSlotId !== request.slotId
+              ? newSlot?.startTime.toISOString()
+              : undefined,
+          originalService: request.serviceId,
+          newService: changes.serviceId || undefined,
+          notes: notes || undefined,
+          priceAdjustment: changes.price || undefined,
+          durationChange: undefined,
+        }
+      : {};
+
+    await sendMedicalEvent("reservation/approved", {
+      reservationId: reservation.id,
+      profileId: request.profileId,
+      requestId: request.id,
+      approvedBy,
+      approvedAt: new Date().toISOString(),
+      ...changesData,
+    });
+
     return {
       request: updatedRequest,
       reservation,
@@ -154,6 +179,14 @@ export class ApprovalService {
 
     // Update slot status back to available
     await this.timeSlotRepository.updateStatus(request.slotId, "available");
+
+    await sendMedicalEvent("reservation/rejected", {
+      requestId: request.id,
+      profileId: request.profileId,
+      rejectionReason,
+      rejectedBy,
+      rejectedAt: new Date().toISOString(),
+    });
 
     return {
       request: updatedRequest,

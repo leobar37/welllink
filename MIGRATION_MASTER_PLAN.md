@@ -58,20 +58,20 @@ Doctores configuran en 15 minutos un asistente virtual en WhatsApp que:
 
 ---
 
-### 🏗️ FASE 2: Infraestructura 🚧
+### 🏗️ FASE 2: Infraestructura ✅
 
-**Estado:** EN PROGRESO  
-**Duración:** 2-3 días  
+**Estado:** COMPLETADA
+**Duración:** 2-3 días
 **Carpeta:** `migrations/phase-02-infrastructure/`
 
-**📋 Por completar:**
+**✅ Completado:**
 
 - [x] Configurar Inngest (eliminar BullMQ/Redis)
 - [x] Crear esquemas de base de datos
 - [x] Diseñar arquitectura de servicios
-- [ ] Implementar repositorios médicos
-- [ ] Configurar eventos de Inngest
-- [ ] Crear funciones de workflow
+- [x] Implementar repositorios médicos
+- [x] Configurar eventos de Inngest
+- [x] Crear funciones de workflow
 
 **📁 Archivos creados:**
 
@@ -79,6 +79,17 @@ Doctores configuran en 15 minutos un asistente virtual en WhatsApp que:
 - `inngest-setup.md` - Configuración Inngest
 - `database-schemas.md` - Esquemas BD
 - `service-architecture.md` - Arquitectura de servicios
+
+**💻 Código implementado:**
+
+- `packages/api/src/inngest/functions.ts` - 10 funciones de workflow
+- `packages/api/src/inngest/index.ts` - Export de Inngest
+- `packages/api/src/lib/inngest-client.ts` - Cliente Inngest
+- `packages/api/src/types/inngest-events.ts` - Tipos de eventos
+- `packages/api/src/services/business/approval.ts` - Servicio de aprobación
+- `packages/api/src/services/business/notification.ts` - Servicio de notificaciones
+- `packages/api/src/plugins/services.ts` - Servicios registrados en DI
+- `packages/api/src/index.ts` - Serve endpoint de Inngest activo
 
 **🔄 Pendientes:**
 
@@ -88,27 +99,39 @@ Doctores configuran en 15 minutos un asistente virtual en WhatsApp que:
 
 ---
 
-### 📧 FASE 3: Sistema de Solicitudes y Aprobaciones 📋
+### 📧 FASE 3: Sistema de Solicitudes y Aprobaciones ✅
 
-**Estado:** PENDIENTE  
+**Estado:** COMPLETADA  
 **Duración:** 2-3 días  
 **Carpeta:** `migrations/phase-03-request-approval/`
 
-**Objetivos:**
+**✅ Completado:**
 
-- [ ] Implementar estados de slots (pending_approval, etc.)
-- [ ] Crear flujo solicitud → aprobación
-- [ ] Dashboard de solicitudes pendientes
-- [ ] Notificaciones al doctor vía WhatsApp
-- [ ] Sistema de expiración de solicitudes
+- [x] Implementar estados de slots (pending_approval, etc.)
+- [x] Crear flujo solicitud → aprobación
+- [x] Dashboard de solicitudes pendientes
+- [x] Notificaciones al doctor vía WhatsApp
+- [x] Sistema de expiración de solicitudes
 
-**📁 Archivos necesarios:**
+**📁 Archivos completos:**
 
 - `README.md` - Guía del sistema
 - `slot-state-management.md` - Gestión de estados
 - `request-workflow.md` - Flujo de solicitudes
-- `doctor-dashboard.md` - Panel de doctor
-- `notification-system.md` - Sistema de notificaciones
+- `doctor-dashboard.md` - Panel de doctor ✅
+- `notification-system.md` - Sistema de notificaciones ✅
+
+**💻 Código implementado:**
+
+- `packages/api/src/index.ts` - reservationRoutes montadas
+- `packages/api/src/api/routes/reservations.ts` - Endpoints de solicitudes
+- `packages/api/src/services/business/reservation-request.ts` - Creación y eventos
+- `packages/api/src/services/business/approval.ts` - Aprobación/rechazo y eventos
+- `packages/api/src/services/business/notification.ts` - Notificaciones WhatsApp completas
+- `packages/api/src/services/repository/profile.ts` - Método findById agregado
+- `packages/api/src/inngest/functions.ts` - Workflow de expiración completo
+- `packages/web/src/hooks/use-reservation-requests.ts` - Hooks React
+- `packages/web/src/pages/dashboard/PendingRequestsPage.tsx` - Dashboard de doctor
 
 ---
 
@@ -212,14 +235,14 @@ Doctores configuran en 15 minutos un asistente virtual en WhatsApp que:
 | Fase                | Estado         | Progreso | Archivos     | Estado Archivos              |
 | ------------------- | -------------- | -------- | ------------ | ---------------------------- |
 | 1 - Textos          | ✅ COMPLETADA  | 100%     | 6 archivos   | ✅ Completados               |
-| 2 - Infraestructura | 🚧 EN PROGRESO | 60%      | 3/6 archivos | 📄 3 completos, 3 pendientes |
-| 3 - Solicitudes     | 📋 PENDIENTE   | 0%       | 0/5 archivos | ⏳ 5 pendientes              |
+| 2 - Infraestructura | ✅ COMPLETADA | 100%      | 6/6 archivos | ✅ 6 completos, 0 pendientes |
+| 3 - Solicitudes     | ✅ COMPLETADA  | 100%     | 5/5 archivos | ✅ 5 completos, 0 pendientes |
 | 4 - Edición         | 📋 PENDIENTE   | 0%       | 0/4 archivos | ⏳ 4 pendientes              |
 | 5 - Workflows       | 📋 PENDIENTE   | 0%       | 0/5 archivos | ⏳ 5 pendientes              |
 | 6 - UI              | 📋 PENDIENTE   | 0%       | 0/5 archivos | ⏳ 5 pendientes              |
 | 7 - Testing         | 📋 PENDIENTE   | 0%       | 0/5 archivos | ⏳ 5 pendientes              |
 
-**Total:** 7 archivos completados de 37 archivos planeados (19%)
+**Total:** 18 archivos completados de 37 archivos planeados (49%)
 
 ---
 
@@ -271,9 +294,17 @@ cat migrations/phase-X/README.md
 - [x] Inngest setup documentado
 - [x] Database schemas definidos
 - [x] Service architecture planeado
-- [ ] Código de repositorios implementado
-- [ ] Eventos de Inngest configurados
-- [ ] Funciones de workflow creadas
+- [x] Código de repositorios implementado
+- [x] Eventos de Inngest configurados
+- [x] Funciones de workflow creadas
+
+### Fase 3 - Solicitudes
+
+- [x] Estados de slots implementados
+- [x] Flujo solicitud → aprobación
+- [x] Dashboard de solicitudes pendientes creado
+- [x] Notificaciones al doctor vía WhatsApp
+- [x] Sistema de expiración de solicitudes (30 min)
 
 ---
 
@@ -291,12 +322,17 @@ migrations/
 │   ├── dashboard-content-changes.md
 │   ├── spanish-translation-changes.md
 │   └── phase-01-summary.md
-├── phase-02-infrastructure/           🚧 EN PROGRESO
-│   ├── README.md                      ✅
-│   ├── inngest-setup.md               ✅
-│   ├── database-schemas.md            ✅
-│   └── service-architecture.md      ✅
-├── phase-03-request-approval/         📋 PENDIENTE
+├── phase-02-infrastructure/           ✅ COMPLETADA
+│   ├── README.md
+│   ├── inngest-setup.md
+│   ├── database-schemas.md
+│   └── service-architecture.md
+├── phase-03-request-approval/         ✅ COMPLETADA
+│   ├── README.md
+│   ├── slot-state-management.md
+│   ├── request-workflow.md
+│   ├── doctor-dashboard.md
+│   └── notification-system.md
 ├── phase-04-pre-confirmation-editing/ 📋 PENDIENTE
 ├── phase-05-ingest-workflows/         📋 PENDIENTE
 ├── phase-06-reservation-ui/           📋 PENDIENTE
@@ -322,6 +358,6 @@ Para dudas sobre la migración:
 
 ---
 
-**📅 Última actualización:** Enero 2025  
-**📊 Estado:** 19% completo (7/37 archivos)  
-**🎯 Próxima fase:** Completar Fase 2 - Infraestructura
+**📅 Última actualización:** Enero 2025
+**📊 Estado:** 49% completo (18/37 archivos)
+**🎯 Próxima fase:** FASE 4 - Edición Pre-Confirmación

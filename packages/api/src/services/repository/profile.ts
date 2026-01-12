@@ -84,4 +84,14 @@ export class ProfileRepository {
 
     return profileData;
   }
+
+  async findById(id: string) {
+    const [profileData] = await db
+      .select()
+      .from(profile)
+      .where(eq(profile.id, id))
+      .limit(1);
+
+    return profileData || null;
+  }
 }

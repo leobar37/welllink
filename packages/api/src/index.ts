@@ -34,9 +34,15 @@ import { qrRoutes } from "./api/routes/qr";
 import { socialLinkRoutes } from "./api/routes/social-links";
 import { storiesRoutes } from "./api/routes/stories";
 import { themeRoutes } from "./api/routes/themes";
+import { reservationRoutes } from "./api/routes/reservations";
 import { aiRecommendationRoutes } from "./api/routes/ai-recommendation";
 import { whatsappRoutes } from "./api/routes/whatsapp";
 import { createStorageStrategy } from "./services/storage";
+
+// Inngest
+import { serve } from "inngest/bun";
+import { inngest } from "./lib/inngest-client";
+import { functions } from "./inngest";
 
 const modules = [
   { id: "02", name: "Public Profile" },
@@ -128,9 +134,12 @@ const app = new Elysia()
       .use(socialLinkRoutes)
       .use(storiesRoutes)
       .use(themeRoutes)
+      .use(reservationRoutes)
       .use(aiRecommendationRoutes)
       .use(whatsappRoutes),
   )
+  // Inngest serve endpoint for workflow orchestration
+  .all("/api/inngest", ({ request }) => serve({ client: inngest, functions })(request))
   .listen({
     port: Number(process.env.PORT) || 5300,
     hostname: "0.0.0.0",

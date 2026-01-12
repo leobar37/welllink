@@ -1,35 +1,62 @@
 import { cn } from "@/lib/utils";
+import { LogoIcon } from "./logo-icon";
+import { Logotype } from "./logotype";
+
+export { LogoIcon, Logotype };
 
 type LogoSize = "sm" | "md" | "lg" | "xl";
-type LogoColor = "primary" | "white" | "dark";
+type LogoVariant = "icon-only" | "text-only" | "full";
 
 interface LogoProps {
   size?: LogoSize;
-  color?: LogoColor;
+  variant?: LogoVariant;
   className?: string;
 }
 
-const sizeConfig: Record<LogoSize, string> = {
-  sm: "text-base",
-  md: "text-lg",
-  lg: "text-2xl",
-  xl: "text-3xl",
+const iconSizeConfig: Record<LogoSize, "sm" | "md" | "lg" | "xl"> = {
+  sm: "sm",
+  md: "md",
+  lg: "lg",
+  xl: "xl",
 };
 
-const colorConfig: Record<LogoColor, { well: string; link: string }> = {
-  primary: { well: "text-foreground", link: "text-primary" },
-  white: { well: "text-white", link: "text-white/80" },
-  dark: { well: "text-foreground", link: "text-primary" },
+const typeSizeConfig: Record<LogoSize, "sm" | "md" | "lg" | "xl"> = {
+  sm: "sm",
+  md: "md",
+  lg: "lg",
+  xl: "xl",
 };
 
-export function Logo({ size = "md", color = "primary", className }: LogoProps) {
-  const textSize = sizeConfig[size];
-  const colors = colorConfig[color];
+export function Logo({
+  size = "md",
+  variant = "full",
+  className,
+}: LogoProps) {
+  if (variant === "icon-only") {
+    return (
+      <LogoIcon
+        size={iconSizeConfig[size]}
+        className={className}
+      />
+    );
+  }
+
+  if (variant === "text-only") {
+    return (
+      <Logotype
+        size={typeSizeConfig[size]}
+        className={className}
+      />
+    );
+  }
+
+  // Full variant: icon + text
+  const gap = size === "sm" ? "gap-1.5" : size === "md" ? "gap-2" : "gap-3";
 
   return (
-    <span className={cn("font-semibold tracking-tight", textSize, className)}>
-      <span className={colors.well}>Well</span>
-      <span className={colors.link}>link</span>
-    </span>
+    <div className={cn("flex items-center", gap, className)}>
+      <LogoIcon size={iconSizeConfig[size]} />
+      <Logotype size={typeSizeConfig[size]} />
+    </div>
   );
 }

@@ -7,17 +7,15 @@ import { NotificationService } from "../../services/business/notification";
 import { ReservationRequestRepository } from "../../services/repository/reservation-request";
 import { TimeSlotRepository } from "../../services/repository/time-slot";
 import { MedicalServiceRepository } from "../../services/repository/medical-service";
-import { ReservationRepository } from "../services/repository/reservation";
-import { WhatsAppConfigRepository } from "../repository/whatsapp-config";
-import { ProfileRepository } from "../repository/profile";
-import { EvolutionService } from "./evolution-api";
+import { ReservationRepository } from "../../services/repository/reservation";
+import { WhatsAppConfigRepository } from "../../services/repository/whatsapp-config";
+import { ProfileRepository } from "../../services/repository/profile";
 
 export const reservationRoutes = new Elysia({ prefix: "/reservations" })
   .use(errorMiddleware)
   .use(servicesPlugin)
   .derive({ as: "global" }, ({ services }) => {
-    // Use services from global plugin
-    const evolutionService = services.evolutionService;
+    const { evolutionService } = services;
 
     const reservationRequestRepository = new ReservationRequestRepository();
     const timeSlotRepository = new TimeSlotRepository();
@@ -55,15 +53,14 @@ export const reservationRoutes = new Elysia({ prefix: "/reservations" })
     async ({ body, set, reservationRequestService, notificationService }) => {
       const result = await reservationRequestService.createRequest(body);
 
-      // Notify doctor about new request
       if (result.slot.profileId) {
         await notificationService.notifyDoctorNewRequest({
           requestId: result.request.id,
           profileId: result.slot.profileId,
-          doctorPhone: result.slot.profileId, // TODO: Get actual doctor phone from profile
+          slotId: result.request.slotId,
+          serviceId: result.request.serviceId,
           patientName: result.request.patientName,
           patientPhone: result.request.patientPhone,
-          serviceName: result.service.name,
           appointmentDate: result.slot.startTime,
           appointmentTime: result.slot.startTime,
           urgencyLevel: result.request.urgencyLevel || "normal",
@@ -116,14 +113,14 @@ export const reservationRoutes = new Elysia({ prefix: "/reservations" })
     async ({ body, set, approvalService, notificationService }) => {
       const result = await approvalService.approveRequest(body);
 
-      // Notify patient about approval
       if (result.reservation) {
         await notificationService.notifyPatientApproval({
           requestId: body.requestId,
           profileId: result.request.profileId,
+          serviceId: result.request.serviceId,
+          slotId: result.slot.id,
           patientPhone: result.request.patientPhone,
           patientName: result.request.patientName,
-          serviceName: result.request.serviceId, // TODO: Get actual service name
           appointmentDate: result.slot.startTime,
           appointmentTime: result.slot.startTime.toLocaleTimeString("es-ES", {
             hour: "2-digit",

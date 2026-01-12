@@ -50,6 +50,10 @@ import { TemplateVariablesService } from "../services/business/template-variable
 
 import { getCampaignQueue } from "../services/queue/campaign-queue";
 
+// NEW RESERVATION SERVICES IMPORTS
+import { ApprovalService } from "../services/business/approval";
+import { NotificationService } from "../services/business/notification";
+
 let storageInstance: StorageStrategy | null = null;
 let initialized = false;
 
@@ -120,6 +124,20 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
       campaignAudienceRepository,
       clientRepository,
       templateVariablesService,
+    );
+
+    // NEW RESERVATION SERVICES
+    const approvalService = new ApprovalService(
+      reservationRequestRepository,
+      timeSlotRepository,
+      reservationRepository,
+    );
+
+    const notificationService = new NotificationService(
+      whatsappConfigRepository,
+      profileRepository,
+      medicalServiceRepository,
+      evolutionService,
     );
 
     // Services
@@ -225,6 +243,9 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         campaignTemplateService,
         campaignService,
         templateVariablesService,
+        // NEW RESERVATION SERVICES
+        approvalService,
+        notificationService,
         // Queues
         whatsappQueue,
         campaignQueue, // NEW

@@ -1,14 +1,15 @@
 import { WhatsAppConfigRepository } from "../repository/whatsapp-config";
 import { ProfileRepository } from "../repository/profile";
+import { MedicalServiceRepository } from "../repository/medical-service";
 import { EvolutionService } from "./evolution-api";
 
 export interface ReservationRequestNotificationData {
   requestId: string;
   profileId: string;
-  doctorPhone: string;
+  slotId: string;
+  serviceId: string;
   patientName: string;
   patientPhone: string;
-  serviceName: string;
   appointmentDate: Date;
   appointmentTime: Date;
   urgencyLevel: string;
@@ -18,9 +19,10 @@ export interface ReservationRequestNotificationData {
 export interface ApprovalNotificationData {
   requestId: string;
   profileId: string;
+  serviceId: string;
+  slotId: string;
   patientPhone: string;
   patientName: string;
-  serviceName: string;
   appointmentDate: Date;
   appointmentTime: string;
   changes?: {
@@ -42,6 +44,7 @@ export class NotificationService {
   constructor(
     private whatsappConfigRepository: WhatsAppConfigRepository,
     private profileRepository: ProfileRepository,
+    private medicalServiceRepository: MedicalServiceRepository,
     private evolutionService: EvolutionService,
   ) {}
 
@@ -60,6 +63,17 @@ export class NotificationService {
   async notifyDoctorNewRequest(data: ReservationRequestNotificationData) {
     try {
       const config = await this.getWhatsAppConfig(data.profileId);
+      const [profile, service] = await Promise.all([
+        this.profileRepository.findById(data.profileId),
+        this.medicalServiceRepository.findById(data.serviceId),
+      ]);
+
+      if (!profile || !profile.phone) {
+        throw new Error("Doctor profile not found or no phone configured");
+      }
+      if (!service) {
+        throw new Error("Medical service not found");
+      }
 
       const formattedDate = data.appointmentDate.toLocaleDateString("es-ES", {
         weekday: "long",
@@ -74,22 +88,20 @@ export class NotificationService {
 
       const message = `🩺 *NUEVA SOLICITUD DE CITA*
 
-👤 *Paciente:* ${data.patientName}
-📞 *Teléfono:* ${data.patientPhone}
-🏥 *Servicio:* ${data.serviceName}
-📅 *Fecha:* ${formattedDate}
-🕐 *Hora:* ${formattedTime}
-⚡ *Urgencia:* ${data.urgencyLevel}
+ 👤 *Paciente:* ${data.patientName}
+ 📞 *Teléfono:* ${data.patientPhone}
+ 🏥 *Servicio:* ${service.name}
+ 📅 *Fecha:* ${formattedDate}
+ 🕐 *Hora:* ${formattedTime}
+ ⚡ *Urgencia:* ${data.urgencyLevel}
 
-📝 *Motivo:*
+ 📝 *Motivo:*
 ${data.chiefComplaint || "No especificado"}
 
 ---
-Responde en el dashboard para aprobar o rechazar esta solicitud.`;
+ Responde en el dashboard para aprobar o rechazar esta solicitud.`;
 
-      const formattedPhone = this.evolutionService.formatPhoneNumber(
-        data.doctorPhone,
-      );
+      const formattedPhone = this.evolutionService.formatPhoneNumber(profile.phone);
 
       await this.evolutionService.sendText(config.instanceName, {
         number: formattedPhone,
@@ -106,6 +118,11 @@ Responde en el dashboard para aprobar o rechazar esta solicitud.`;
   async notifyPatientApproval(data: ApprovalNotificationData) {
     try {
       const config = await this.getWhatsAppConfig(data.profileId);
+      const [service] = await this.medicalServiceRepository.findById(data.serviceId);
+
+      if (!service) {
+        throw new Error("Medical service not found");
+      }
 
       const formattedDate = data.appointmentDate.toLocaleDateString("es-ES", {
         weekday: "long",
@@ -116,13 +133,13 @@ Responde en el dashboard para aprobar o rechazar esta solicitud.`;
 
       let message = `✅ *SOLICITUD APROBADA*
 
-¡Hola ${data.patientName}!
+ ¡Hola ${data.patientName}!
 
-Tu solicitud de cita ha sido *aprobada*.
+ Tu solicitud de cita ha sido *aprobada*.
 
-🏥 *Servicio:* ${data.serviceName}
-📅 *Fecha:* ${formattedDate}
-🕐 *Hora:* ${data.appointmentTime}`;
+ 🏥 *Servicio:* ${service.name}
+ 📅 *Fecha:* ${formattedDate}
+ 🕐 *Hora:* ${data.appointmentTime}`;
 
       if (data.changes) {
         message += `\n\n📝 *Cambios realizados:*\n`;
