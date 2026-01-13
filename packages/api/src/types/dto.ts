@@ -75,13 +75,13 @@ export type SocialPlatform =
 export interface CreateSocialLinkData {
   profileId: string;
   platform: SocialPlatform;
-  url: string;
+  username: string;
   displayOrder?: number;
 }
 
 export interface UpdateSocialLinkData {
   platform?: SocialPlatform;
-  url?: string;
+  username?: string;
   displayOrder?: number;
 }
 
@@ -110,7 +110,7 @@ export interface AvatarUploadData {
 export interface SocialLinksData {
   links: Array<{
     platform: string;
-    url: string;
+    username: string;
   }>;
 }
 
@@ -138,7 +138,7 @@ export interface OnboardingExample {
   slug?: string;
   bio?: string;
   platform?: string;
-  url?: string;
+  username?: string;
 }
 
 // =============================================================================

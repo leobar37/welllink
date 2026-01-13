@@ -292,9 +292,9 @@ export class OnboardingService {
         },
       ],
       social_links: [
-        { platform: "twitter", url: "https://twitter.com/johndoe" },
-        { platform: "instagram", url: "https://instagram.com/sarahsmith" },
-        { platform: "github", url: "https://github.com/techmike" },
+        { platform: "instagram", username: "johndoe" },
+        { platform: "instagram", username: "sarahsmith" },
+        { platform: "facebook", username: "techmike" },
       ],
     };
 
@@ -356,7 +356,7 @@ export class OnboardingService {
 
     // Add social links (would use SocialLinkService in real implementation)
     for (const link of socialData.links) {
-      console.log(`Would add social link: ${link.platform} - ${link.url}`);
+      console.log(`Would add social link: ${link.platform} - ${link.username}`);
     }
   }
 

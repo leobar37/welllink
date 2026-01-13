@@ -20,7 +20,7 @@ export default function PublicSurveyRoute() {
     queryFn: async () => {
       if (!username) throw new Error("Username is required")
 
-      const { data, error } = await api.public.profiles[username].get()
+      const { data, error } = await api.api.public.profiles[username].get()
       if (error) throw error
       return data
     },

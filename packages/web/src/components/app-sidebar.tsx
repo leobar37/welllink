@@ -1,4 +1,4 @@
-import { User, Settings, QrCode, Sparkles, LayoutDashboard, FileText, Link as LinkIcon, Palette, Users } from "lucide-react"
+import { User, Settings, QrCode, Sparkles, LayoutDashboard, Link as LinkIcon, Palette, Users } from "lucide-react"
 import { Logo } from "@/components/ui/logo"
 import {
   Sidebar,
@@ -45,11 +45,6 @@ const items = [
     title: "Temas",
     url: "/dashboard/themes",
     icon: Palette,
-  },
-  {
-    title: "Encuestas",
-    url: "/dashboard/surveys",
-    icon: FileText,
   },
   {
     title: "QR y Tarjeta",

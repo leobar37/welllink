@@ -19,7 +19,17 @@ export const getAllowedOrigins = (): string[] => {
   // In dev mode, return array of localhost origins
   // Both Elysia CORS and Better Auth accept array format
   if (process.env.NODE_ENV !== "production") {
-    return ["http://localhost:5179", "http://localhost:5300"];
+    return [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://localhost:5175",
+      "http://localhost:5176",
+      "http://localhost:5177",
+      "http://localhost:5178",
+      "http://localhost:5179",
+      "http://localhost:5180",
+      "http://localhost:5300",
+    ];
   }
 
   // Production fallback - should be configured via CORS_ORIGIN env var
@@ -39,7 +49,7 @@ export const getCorsOrigins = (): string[] | true => {
 
   // In dev mode, return true to accept any origin (Elysia specific)
   if (process.env.NODE_ENV !== "production") {
-    return true;
+    return true; // Keep allowing all origins in dev for flexibility
   }
 
   return [];

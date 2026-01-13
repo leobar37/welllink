@@ -19,7 +19,7 @@ export function useAvailableThemes() {
     queryFn: async () => {
       // We can use local data since themes are static
       // But let's fetch from API to stay consistent
-      const { data, error } = await api.themes.get();
+      const { data, error } = await api.api.themes.get();
       if (error) throw error;
       return data as unknown as ThemeDefinition[];
     },
@@ -37,7 +37,7 @@ export function useProfileTheme(profileId?: string) {
     queryKey: ["profile-theme", profileId],
     queryFn: async () => {
       if (!profileId) return null;
-      const { data, error } = await api.themes.profiles[profileId].get();
+      const { data, error } = await api.api.themes.profiles[profileId].get();
       if (error) throw error;
       return data as unknown as ProfileThemeResponse;
     },
@@ -54,7 +54,7 @@ export function useUpdateProfileTheme(profileId?: string) {
   return useMutation({
     mutationFn: async (themeId: string) => {
       if (!profileId) throw new Error("Profile ID is required");
-      const { data, error } = await api.themes.profiles[profileId].put({
+      const { data, error } = await api.api.themes.profiles[profileId].put({
         themeId,
       });
       if (error) throw error;

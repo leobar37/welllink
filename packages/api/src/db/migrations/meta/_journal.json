@@ -43,6 +43,13 @@
       "when": 1768250386456,
       "tag": "0005_exotic_sentinels",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1768250386500,
+      "tag": "0006_rename_social_link_url_to_username",
+      "breakpoints": true
     }
   ]
 }

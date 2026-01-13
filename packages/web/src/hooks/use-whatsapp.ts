@@ -52,7 +52,7 @@ export function useWhatsApp(): WhatsAppConnectionState {
   const fetchConfigs = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await api.whatsapp.configs.get();
+      const response = await api.api.whatsapp.configs.get();
 
       if (response.error) {
         console.error("Error fetching WhatsApp configs:", response.error);
@@ -64,7 +64,7 @@ export function useWhatsApp(): WhatsAppConnectionState {
 
       // If no configs exist, call get-or-create endpoint
       if (configsList.length === 0) {
-        const createResponse = await api.whatsapp.configs["get-or-create"].get();
+        const createResponse = await api.api.whatsapp.configs["get-or-create"].get();
         if (createResponse.error) {
           console.error("Error creating WhatsApp config:", createResponse.error);
           setConfigs([]);
@@ -129,7 +129,7 @@ export function useWhatsApp(): WhatsAppConnectionState {
           pollIntervalRef.current = null;
         }
 
-        const response = await api.whatsapp
+        const response = await api.api.whatsapp
           .configs({ id: configId })
           .connect.post();
 
@@ -171,7 +171,7 @@ export function useWhatsApp(): WhatsAppConnectionState {
           // Poll for connection status every 3 seconds
           pollIntervalRef.current = setInterval(async () => {
             try {
-              const statusResponse = await api.whatsapp
+              const statusResponse = await api.api.whatsapp
                 .configs({ id: configId })
                 .status.get();
 
@@ -242,7 +242,7 @@ export function useWhatsApp(): WhatsAppConnectionState {
           pollIntervalRef.current = null;
         }
 
-        const response = await api.whatsapp
+        const response = await api.api.whatsapp
           .configs({ id: configId })
           .disconnect.post();
 
@@ -280,7 +280,7 @@ export function useWhatsApp(): WhatsAppConnectionState {
   const refreshStatus = useCallback(async (configId: string) => {
     try {
       setIsLoading(true);
-      const response = await api.whatsapp
+      const response = await api.api.whatsapp
         .configs({ id: configId })
         .status.get();
 

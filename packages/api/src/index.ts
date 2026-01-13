@@ -36,6 +36,7 @@ import { themeRoutes } from "./api/routes/themes";
 import { reservationRoutes } from "./api/routes/reservations";
 import { aiRecommendationRoutes } from "./api/routes/ai-recommendation";
 import { whatsappRoutes } from "./api/routes/whatsapp";
+import { clientRoutes } from "./api/routes/client";
 import { createStorageStrategy } from "./services/storage";
 
 // Inngest
@@ -134,7 +135,8 @@ const app = new Elysia()
       .use(themeRoutes)
       .use(reservationRoutes)
       .use(aiRecommendationRoutes)
-      .use(whatsappRoutes),
+      .use(whatsappRoutes)
+      .use(clientRoutes),
   )
   // Inngest serve endpoint for workflow orchestration
   .all("/api/inngest", ({ request }) => serve({ client: inngest, functions })(request))

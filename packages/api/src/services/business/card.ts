@@ -5,6 +5,7 @@ import { ProfileRepository } from "../repository/profile";
 import { AssetRepository } from "../repository/asset";
 import { SocialLinkRepository } from "../repository/social-link";
 import type { StorageStrategy } from "../storage/storage.interface";
+import { transformSocialLinksWithUrl } from "../../utils/social-links";
 
 export interface VirtualCardData {
   profile: {
@@ -75,7 +76,8 @@ export class CardService {
         ctx,
         profileId,
       );
-      socialLinks = links.map((link) => ({
+      const linksWithUrl = transformSocialLinksWithUrl(links);
+      socialLinks = linksWithUrl.map((link) => ({
         platform: link.platform,
         url: link.url,
       }));
@@ -153,9 +155,17 @@ export class CardService {
         guestCtx,
         profile.id,
       );
+      // Transform social links with generated URLs
       socialLinks = links.map((link) => ({
         platform: link.platform,
-        url: link.url,
+        url: `${link.platform === "whatsapp" 
+          ? `https://wa.me/${link.username.replace(/\D/g, "")}`
+          : link.platform === "youtube"
+          ? `https://youtube.com/@${link.username}`
+          : link.platform === "tiktok"
+          ? `https://tiktok.com/@${link.username}`
+          : `https://${link.platform}.com/${link.username}`
+        }`,
       }));
     }
 

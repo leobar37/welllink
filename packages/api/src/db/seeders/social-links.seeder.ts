@@ -16,7 +16,7 @@ const SOCIAL_LINK_DATA = [
     profileKey: "maria",
     userIndex: 0,
     platform: "instagram" as const,
-    url: "https://instagram.com/maria_wellness",
+    username: "maria_wellness",
     displayOrder: 1,
   },
   {
@@ -24,7 +24,7 @@ const SOCIAL_LINK_DATA = [
     profileKey: "maria",
     userIndex: 0,
     platform: "whatsapp" as const,
-    url: "https://wa.me/51987654321",
+    username: "51987654321",
     displayOrder: 2,
   },
   {
@@ -32,7 +32,7 @@ const SOCIAL_LINK_DATA = [
     profileKey: "maria",
     userIndex: 0,
     platform: "tiktok" as const,
-    url: "https://tiktok.com/@maria_wellness",
+    username: "maria_wellness",
     displayOrder: 3,
   },
   {
@@ -40,7 +40,7 @@ const SOCIAL_LINK_DATA = [
     profileKey: "maria",
     userIndex: 0,
     platform: "facebook" as const,
-    url: "https://facebook.com/mariawellness",
+    username: "mariawellness",
     displayOrder: 4,
   },
 ];

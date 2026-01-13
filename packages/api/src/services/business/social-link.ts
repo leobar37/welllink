@@ -9,6 +9,10 @@ import type {
 } from "../../types/dto";
 import { SocialLinkRepository } from "../repository/social-link";
 import { AnalyticsRepository } from "../repository/analytics";
+import {
+  transformSocialLinksWithUrl,
+  validateUsernameByPlatform,
+} from "../../utils/social-links";
 
 export class SocialLinkService {
   constructor(
@@ -17,7 +21,10 @@ export class SocialLinkService {
   ) {}
 
   async getSocialLinks(ctx: RequestContext, profileId: string) {
-    return this.socialLinkRepository.findByProfile(ctx, profileId);
+    const links = await this.socialLinkRepository.findByProfile(ctx, profileId);
+    
+    // Transform links to include generated URLs for frontend
+    return transformSocialLinksWithUrl(links);
   }
 
   async getSocialLink(ctx: RequestContext, id: string) {
@@ -25,23 +32,24 @@ export class SocialLinkService {
     if (!socialLink) {
       throw new NotFoundException("Social link not found");
     }
-    return socialLink;
+    
+    // Return link with generated URL
+    return {
+      ...socialLink,
+      url: transformSocialLinksWithUrl([socialLink])[0].url,
+    };
   }
 
   async createSocialLink(ctx: RequestContext, data: CreateSocialLinkData) {
     // Validate required fields
-    if (!data.profileId || !data.platform || !data.url) {
+    if (!data.profileId || !data.platform || !data.username) {
       throw new BadRequestException(
-        "Missing required fields: profileId, platform, url",
+        "Missing required fields: profileId, platform, username",
       );
     }
 
-    // Validate URL format
-    try {
-      new URL(data.url);
-    } catch {
-      throw new BadRequestException("Invalid URL format");
-    }
+    // Validate username based on platform
+    validateUsernameByPlatform(data.platform, data.username);
 
     return this.socialLinkRepository.create(ctx, data);
   }
@@ -57,20 +65,15 @@ export class SocialLinkService {
       throw new NotFoundException("Social link not found");
     }
 
-    // Validate URL if provided
-    if (data.url) {
-      try {
-        new URL(data.url);
-      } catch {
-        throw new BadRequestException("Invalid URL format");
-      }
+    // Validate username if provided
+    if (data.username && data.platform) {
+      validateUsernameByPlatform(data.platform, data.username);
     }
 
     return this.socialLinkRepository.update(ctx, id, data);
   }
 
   async deleteSocialLink(ctx: RequestContext, id: string) {
-    // Check if social link exists and user owns it
     const socialLink = await this.socialLinkRepository.findOne(ctx, id);
     if (!socialLink) {
       throw new NotFoundException("Social link not found");
@@ -99,7 +102,6 @@ export class SocialLinkService {
       profileId,
     );
 
-    // Group clicks by platform (via socialLink relation)
     const stats = socialClicks.reduce((acc: Record<string, number>, click) => {
       const platform = click.socialLink.platform;
       if (!acc[platform]) {
@@ -120,7 +122,6 @@ export class SocialLinkService {
     profileId: string,
     linkIds: string[],
   ) {
-    // Verify all links belong to the same profile and user has access
     for (const linkId of linkIds) {
       const link = await this.socialLinkRepository.findOne(ctx, linkId);
       if (!link || link.profileId !== profileId) {
@@ -128,7 +129,6 @@ export class SocialLinkService {
       }
     }
 
-    // Update order for each link
     const updates = linkIds.map((linkId, index) =>
       this.socialLinkRepository.update(ctx, linkId, { displayOrder: index }),
     );

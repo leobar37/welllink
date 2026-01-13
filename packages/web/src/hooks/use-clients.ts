@@ -29,7 +29,7 @@ export function useClients() {
     queryKey: ["clients", profile?.id],
     queryFn: async () => {
       if (!profile?.id) return [];
-      const { data, error } = await api.clients.get();
+      const { data, error } = await api.api.clients.get();
       if (error) throw error;
       return (data as Client[]).sort((a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -41,7 +41,7 @@ export function useClients() {
   const createClient = useMutation({
     mutationFn: async (client: Omit<Client, "id" | "createdAt" | "updatedAt" | "profileId">) => {
       if (!profile?.id) throw new Error("No profile found");
-      const { data, error } = await api.clients.post({
+      const { data, error } = await api.api.clients.post({
         ...client,
         profileId: profile.id,
       });
@@ -60,7 +60,7 @@ export function useClients() {
 
   const updateClient = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<Client> }) => {
-      const { data: resData, error } = await api.clients[id].put(data);
+      const { data: resData, error } = await api.api.clients[id].put(data);
       if (error) throw error;
       return resData;
     },
@@ -76,7 +76,7 @@ export function useClients() {
 
   const deleteClient = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await api.clients[id].delete();
+      const { error } = await api.api.clients[id].delete();
       if (error) throw error;
     },
     onSuccess: () => {
@@ -93,7 +93,7 @@ export function useClients() {
     return useQuery({
       queryKey: ["clients", profile?.id, "label", label],
       queryFn: async () => {
-        const { data, error } = await api.clients.label[label].get();
+        const { data, error } = await api.api.clients.label[label].get();
         if (error) throw error;
         return data as Client[];
       },

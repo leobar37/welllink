@@ -14,7 +14,7 @@ export function useRecentActivity(profileId?: string, limit: number = 15) {
     queryKey: ["recent-activity", profileId, limit],
     queryFn: async () => {
       if (!profileId) return null;
-      const { data, error } = await api.analytics.profiles[profileId][
+      const { data, error } = await api.api.analytics.profiles[profileId][
         "recent-activity"
       ].get({
         $query: { limit: limit.toString() },

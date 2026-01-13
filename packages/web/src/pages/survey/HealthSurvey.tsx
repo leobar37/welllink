@@ -44,7 +44,7 @@ export function HealthSurveyPage() {
     setLoading(true)
     try {
       // First get profile ID by username
-      const { data: profile } = await api.profiles.username[username].get()
+      const { data: profile } = await api.api.profiles.username[username].get()
       
       if (!profile) {
         toast.error("Profile not found")

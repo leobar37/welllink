@@ -18,7 +18,7 @@ export const socialLink = pgTable(
       .notNull()
       .references(() => profile.id, { onDelete: "cascade" }),
     platform: socialPlatformEnum("platform").notNull(),
-    url: varchar("url", { length: 500 }).notNull(),
+    username: varchar("username", { length: 100 }).notNull(),
     displayOrder: integer("display_order").notNull().default(0),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },

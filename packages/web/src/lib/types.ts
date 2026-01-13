@@ -8,7 +8,10 @@ export type Profile = DbProfile & {
   avatarUrl?: string | null;
 };
 
-export type SocialLink = DbSocialLink;
+// Extend the DB social link with URL computed by backend
+export type SocialLink = DbSocialLink & {
+  url: string;
+};
 
 interface BaseFeature<Config = Record<string, unknown>> {
   id: string;

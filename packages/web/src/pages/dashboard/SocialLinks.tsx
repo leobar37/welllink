@@ -31,10 +31,80 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSocialLinks } from "@/hooks/use-social-links";
 
-const socialLinkSchema = z.object({
-  platform: z.enum(["whatsapp", "instagram", "tiktok", "facebook", "youtube"]),
-  url: z.string().url("Debe ser una URL válida"),
-});
+const socialLinkSchema = z
+  .object({
+    platform: z.enum(["whatsapp", "instagram", "tiktok", "facebook", "youtube"]),
+    username: z.string().min(1, "El usuario es requerido"),
+  })
+  .superRefine((data, ctx) => {
+    const { platform, username } = data;
+    const trimmed = username.trim();
+
+    switch (platform) {
+      case "instagram":
+        if (!/^[a-zA-Z0-9._]{1,30}$/.test(trimmed)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["username"],
+            message:
+              "Usuario de Instagram inválido. Debe tener 1-30 caracteres: letras, números, puntos y guiones bajos.",
+          });
+          return false;
+        }
+        break;
+
+      case "tiktok":
+        if (!/^[a-zA-Z0-9_]{1,24}$/.test(trimmed)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["username"],
+            message:
+              "Usuario de TikTok inválido. Debe tener 1-24 caracteres: letras, números y guiones bajos.",
+          });
+          return false;
+        }
+        break;
+
+      case "facebook":
+        if (!/^[a-zA-Z0-9.-]{5,50}$/.test(trimmed)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["username"],
+            message:
+              "Usuario de Facebook inválido. Debe tener 5-50 caracteres.",
+          });
+          return false;
+        }
+        break;
+
+      case "youtube":
+        if (!/^[a-zA-Z0-9_-]{3,30}$/.test(trimmed)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["username"],
+            message:
+              "Handle de YouTube inválido. Debe tener 3-30 caracteres: letras, números, guiones y guiones bajos.",
+          });
+          return false;
+        }
+        break;
+
+      case "whatsapp":
+        const digitsOnly = trimmed.replace(/\D/g, "");
+        if (digitsOnly.length < 10 || digitsOnly.length > 15) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["username"],
+            message:
+              "Número de WhatsApp inválido. Ingrese solo dígitos (incluyendo código de país).",
+          });
+          return false;
+        }
+        break;
+    }
+
+    return true;
+  });
 
 type SocialLinkValues = z.infer<typeof socialLinkSchema>;
 
@@ -47,7 +117,7 @@ export function SocialLinks() {
     resolver: zodResolver(socialLinkSchema),
     defaultValues: {
       platform: "instagram",
-      url: "",
+      username: "",
     },
   });
 
@@ -129,12 +199,27 @@ export function SocialLinks() {
                 />
                 <FormField
                   control={form.control}
-                  name="url"
+                  name="username"
                   render={({ field }) => (
                     <FormItem className="flex-1 w-full">
-                      <FormLabel>URL</FormLabel>
+                      <FormLabel>
+                        {form.watch("platform") === "whatsapp"
+                          ? "Número de WhatsApp"
+                          : form.watch("platform") === "youtube"
+                          ? "Handle de YouTube"
+                          : "Usuario"}
+                      </FormLabel>
                       <FormControl>
-                        <Input placeholder="https://..." {...field} />
+                        <Input
+                          placeholder={
+                            form.watch("platform") === "whatsapp"
+                              ? "1234567890"
+                              : form.watch("platform") === "youtube"
+                              ? "@usuario"
+                              : "usuario"
+                          }
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -181,7 +266,7 @@ export function SocialLinks() {
                     rel="noreferrer"
                     className="flex-1 min-w-0 text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors flex items-center gap-1"
                   >
-                    <span className="truncate">{link.url}</span>
+                    <span className="truncate">@{link.username}</span>
                     <ExternalLink className="shrink-0 h-3 w-3" />
                   </a>
 

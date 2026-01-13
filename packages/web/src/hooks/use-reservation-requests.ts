@@ -57,7 +57,7 @@ export function usePendingRequests(profileId?: string) {
     queryKey: ["pending-requests", profileId],
     queryFn: async () => {
       if (!profileId) return [];
-      const result = await api.reservations[":profileId"].pending.get();
+      const result = await api.api.reservations[":profileId"].pending.get();
       return result as PendingRequest[];
     },
     enabled: !!profileId,
@@ -70,7 +70,7 @@ export function useReservationStats(profileId?: string) {
     queryKey: ["reservation-stats", profileId],
     queryFn: async () => {
       if (!profileId) return { pending: 0, approved: 0, rejected: 0, expired: 0 };
-      const result = await api.reservations[":profileId"].stats.get();
+      const result = await api.api.reservations[":profileId"].stats.get();
       return result as { pending: number; approved: number; rejected: number; expired: number };
     },
     enabled: !!profileId,
@@ -92,7 +92,7 @@ export function useApproveRequest() {
         price?: number;
       };
     }) => {
-      const result = await api.reservations.approve.post(data);
+      const result = await api.api.reservations.approve.post(data);
       return result;
     },
     onSuccess: () => {
@@ -115,7 +115,7 @@ export function useRejectRequest() {
       rejectedBy: string;
       rejectionReason: string;
     }) => {
-      const result = await api.reservations.reject.post(data);
+      const result = await api.api.reservations.reject.post(data);
       return result;
     },
     onSuccess: () => {

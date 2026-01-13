@@ -3,13 +3,7 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { useProfile } from "./use-profile";
 import { extractErrorMessage } from "@/lib/error-handler";
-
-export interface SocialLink {
-  id: string;
-  platform: "whatsapp" | "instagram" | "tiktok" | "facebook" | "youtube";
-  url: string;
-  displayOrder: number;
-}
+import type { SocialLink } from "@/lib/types";
 
 export function useSocialLinks() {
   const queryClient = useQueryClient();
@@ -35,7 +29,12 @@ export function useSocialLinks() {
   });
 
   const createLink = useMutation({
-    mutationFn: async (newLink: Omit<SocialLink, "id" | "displayOrder">) => {
+    mutationFn: async (
+      newLink: Omit<
+        SocialLink,
+        "id" | "profileId" | "displayOrder" | "createdAt" | "url"
+      >,
+    ) => {
       if (!profile?.id) throw new Error("No profile found");
       const { data, error } = await api.api["social-links"].post({
         profileId: profile.id,
@@ -61,7 +60,7 @@ export function useSocialLinks() {
       data,
     }: {
       id: string;
-      data: Partial<SocialLink>;
+      data: Partial<Omit<SocialLink, "id" | "createdAt" | "url">>;
     }) => {
       const { data: resData, error } =
         await api.api["social-links"][id].put(data);

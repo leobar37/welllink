@@ -1,7 +1,6 @@
 import { Link } from "react-router";
 import { Logo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
-import { ThemeSelector } from "@/components/ui/theme-selector";
 
 export function Navbar() {
   return (
@@ -12,7 +11,6 @@ export function Navbar() {
         </Link>
 
         <nav className="flex items-center gap-2">
-          <ThemeSelector />
           <Button variant="ghost" asChild className="hidden sm:flex">
             <Link to="/auth/login">Iniciar sesión</Link>
           </Button>

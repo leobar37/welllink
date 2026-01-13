@@ -33,12 +33,13 @@ export const clientRoutes = new Elysia({ prefix: "/clients" })
         phone: t.String(),
         email: t.Optional(t.String()),
         label: t
-          .Union([
-            t.Literal("consumidor"),
-            t.Literal("prospecto"),
-            t.Literal("afiliado"),
-          ])
-          .optional(),
+          .Optional(
+            t.Union([
+              t.Literal("consumidor"),
+              t.Literal("prospecto"),
+              t.Literal("afiliado"),
+            ])
+          ),
         notes: t.Optional(t.String()),
       }),
     },
@@ -60,12 +61,13 @@ export const clientRoutes = new Elysia({ prefix: "/clients" })
         phone: t.Optional(t.String()),
         email: t.Optional(t.String()),
         label: t
-          .Union([
-            t.Literal("consumidor"),
-            t.Literal("prospecto"),
-            t.Literal("afiliado"),
-          ])
-          .optional(),
+          .Optional(
+            t.Union([
+              t.Literal("consumidor"),
+              t.Literal("prospecto"),
+              t.Literal("afiliado"),
+            ])
+          ),
         notes: t.Optional(t.String()),
         lastContactAt: t.Optional(t.String()),
       }),
