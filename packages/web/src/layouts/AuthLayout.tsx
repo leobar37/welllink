@@ -9,9 +9,6 @@ export function AuthLayout() {
           <Link to="/" className="inline-flex justify-center">
             <Logo size="lg" />
           </Link>
-          <p className="text-muted-foreground text-sm sm:text-base px-2">
-            Tu tarjeta digital de bienestar
-          </p>
         </div>
         <Outlet />
       </div>

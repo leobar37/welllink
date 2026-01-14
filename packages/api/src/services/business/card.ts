@@ -6,6 +6,7 @@ import { AssetRepository } from "../repository/asset";
 import { SocialLinkRepository } from "../repository/social-link";
 import type { StorageStrategy } from "../storage/storage.interface";
 import { transformSocialLinksWithUrl } from "../../utils/social-links";
+import { env } from "../../config/env";
 
 export interface VirtualCardData {
   profile: {
@@ -38,7 +39,7 @@ export class CardService {
     private socialLinkRepository: SocialLinkRepository,
     private storage: StorageStrategy,
   ) {
-    this.baseUrl = process.env.PUBLIC_URL || "https://wellnesslink.com";
+    this.baseUrl = env.PUBLIC_URL;
   }
 
   /**
@@ -158,13 +159,14 @@ export class CardService {
       // Transform social links with generated URLs
       socialLinks = links.map((link) => ({
         platform: link.platform,
-        url: `${link.platform === "whatsapp" 
-          ? `https://wa.me/${link.username.replace(/\D/g, "")}`
-          : link.platform === "youtube"
-          ? `https://youtube.com/@${link.username}`
-          : link.platform === "tiktok"
-          ? `https://tiktok.com/@${link.username}`
-          : `https://${link.platform}.com/${link.username}`
+        url: `${
+          link.platform === "whatsapp"
+            ? `https://wa.me/${link.username.replace(/\D/g, "")}`
+            : link.platform === "youtube"
+              ? `https://youtube.com/@${link.username}`
+              : link.platform === "tiktok"
+                ? `https://tiktok.com/@${link.username}`
+                : `https://${link.platform}.com/${link.username}`
         }`,
       }));
     }

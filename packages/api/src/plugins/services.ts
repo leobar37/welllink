@@ -3,6 +3,7 @@ import {
   createStorageStrategy,
   type StorageStrategy,
 } from "../services/storage";
+import { env } from "../config/env";
 import { AssetRepository } from "../services/repository/asset";
 import { ProfileRepository } from "../services/repository/profile";
 import { SocialLinkRepository } from "../services/repository/social-link";
@@ -23,8 +24,6 @@ import { EvolutionService } from "../services/business/evolution-api";
 import { WhatsAppConfigService } from "../services/business/whatsapp-config";
 import { WhatsAppService } from "../services/business/whatsapp";
 import { WhatsAppTemplateService } from "../services/business/whatsapp-template";
-import { getWhatsAppQueue } from "../services/queue/whatsapp-queue";
-import { getRedisConnection } from "../lib/redis";
 
 // NEW IMPORTS
 import { ClientRepository } from "../services/repository/client";
@@ -95,28 +94,14 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
 
     // Evolution API service
     const evolutionService = new EvolutionService({
-      baseUrl: process.env.EVOLUTION_API_URL || "http://localhost:8080",
-      apiKey: process.env.EVOLUTION_API_KEY || "",
+      baseUrl: env.EVOLUTION_API_URL,
+      apiKey: env.EVOLUTION_API_KEY,
     });
 
-    // WhatsApp queue
-    const whatsappQueue = await getWhatsAppQueue(
-      whatsappMessageRepository,
-      whatsappConfigRepository,
-      evolutionService,
-    );
-
-    // NEW QUEUE: Campaign queue
+    // NEW RESERVATION SERVICES
     const templateVariablesService = new TemplateVariablesService(
       profileRepository,
       clientRepository,
-    );
-
-    const campaignQueue = await getCampaignQueue(
-      campaignRepository,
-      campaignAudienceRepository,
-      clientRepository,
-      templateVariablesService,
     );
 
     // NEW RESERVATION SERVICES
@@ -186,7 +171,6 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     return {
       services: {
         storage,
-        redis: getRedisConnection(),
         // Repositories
         assetRepository,
         profileRepository,
@@ -227,9 +211,6 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         // NEW RESERVATION SERVICES
         approvalService,
         notificationService,
-        // Queues
-        whatsappQueue,
-        campaignQueue, // NEW
       },
     };
   },

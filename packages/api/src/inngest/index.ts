@@ -6,4 +6,4 @@
  */
 
 export { inngest } from "../lib/inngest-client";
-export * from "./functions";
+export * from "./functions/index";

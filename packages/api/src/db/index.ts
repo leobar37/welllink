@@ -1,11 +1,12 @@
 // Load environment variables FIRST
-import { config } from "dotenv";
-config({ path: ".env" });
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig({ path: ".env" });
 
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
 import { setDefaultResultOrder } from "node:dns";
+import { env } from "../config/env";
 
 // Force IPv4 DNS resolution BEFORE any database connection
 // This MUST happen before postgres() is called
@@ -13,7 +14,7 @@ setDefaultResultOrder("ipv4first");
 console.log("🔧 [DB] DNS resolution set to prefer IPv4");
 
 // Validate DATABASE_URL before attempting connection
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = env.DATABASE_URL;
 
 if (!databaseUrl) {
   console.error(
@@ -21,12 +22,13 @@ if (!databaseUrl) {
   );
   console.error(
     "📝 Available environment variables:",
-    Object.keys(process.env).filter(
-      (k: string) => k.includes("DATABASE") || k.includes("DB"),
-    ),
+    Object.entries({
+      DATABASE_URL: env.DATABASE_URL,
+      NODE_ENV: env.NODE_ENV,
+    }).filter(([k, v]) => v && (k.includes("DATABASE") || k.includes("DB"))),
   );
   console.error(
-    "🔧 Please configure DATABASE_URL in your deployment platform (Dokploy)",
+    "🔧 Please configure DATABASE_URL in your deployment platform (Deploy)",
   );
   throw new Error(
     "DATABASE_URL is required. Set it to: postgresql://user:password@host:port/database",

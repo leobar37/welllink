@@ -3,6 +3,7 @@ import { z } from "zod";
 import { authPlugin } from "../../plugins/auth";
 import { errorMiddleware } from "../../middleware/error";
 import { auth } from "../../lib/auth";
+import { env } from "../../config/env";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -54,7 +55,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       if (result.token && cookie.session) {
         cookie.session.value = result.token;
         cookie.session.httpOnly = true;
-        cookie.session.secure = process.env.NODE_ENV === "production";
+        cookie.session.secure = env.NODE_ENV === "production";
         cookie.session.sameSite = "lax";
         cookie.session.maxAge = 60 * 60 * 24 * 7; // 7 days
       }

@@ -2,6 +2,9 @@
 import { config } from "dotenv";
 config({ path: ".env" });
 
+// Import centralized env config
+import { env } from "./config/env";
+
 import { Elysia, redirect } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { setDefaultResultOrder } from "node:dns";
@@ -37,6 +40,7 @@ import { reservationRoutes } from "./api/routes/reservations";
 import { aiRecommendationRoutes } from "./api/routes/ai-recommendation";
 import { whatsappRoutes } from "./api/routes/whatsapp";
 import { clientRoutes } from "./api/routes/client";
+import { medicalServiceRoutes } from "./api/routes/medical-services";
 import { createStorageStrategy } from "./services/storage";
 
 // Inngest
@@ -70,7 +74,7 @@ const app = new Elysia()
       await storageService.initialize();
 
       // If using Supabase, redirect to public URL (more efficient)
-      const provider = process.env.STORAGE_PROVIDER || "local";
+      const provider = env.STORAGE_PROVIDER || "local";
       if (provider === "supabase") {
         const publicUrl = storageService.getPublicUrl(params.path);
         // Use inline redirect instead
@@ -136,12 +140,15 @@ const app = new Elysia()
       .use(reservationRoutes)
       .use(aiRecommendationRoutes)
       .use(whatsappRoutes)
-      .use(clientRoutes),
+      .use(clientRoutes)
+      .use(medicalServiceRoutes),
   )
   // Inngest serve endpoint for workflow orchestration
-  .all("/api/inngest", ({ request }) => serve({ client: inngest, functions })(request))
+  .all("/api/inngest", ({ request }) =>
+    serve({ client: inngest, functions })(request),
+  )
   .listen({
-    port: Number(process.env.PORT) || 5300,
+    port: Number(env.PORT),
     hostname: "0.0.0.0",
   });
 

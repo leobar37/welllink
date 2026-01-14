@@ -4,18 +4,19 @@ import type {
   UploadResult,
   UploadOptions,
 } from "./storage.interface";
+import { env } from "../../config/env";
 
 export class SupabaseStorageStrategy implements StorageStrategy {
   private supabase: SupabaseClient;
   private initialized = false;
 
   constructor(private bucket: string) {
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabaseUrl = env.SUPABASE_URL;
+    const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
       throw new Error(
-        "SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required"
+        "SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required",
       );
     }
 
@@ -41,7 +42,7 @@ export class SupabaseStorageStrategy implements StorageStrategy {
             "application/pdf",
             "video/mp4",
           ],
-        }
+        },
       );
 
       if (createError) {
@@ -64,7 +65,7 @@ export class SupabaseStorageStrategy implements StorageStrategy {
     userId: string,
     file: File,
     type: "file" | "asset",
-    options?: UploadOptions
+    options?: UploadOptions,
   ): Promise<UploadResult> {
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
@@ -133,7 +134,7 @@ export class SupabaseStorageStrategy implements StorageStrategy {
 
   async getSignedUrl(
     storagePath: string,
-    expiresIn: number = 3600
+    expiresIn: number = 3600,
   ): Promise<string> {
     const { data, error } = await this.supabase.storage
       .from(this.bucket)

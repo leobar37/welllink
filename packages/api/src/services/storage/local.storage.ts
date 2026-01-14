@@ -5,6 +5,7 @@ import type {
   UploadResult,
   UploadOptions,
 } from "./storage.interface";
+import { env } from "../../config/env";
 
 export class LocalStorageStrategy implements StorageStrategy {
   private uploadDir: string;
@@ -32,7 +33,7 @@ export class LocalStorageStrategy implements StorageStrategy {
     userId: string,
     file: File,
     type: "file" | "asset",
-    _options?: UploadOptions
+    _options?: UploadOptions,
   ): Promise<UploadResult> {
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
@@ -84,13 +85,13 @@ export class LocalStorageStrategy implements StorageStrategy {
   }
 
   getPublicUrl(storagePath: string): string {
-    const baseUrl = process.env.API_BASE_URL || "http://localhost:5300";
+    const baseUrl = env.API_BASE_URL;
     return `${baseUrl}/api/files/${encodeURIComponent(storagePath)}`;
   }
 
   async getSignedUrl(
     storagePath: string,
-    _expiresIn: number = 3600
+    _expiresIn: number = 3600,
   ): Promise<string> {
     return this.getPublicUrl(storagePath);
   }

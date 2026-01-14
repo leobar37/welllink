@@ -3,26 +3,27 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "../db";
 import * as schema from "../db/schema";
 import { getAllowedOrigins } from "../config/cors";
-
-// Get base URL from environment or use default
-const getBaseURL = (): string => {
-  return process.env.BETTER_AUTH_URL || "http://localhost:5300";
-};
+import { env } from "../config/env";
 
 // Check if we're in production
-const isProduction = process.env.NODE_ENV === "production";
+const isProduction = env.NODE_ENV === "production";
 
 const allowedOrigins = getAllowedOrigins();
 
 console.log("🔐 [Auth] Initializing Better Auth");
-console.log(`   Environment: ${process.env.NODE_ENV || "development"}`);
-console.log(`   Base URL: ${getBaseURL()}`);
-console.log(`   Trusted Origins: ${allowedOrigins === true ? "any (dev mode)" : allowedOrigins.join(", ")}`);
+console.log(`   Environment: ${env.NODE_ENV}`);
+console.log(`   Base URL: ${env.BETTER_AUTH_URL}`);
+console.log(
+  `   Trusted Origins: ${
+    typeof allowedOrigins === "function"
+      ? "any (dev mode)"
+      : allowedOrigins.join(", ")
+  }`,
+);
 
 export const auth = betterAuth({
-  baseURL: getBaseURL(),
-  secret:
-    process.env.BETTER_AUTH_SECRET || "development-secret-change-in-production",
+  baseURL: env.BETTER_AUTH_URL,
+  secret: env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {

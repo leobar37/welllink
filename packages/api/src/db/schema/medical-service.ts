@@ -10,6 +10,7 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
+import { asset } from "./asset";
 
 export const medicalService = pgTable(
   "medical_service",
@@ -18,6 +19,7 @@ export const medicalService = pgTable(
     profileId: uuid("profile_id")
       .notNull()
       .references(() => profile.id, { onDelete: "cascade" }),
+    // imageAssetId: uuid("image_asset_id").references(() => asset.id), // TODO: Add migration for this column
     name: varchar("name", { length: 255 }).notNull(),
     description: text("description"),
     duration: integer("duration").notNull(),

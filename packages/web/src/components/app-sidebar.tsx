@@ -1,4 +1,4 @@
-import { User, Settings, QrCode, Sparkles, LayoutDashboard, Link as LinkIcon, Palette, Users } from "lucide-react"
+import { User, Settings, QrCode, Sparkles, LayoutDashboard, Link as LinkIcon, Palette, Users, Stethoscope, Folder } from "lucide-react"
 import { Logo } from "@/components/ui/logo"
 import {
   Sidebar,
@@ -37,6 +37,11 @@ const items = [
     icon: Users,
   },
   {
+    title: "Servicios Médicos",
+    url: "/dashboard/services",
+    icon: Stethoscope,
+  },
+  {
     title: "Funciones",
     url: "/dashboard/features",
     icon: Sparkles,
@@ -55,6 +60,11 @@ const items = [
     title: "Configuración",
     url: "/dashboard/settings",
     icon: Settings,
+  },
+  {
+    title: "Archivos",
+    url: "/dashboard/files",
+    icon: Folder,
   },
 ]
 

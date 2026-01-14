@@ -1,5 +1,6 @@
 import type { StorageStrategy } from "./storage.interface";
 import { LocalStorageStrategy } from "./local.storage";
+import { env } from "../../config/env";
 
 export type StorageProvider = "supabase" | "local";
 
@@ -7,13 +8,13 @@ export async function createStorageStrategy(
   provider?: StorageProvider,
 ): Promise<StorageStrategy> {
   const storageProvider =
-    provider || (process.env.STORAGE_PROVIDER as StorageProvider) || "local";
+    provider || (env.STORAGE_PROVIDER as StorageProvider) || "local";
 
   switch (storageProvider) {
     case "supabase": {
-      const bucket = process.env.STORAGE_BUCKET;
-      const supabaseUrl = process.env.SUPABASE_URL;
-      const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      const bucket = env.STORAGE_BUCKET;
+      const supabaseUrl = env.SUPABASE_URL;
+      const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY;
 
       if (!bucket) {
         throw new Error("STORAGE_BUCKET is required for Supabase storage");

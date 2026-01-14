@@ -2,6 +2,7 @@ import QRCode from "qrcode";
 import { NotFoundException } from "../../utils/http-exceptions";
 import type { RequestContext } from "../../types/context";
 import { ProfileRepository } from "../repository/profile";
+import { env } from "../../config/env";
 
 export type QRFormat = "png" | "svg";
 
@@ -26,7 +27,7 @@ export class QRService {
   private baseUrl: string;
 
   constructor(private profileRepository: ProfileRepository) {
-    this.baseUrl = process.env.PUBLIC_URL || "https://wellnesslink.com";
+    this.baseUrl = env.PUBLIC_URL;
   }
 
   /**

@@ -7,6 +7,7 @@ import { socialLink } from "./social-link";
 import { healthSurveyResponse } from "./health-survey";
 import { profileView, socialClick, qrDownload } from "./analytics";
 import { aiRecommendation } from "./ai-recommendation";
+import { medicalService } from "./medical-service";
 
 // User relations
 export const userRelations = relations(user, ({ many }) => ({
@@ -62,6 +63,7 @@ export const profileRelations = relations(profile, ({ one, many }) => ({
   aiRecommendations: many(aiRecommendation),
   views: many(profileView),
   qrDownloads: many(qrDownload),
+  medicalServices: many(medicalService),
 }));
 
 // Profile Customization relations
@@ -135,4 +137,16 @@ export const qrDownloadRelations = relations(qrDownload, ({ one }) => ({
     fields: [qrDownload.profileId],
     references: [profile.id],
   }),
+}));
+
+// Medical Service relations
+export const medicalServiceRelations = relations(medicalService, ({ one }) => ({
+  profile: one(profile, {
+    fields: [medicalService.profileId],
+    references: [profile.id],
+  }),
+  // imageAsset: one(asset, {
+  //   fields: [medicalService.imageAssetId],
+  //   references: [asset.id],
+  // }),
 }));

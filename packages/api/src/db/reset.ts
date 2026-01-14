@@ -1,10 +1,11 @@
 import { config } from "dotenv";
 import postgres from "postgres";
+import { env } from "../config/env";
 
 // Load environment variables
 config({ path: ".env" });
 
-const sql = postgres(process.env.DATABASE_URL!);
+const sql = postgres(env.DATABASE_URL);
 
 async function reset() {
   console.log("\n🗑️  Starting database reset...\n");

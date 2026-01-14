@@ -125,9 +125,9 @@ Usage notes:
 <available_skills>
 
 <skill>
-<name>link</name>
+<name>frontend</name>
 <description>|</description>
-<location>project</location>
+<location>global</location>
 </skill>
 
 </available_skills>
