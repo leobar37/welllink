@@ -3,10 +3,12 @@ import { servicesPlugin } from "../../plugins/services";
 import { errorMiddleware } from "../../middleware/error";
 import { ProfileService } from "../../services/business/profile";
 import { SocialLinkService } from "../../services/business/social-link";
+import { MedicalServiceBusinessService } from "../../services/business/medical-service";
 import { ProfileRepository } from "../../services/repository/profile";
 import { SocialLinkRepository } from "../../services/repository/social-link";
 import { AssetRepository } from "../../services/repository/asset";
 import { AnalyticsRepository } from "../../services/repository/analytics";
+import { MedicalServiceRepository } from "../../services/repository/medical-service";
 import { DEFAULT_THEME_ID } from "../../config/themes";
 
 export const publicRoutes = new Elysia({ prefix: "/public" })
@@ -23,6 +25,7 @@ export const publicRoutes = new Elysia({ prefix: "/public" })
     const socialLinkRepository = new SocialLinkRepository();
     const assetRepository = new AssetRepository();
     const analyticsRepository = new AnalyticsRepository();
+    const medicalServiceRepository = new MedicalServiceRepository();
 
     const profileService = new ProfileService(
       profileRepository,
@@ -35,14 +38,20 @@ export const publicRoutes = new Elysia({ prefix: "/public" })
       analyticsRepository,
     );
 
+    const medicalServiceService = new MedicalServiceBusinessService(
+      medicalServiceRepository,
+      assetRepository,
+    );
+
     return {
       profileService,
       socialLinkService,
+      medicalServiceService,
     };
   })
   .get(
     "/profiles/:username",
-    async ({ params, profileService, socialLinkService }) => {
+    async ({ params, profileService, socialLinkService, medicalServiceService }) => {
       // Create a guest context
       const guestCtx = {
         userId: "", // Empty string or specific guest ID
@@ -59,26 +68,18 @@ export const publicRoutes = new Elysia({ prefix: "/public" })
         profile.id,
       );
 
+      // Fetch active medical services
+      const allServices = await medicalServiceService.getServicesByProfile(profile.id);
+      const medicalServices = allServices.filter((service) => service.isActive);
+
       // Build features array from profile's featuresConfig
       const featuresConfig = profile.featuresConfig || {};
-      const healthSurveyConfig = featuresConfig.healthSurvey || {
-        enabled: true,
-        buttonText: "Evalúate gratis",
-      };
       const whatsappCtaConfig = featuresConfig.whatsappCta || {
         enabled: false,
         buttonText: "Escríbeme por WhatsApp",
       };
 
       const features = [
-        {
-          id: "health-survey",
-          type: "health-survey",
-          isEnabled: healthSurveyConfig.enabled,
-          config: {
-            buttonText: healthSurveyConfig.buttonText || "Evalúate gratis",
-          },
-        },
         {
           id: "whatsapp-cta",
           type: "whatsapp-cta",
@@ -96,14 +97,6 @@ export const publicRoutes = new Elysia({ prefix: "/public" })
       return {
         profile: {
           ...profile,
-          // Ensure we return the avatar URL if it exists (ProfileService might return avatarId)
-          // actually ProfileService returns the raw profile record.
-          // We might need to resolve the avatar URL if it's not in the record.
-          // But for now let's assume the frontend handles it or the record has it.
-          // Looking at the schema, it has avatarId.
-          // The frontend expects avatarUrl.
-          // We should probably resolve it here or let the frontend construct it.
-          // For MVP, let's assume the frontend constructs it or we add it here.
           avatarUrl: profile.avatarId
             ? `/api/assets/${profile.avatarId}/public`
             : null,
@@ -111,6 +104,7 @@ export const publicRoutes = new Elysia({ prefix: "/public" })
         socialLinks,
         features,
         themeId,
+        medicalServices,
       };
     },
   );

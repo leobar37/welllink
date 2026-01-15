@@ -104,6 +104,24 @@ export class ClientService {
     return this.clientNoteRepository.findByClientId(ctx, clientId);
   }
 
+  async updateNote(ctx: RequestContext, noteId: string, note: string) {
+    const existingNote = await this.clientNoteRepository.findById(ctx, noteId);
+    if (!existingNote) {
+      throw new NotFoundException("Note not found");
+    }
+
+    return this.clientNoteRepository.update(ctx, noteId, { note });
+  }
+
+  async deleteNote(ctx: RequestContext, noteId: string) {
+    const existingNote = await this.clientNoteRepository.findById(ctx, noteId);
+    if (!existingNote) {
+      throw new NotFoundException("Note not found");
+    }
+
+    await this.clientNoteRepository.delete(ctx, noteId);
+  }
+
   async createClientFromSurvey(
     ctx: RequestContext,
     survey: HealthSurveyResponse,

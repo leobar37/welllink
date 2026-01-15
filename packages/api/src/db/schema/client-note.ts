@@ -1,17 +1,11 @@
 import { pgTable, uuid, text, timestamp, index } from "drizzle-orm/pg-core";
-import { client } from "./client";
-import { profile } from "./profile";
 
 export const clientNote = pgTable(
   "client_note",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    clientId: uuid("client_id")
-      .notNull()
-      .references(() => client.id, { onDelete: "cascade" }),
-    profileId: uuid("profile_id")
-      .notNull()
-      .references(() => profile.id, { onDelete: "cascade" }),
+    clientId: uuid("client_id").notNull(),
+    profileId: uuid("profile_id").notNull(),
     note: text("note").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },

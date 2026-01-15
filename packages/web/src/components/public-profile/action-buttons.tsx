@@ -1,7 +1,7 @@
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
 import type { Feature } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, MessageCircle } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { useWhatsApp } from "@/hooks/use-whatsapp";
 
 interface ActionButtonsProps {
@@ -20,55 +20,29 @@ export function ActionButtons({
   // No buttons to show
   if (!activeFeatures.length) return null;
 
-  // Get the appropriate link for each feature type
-  const getFeatureLink = (feature: Feature): string => {
-    if (feature.type === "health-survey") {
-      return `/${username}/survey`;
-    }
-    if (feature.type === "whatsapp-cta" && whatsappNumber) {
-      // Clean phone number and create WhatsApp link
-      const cleanPhone = whatsappNumber.replace(/[^\d+]/g, "");
-      return `https://wa.me/${cleanPhone}`;
-    }
-    // Default fallback for other feature types
-    return `#feature-${feature.id}`;
-  };
+  // Filter to only show WhatsApp CTA
+  const whatsappFeature = activeFeatures.find((f) => f.type === "whatsapp-cta");
+
+  if (!whatsappFeature || !whatsappNumber || !config.isConnected) {
+    return null;
+  }
+
+  // Clean phone number and create WhatsApp link
+  const cleanPhone = whatsappNumber.replace(/[^\d+]/g, "");
+  const link = `https://wa.me/${cleanPhone}`;
 
   return (
-    <div className="w-full max-w-sm space-y-3">
-      {activeFeatures.map((feature) => {
-        const link = getFeatureLink(feature);
-        const isInternalLink = link.startsWith("/");
-        const isWhatsAppCta = feature.type === "whatsapp-cta";
-
-        // Don't render WhatsApp CTA if no phone number configured or not connected
-        if (isWhatsAppCta && (!whatsappNumber || !config.isConnected)) {
-          return null;
-        }
-
-        return (
-          <Button
-            key={feature.id}
-            className="w-full h-12 text-base font-medium shadow-sm transition-all hover:scale-[1.02]"
-            size="lg"
-            asChild
-          >
-            {isInternalLink ? (
-              <Link to={link}>
-                {isWhatsAppCta && <MessageCircle className="mr-2 h-4 w-4" />}
-                {(feature.config.buttonText as string) || "Ver más"}
-                {!isWhatsAppCta && <ArrowRight className="ml-2 h-4 w-4" />}
-              </Link>
-            ) : (
-              <a href={link} target="_blank" rel="noopener noreferrer">
-                {isWhatsAppCta && <MessageCircle className="mr-2 h-4 w-4" />}
-                {(feature.config.buttonText as string) || "Ver más"}
-                {!isWhatsAppCta && <ArrowRight className="ml-2 h-4 w-4" />}
-              </a>
-            )}
-          </Button>
-        );
-      })}
+    <div className="w-full max-w-sm">
+      <Button
+        className="w-full h-12 text-base font-medium shadow-sm transition-all hover:scale-[1.02]"
+        size="lg"
+        asChild
+      >
+        <a href={link} target="_blank" rel="noopener noreferrer">
+          <MessageCircle className="mr-2 h-4 w-4" />
+          {(whatsappFeature.config.buttonText as string) || "Escríbeme por WhatsApp"}
+        </a>
+      </Button>
     </div>
   );
 }

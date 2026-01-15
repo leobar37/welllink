@@ -6,6 +6,7 @@ import { ProfileHeader } from "@/components/public-profile/profile-header";
 import { SocialLinks } from "@/components/public-profile/social-links";
 import { ActionButtons } from "@/components/public-profile/action-buttons";
 import { FloatingActions } from "@/components/public-profile/floating-actions";
+import { MedicalServices } from "@/components/public-profile/medical-services";
 import { ProfileThemeProvider } from "@/components/public-profile/theme-provider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
@@ -87,6 +88,11 @@ export function PublicProfilePage() {
           <ProfileHeader profile={data.profile} />
 
           <SocialLinks links={data.socialLinks} />
+
+          <MedicalServices
+            services={data.medicalServices || []}
+            username={data.profile.username}
+          />
 
           <ActionButtons
             features={data.features}

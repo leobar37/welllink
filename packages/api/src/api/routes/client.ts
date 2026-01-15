@@ -123,4 +123,23 @@ export const clientRoutes = new Elysia({ prefix: "/clients" })
         note: t.String(),
       }),
     },
-  );
+  )
+
+  // Update client note
+  .put(
+    "/:id/notes/:noteId",
+    async ({ params, body, ctx, services }) => {
+      return services.clientService.updateNote(ctx!, params.noteId, body.note);
+    },
+    {
+      body: t.Object({
+        note: t.String(),
+      }),
+    },
+  )
+
+  // Delete client note
+  .delete("/:id/notes/:noteId", async ({ params, ctx, services, set }) => {
+    await services.clientService.deleteNote(ctx!, params.noteId);
+    set.status = 204;
+  });

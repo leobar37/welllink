@@ -11,6 +11,7 @@ import {
 import { Loader2, Plus, Search } from "lucide-react";
 import { ClientCard } from "./ClientCard";
 import { ClientForm } from "./ClientForm";
+import { ClientNotesModal } from "./ClientNotesModal";
 import { useClients } from "@/hooks/use-clients";
 import type { Client } from "@/hooks/use-clients";
 
@@ -18,6 +19,7 @@ export function ClientList() {
   const { clients, isLoading, createClient, updateClient, deleteClient } = useClients();
   const [showForm, setShowForm] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | undefined>();
+  const [viewingClient, setViewingClient] = useState<Client | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [labelFilter, setLabelFilter] = useState<"all" | "consumidor" | "prospecto" | "afiliado">("all");
 
@@ -60,6 +62,14 @@ export function ClientList() {
   const handleCloseForm = () => {
     setShowForm(false);
     setEditingClient(undefined);
+  };
+
+  const handleViewNotes = (client: Client) => {
+    setViewingClient(client);
+  };
+
+  const handleCloseNotes = () => {
+    setViewingClient(null);
   };
 
   if (isLoading) {
@@ -113,6 +123,7 @@ export function ClientList() {
               client={client}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onViewNotes={handleViewNotes}
             />
           ))
         ) : (
@@ -131,6 +142,15 @@ export function ClientList() {
         client={editingClient}
         onSave={handleSave}
       />
+
+      {/* Client Notes Modal */}
+      {viewingClient && (
+        <ClientNotesModal
+          client={viewingClient}
+          open={!!viewingClient}
+          onOpenChange={handleCloseNotes}
+        />
+      )}
     </div>
   );
 }

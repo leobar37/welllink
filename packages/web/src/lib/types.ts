@@ -1,6 +1,7 @@
 import type {
   Profile as DbProfile,
   SocialLink as DbSocialLink,
+  MedicalService as DbMedicalService,
 } from "../../../api/src/db/schema";
 
 // Extend the DB profile with properties returned by the API (e.g. computed avatarUrl)
@@ -13,17 +14,14 @@ export type SocialLink = DbSocialLink & {
   url: string;
 };
 
+// Medical service type for public profile
+export type MedicalService = DbMedicalService;
+
 interface BaseFeature<Config = Record<string, unknown>> {
   id: string;
   type: string;
   isEnabled: boolean;
   config: Config;
-}
-
-export interface HealthSurveyFeature extends BaseFeature<{
-  buttonText?: string;
-}> {
-  type: "health-survey";
 }
 
 export interface WhatsAppCtaFeature extends BaseFeature<{
@@ -33,7 +31,6 @@ export interface WhatsAppCtaFeature extends BaseFeature<{
 }
 
 export type Feature =
-  | HealthSurveyFeature
   | WhatsAppCtaFeature
   | BaseFeature;
 
@@ -42,4 +39,5 @@ export interface PublicProfileData {
   socialLinks: SocialLink[];
   features: Feature[];
   themeId?: string;
+  medicalServices?: MedicalService[];
 }
