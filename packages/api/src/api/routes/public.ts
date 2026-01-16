@@ -9,6 +9,7 @@ import { SocialLinkRepository } from "../../services/repository/social-link";
 import { AssetRepository } from "../../services/repository/asset";
 import { AnalyticsRepository } from "../../services/repository/analytics";
 import { MedicalServiceRepository } from "../../services/repository/medical-service";
+import { TimeSlotRepository } from "../../services/repository/time-slot";
 import { DEFAULT_THEME_ID } from "../../config/themes";
 
 export const publicRoutes = new Elysia({ prefix: "/public" })
@@ -105,6 +106,68 @@ export const publicRoutes = new Elysia({ prefix: "/public" })
         features,
         themeId,
         medicalServices,
+      };
+    },
+  )
+  .get(
+    "/profiles/:username/services",
+    async ({ params, profileService }) => {
+      const guestCtx = {
+        userId: "",
+        email: "",
+        role: "guest",
+      };
+
+      const profile = await profileService.getProfileByUsername(
+        guestCtx,
+        params.username,
+      );
+
+      const medicalServiceRepository = new MedicalServiceRepository();
+      const allServices = await medicalServiceRepository.findActiveByProfileId(profile.id);
+
+      return {
+        services: allServices,
+      };
+    },
+  )
+  .get(
+    "/profiles/:username/slots/:serviceId",
+    async ({ params, query, profileService }) => {
+      const guestCtx = {
+        userId: "",
+        email: "",
+        role: "guest",
+      };
+
+      const profile = await profileService.getProfileByUsername(
+        guestCtx,
+        params.username,
+      );
+
+      const timeSlotRepository = new TimeSlotRepository();
+
+      const startDate = query.date
+        ? new Date(query.date)
+        : new Date();
+      startDate.setHours(0, 0, 0, 0);
+
+      const endDate = new Date(startDate);
+      endDate.setHours(23, 59, 59, 999);
+
+      const slots = await timeSlotRepository.findAvailableSlots(
+        profile.id,
+        params.serviceId,
+        startDate,
+      );
+
+      return {
+        slots: slots.filter(slot => {
+          const slotDate = new Date(slot.startTime);
+          return slotDate >= startDate && slotDate <= endDate;
+        }),
+        serviceId: params.serviceId,
+        date: query.date || startDate.toISOString(),
       };
     },
   );

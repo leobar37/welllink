@@ -15,6 +15,7 @@ export const slotStatus = [
   "reserved",
   "expired",
   "blocked",
+  "cancelled",
 ] as const;
 export type SlotStatus = (typeof slotStatus)[number];
 

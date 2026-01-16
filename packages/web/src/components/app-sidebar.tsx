@@ -1,4 +1,4 @@
-import { User, Settings, QrCode, Sparkles, LayoutDashboard, Link as LinkIcon, Palette, Users, Stethoscope, Folder, Calendar } from "lucide-react"
+import { User, Settings, QrCode, Sparkles, LayoutDashboard, Link as LinkIcon, Palette, Users, Stethoscope, Folder, Calendar, Clock, CalendarDays } from "lucide-react"
 import { Logo } from "@/components/ui/logo"
 import {
   Sidebar,
@@ -25,6 +25,16 @@ const items = [
     title: "Reservas",
     url: "/dashboard/reservations",
     icon: Calendar,
+  },
+  {
+    title: "Disponibilidad",
+    url: "/dashboard/availability",
+    icon: Clock,
+  },
+  {
+    title: "Slots",
+    url: "/dashboard/slots",
+    icon: CalendarDays,
   },
   {
     title: "Perfil",

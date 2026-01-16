@@ -41,6 +41,8 @@ import { aiRecommendationRoutes } from "./api/routes/ai-recommendation";
 import { whatsappRoutes } from "./api/routes/whatsapp";
 import { clientRoutes } from "./api/routes/client";
 import { medicalServiceRoutes } from "./api/routes/medical-services";
+import { availabilityRoutes } from "./api/routes/availability";
+import { slotsRoutes } from "./api/routes/slots";
 import { createStorageStrategy } from "./services/storage";
 
 // Inngest
@@ -141,7 +143,9 @@ const app = new Elysia()
       .use(aiRecommendationRoutes)
       .use(whatsappRoutes)
       .use(clientRoutes)
-      .use(medicalServiceRoutes),
+      .use(medicalServiceRoutes)
+      .use(availabilityRoutes)
+      .use(slotsRoutes),
   )
   // Inngest serve endpoint for workflow orchestration
   .all("/api/inngest", ({ request }) =>

@@ -39,6 +39,7 @@ export const reservationRoutes = new Elysia({ prefix: "/reservations" })
     const notificationService = new NotificationService(
       whatsappConfigRepository,
       profileRepository,
+      medicalServiceRepository,
       evolutionService,
     );
 
@@ -53,7 +54,7 @@ export const reservationRoutes = new Elysia({ prefix: "/reservations" })
     async ({ body, set, reservationRequestService, notificationService }) => {
       const result = await reservationRequestService.createRequest(body);
 
-      if (result.slot.profileId) {
+      if (result.slot && result.slot.profileId) {
         await notificationService.notifyDoctorNewRequest({
           requestId: result.request.id,
           profileId: result.slot.profileId,
@@ -111,9 +112,26 @@ export const reservationRoutes = new Elysia({ prefix: "/reservations" })
   .post(
     "/approve",
     async ({ body, set, approvalService, notificationService }) => {
-      const result = await approvalService.approveRequest(body);
+      // Transform changes from notification format to approval service format
+      const approvalChanges = body.changes ? {
+        // If the doctor selected a different time slot, they would provide timeSlotId
+        // For now, we'll pass empty changes as the time slot selection is done elsewhere
+      } : undefined;
 
-      if (result.reservation) {
+      const result = await approvalService.approveRequest({
+        requestId: body.requestId,
+        approvedBy: body.approvedBy,
+        notes: body.notes,
+        changes: approvalChanges,
+      });
+
+      if (result.reservation && result.slot && result.request) {
+        const changes = body.changes ? {
+          newDate: body.changes.newDate ? new Date(body.changes.newDate) : undefined,
+          newTime: body.changes.newTime,
+          newService: body.changes.newService,
+        } : undefined;
+
         await notificationService.notifyPatientApproval({
           requestId: body.requestId,
           profileId: result.request.profileId,
@@ -126,7 +144,7 @@ export const reservationRoutes = new Elysia({ prefix: "/reservations" })
             hour: "2-digit",
             minute: "2-digit",
           }),
-          changes: body.changes,
+          changes,
         });
       }
 
@@ -140,9 +158,9 @@ export const reservationRoutes = new Elysia({ prefix: "/reservations" })
         notes: t.Optional(t.String()),
         changes: t.Optional(
           t.Object({
-            serviceId: t.Optional(t.String()),
-            timeSlotId: t.Optional(t.String()),
-            price: t.Optional(t.Number()),
+            newDate: t.Optional(t.String()), // ISO date string
+            newTime: t.Optional(t.String()), // Time string "HH:MM"
+            newService: t.Optional(t.String()), // Service name
           }),
         ),
       }),

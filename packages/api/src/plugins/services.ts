@@ -208,6 +208,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         campaignTemplateService,
         campaignService,
         templateVariablesService,
+        evolutionService,
         // NEW RESERVATION SERVICES
         approvalService,
         notificationService,
