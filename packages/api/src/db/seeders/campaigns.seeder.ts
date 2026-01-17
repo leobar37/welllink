@@ -2,7 +2,7 @@ import { createSeederContext } from "./helpers";
 import { CampaignTemplateRepository } from "../../services/repository/campaign-template";
 import { CampaignRepository } from "../../services/repository/campaign";
 import { createdProfileIds } from "./profiles.seeder";
-import { SEED_USERS } from "./users.seeder";
+import { getTestUserId } from "./users.seeder";
 import { eq } from "drizzle-orm";
 import { campaignTemplate, campaign } from "../schema";
 import { CampaignStatus } from "../schema/campaign";
@@ -15,9 +15,9 @@ const CAMPAIGN_TEMPLATE_DATA = [
   {
     key: "template_promo",
     profileKey: "maria",
-    userIndex: 0,
     name: "Promoción Taller Grupal",
-    content: "Hola {{nombre}}, 👋\n\nTe invito a mi próximo taller de {TALLER}. Cupos limitados.\n\n{FECHA} | {HORA}\n\n¿Te anotas?",
+    content:
+      "Hola {{nombre}}, 👋\n\nTe invito a mi próximo taller de {TALLER}. Cupos limitados.\n\n{FECHA} | {HORA}\n\n¿Te anotas?",
     objective: "Promoción",
     variables: ["nombre", "TALLER", "FECHA", "HORA"],
     usageCount: 2,
@@ -25,9 +25,9 @@ const CAMPAIGN_TEMPLATE_DATA = [
   {
     key: "template_followup",
     profileKey: "maria",
-    userIndex: 0,
     name: "Seguimiento Post-Consulta",
-    content: "Hola {{nombre}}, ¿cómo te va con el plan?\n\nRecuerda beber agua y mantener los horarios de comida.\n\n¡Ánimo!",
+    content:
+      "Hola {{nombre}}, ¿cómo te va con el plan?\n\nRecuerda beber agua y mantener los horarios de comida.\n\n¡Ánimo!",
     objective: "Retención",
     variables: ["nombre"],
     usageCount: 5,
@@ -35,9 +35,9 @@ const CAMPAIGN_TEMPLATE_DATA = [
   {
     key: "template_newsletter",
     profileKey: "maria",
-    userIndex: 0,
     name: "Boletín Mensual - Tips de Nutrición",
-    content: "Hola {{nombre}}, 🥗\n\nEste mes te comparto: {TIP_1} y {TIP_2}.\n\nPara más info, escríbeme.",
+    content:
+      "Hola {{nombre}}, 🥗\n\nEste mes te comparto: {TIP_1} y {TIP_2}.\n\nPara más info, escríbeme.",
     objective: "Engagement",
     variables: ["nombre", "TIP_1", "TIP_2"],
     usageCount: 1,
@@ -49,7 +49,6 @@ const CAMPAIGN_DATA = [
     key: "campaign_promo_taller",
     profileKey: "maria",
     templateKey: "template_promo",
-    userIndex: 0,
     name: "Promo Taller Alimentación Consciente",
     objective: "Promoción",
     messageContent:
@@ -59,14 +58,13 @@ const CAMPAIGN_DATA = [
     deliveredCount: 13,
     failedCount: 2,
     status: CampaignStatus.SENT,
-    scheduledAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
-    sentAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+    scheduledAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+    sentAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
   },
   {
     key: "campaign_followup",
     profileKey: "maria",
     templateKey: "template_followup",
-    userIndex: 0,
     name: "Seguimiento Semanal - Enero",
     objective: "Retención",
     messageContent:
@@ -76,18 +74,17 @@ const CAMPAIGN_DATA = [
     deliveredCount: 8,
     failedCount: 0,
     status: CampaignStatus.SENT,
-    scheduledAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-    sentAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+    scheduledAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    sentAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
   },
   {
     key: "campaign_draft",
     profileKey: "maria",
     templateKey: null,
-    userIndex: 0,
     name: "Lanzamiento Programa Primavera",
     objective: "Ventas",
     messageContent:
-      "Hola {{nombre}},\n\nEstoy lanzando mi nuevo Programa de Bienestar para Primavera.\n\nIncluye:\n• Evaluación inicial\n• 8 sesiones\n• Plan personalizado\n\nPrecio especial: $199 (antes $250)\n\n¡Escríbeme para reservar tu cupo!",
+      "Hola {{nombre}},\n\nEstoy lanzando mi nuevo Programa de Bienestar para Primavera.\n\nIncluye:\n• Evaluación inicial\n• 8 sesiones\n• Plan personalizado\n\nPrecio especial: $199 (antes $250)\n\n¡Escríbeme para reservar tu控除o!",
     totalRecipients: 0,
     sentCount: 0,
     deliveredCount: 0,
@@ -103,13 +100,12 @@ export async function seedCampaigns() {
 
   const campaignTemplateRepository = new CampaignTemplateRepository();
   const campaignRepository = new CampaignRepository();
+  const userId = await getTestUserId();
 
-  // Seed campaign templates first
   console.log("  📝 Seeding campaign templates...");
   for (const templateData of CAMPAIGN_TEMPLATE_DATA) {
-    const { key, profileKey, userIndex, ...data } = templateData;
+    const { key, profileKey, ...data } = templateData;
     const profileId = createdProfileIds[profileKey];
-    const userId = SEED_USERS[userIndex].id;
     const ctx = createSeederContext(userId);
 
     if (!profileId) {
@@ -119,7 +115,6 @@ export async function seedCampaigns() {
       continue;
     }
 
-    // Check if template already exists
     const existingTemplate = await db.query.campaignTemplate.findFirst({
       where: eq(campaignTemplate.name, data.name),
     });
@@ -138,23 +133,20 @@ export async function seedCampaigns() {
     console.log(`    ✓ Created template: ${data.name}`);
   }
 
-  // Seed campaigns
   console.log("  📢 Seeding campaigns...");
   for (const campaignData of CAMPAIGN_DATA) {
-    const { key, profileKey, templateKey, userIndex, ...data } = campaignData;
+    const { key, profileKey, templateKey, ...data } = campaignData;
     const profileId = createdProfileIds[profileKey];
-    const templateId = templateKey ? createdCampaignTemplateIds[templateKey] : null;
-    const userId = SEED_USERS[userIndex].id;
+    const templateId = templateKey
+      ? createdCampaignTemplateIds[templateKey]
+      : null;
     const ctx = createSeederContext(userId);
 
     if (!profileId) {
-      console.log(
-        `  ⚠️  Profile ${profileKey} not found, skipping campaign`,
-      );
+      console.log(`  ⚠️  Profile ${profileKey} not found, skipping campaign`);
       continue;
     }
 
-    // Check if campaign already exists
     const existingCampaign = await db.query.campaign.findFirst({
       where: eq(campaign.name, data.name),
     });

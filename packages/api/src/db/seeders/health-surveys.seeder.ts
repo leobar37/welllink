@@ -2,7 +2,7 @@ import { createSeederContext } from "./helpers";
 import { HealthSurveyRepository } from "../../services/repository/health-survey";
 import type { HealthSurveyResponseData } from "../schema/health-survey";
 import { createdProfileIds } from "./profiles.seeder";
-import { SEED_USERS } from "./users.seeder";
+import { getTestUserId } from "./users.seeder";
 import { eq } from "drizzle-orm";
 import { healthSurveyResponse } from "../schema/health-survey";
 import { db } from "../index";
@@ -11,13 +11,11 @@ export async function seedHealthSurveys() {
   console.log("📋 Seeding health survey responses...");
 
   const healthSurveyRepository = new HealthSurveyRepository();
-
+  const userId = await getTestUserId();
   const mariaId = createdProfileIds.maria;
 
   const surveys = [
-    // Survey 1 - Para María (perfil de nutrición)
     {
-      userIndex: 0,
       profileId: mariaId,
       visitorName: "Laura Gómez",
       visitorPhone: "+51912345678",
@@ -46,9 +44,7 @@ export async function seedHealthSurveys() {
       } as HealthSurveyResponseData,
       whatsappSentAt: new Date("2024-11-25T15:30:00Z"),
     },
-    // Survey 2 - Para María
     {
-      userIndex: 0,
       profileId: mariaId,
       visitorName: "Roberto Pérez",
       visitorPhone: null,
@@ -80,25 +76,21 @@ export async function seedHealthSurveys() {
   ];
 
   for (const surveyData of surveys) {
-    const { userIndex, ...data } = surveyData;
-    const userId = SEED_USERS[userIndex].id;
     const ctx = createSeederContext(userId);
 
-    // Check if survey already exists by checking visitor name + profile (idempotent)
     const existingSurvey = await db.query.healthSurveyResponse.findFirst({
-      where: eq(healthSurveyResponse.visitorName, data.visitorName),
+      where: eq(healthSurveyResponse.visitorName, surveyData.visitorName),
     });
 
     if (existingSurvey) {
       console.log(
-        `  ✓ Survey from ${data.visitorName} already exists, skipping`,
+        `  ✓ Survey from ${surveyData.visitorName} already exists, skipping`,
       );
       continue;
     }
 
-    // Use repository to create survey (preserves business logic)
-    await healthSurveyRepository.create(data);
-    console.log(`  ✓ Created survey response from: ${data.visitorName}`);
+    await healthSurveyRepository.create(surveyData);
+    console.log(`  ✓ Created survey response from: ${surveyData.visitorName}`);
   }
 
   console.log("✅ Health surveys seeded successfully\n");

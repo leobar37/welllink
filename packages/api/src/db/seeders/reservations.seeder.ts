@@ -4,14 +4,13 @@ import { createdProfileIds } from "./profiles.seeder";
 import { createdMedicalServiceIds } from "./medical-services.seeder";
 import { createdTimeSlotIds } from "./time-slots.seeder";
 import { createdClientIds } from "./clients.seeder";
-import { SEED_USERS } from "./users.seeder";
+import { getTestUserId } from "./users.seeder";
 import { eq } from "drizzle-orm";
 import { reservation } from "../schema/reservation";
 import { db } from "../index";
 
 export const createdReservationIds: Record<string, string> = {};
 
-// Get a specific slot key by day and hour
 function getSlotKey(day: number, hour: number): string {
   const period = hour < 12 ? "morning" : "afternoon";
   return `slot_${period}_${day}_${hour}`;
@@ -22,8 +21,7 @@ const RESERVATION_DATA = [
     key: "reservation_confirmed",
     profileKey: "maria",
     serviceKey: "consultation",
-    slotKey: getSlotKey(0, 10), // Tomorrow 10 AM
-    userIndex: 0,
+    slotKey: getSlotKey(0, 10),
     patientName: "Laura Gómez",
     patientPhone: "+51912345678",
     patientEmail: "laura.gomez@example.com",
@@ -37,8 +35,7 @@ const RESERVATION_DATA = [
     key: "reservation_completed",
     profileKey: "maria",
     serviceKey: "followUp",
-    slotKey: getSlotKey(1, 9), // Day 2 at 9 AM (past slot for testing)
-    userIndex: 0,
+    slotKey: getSlotKey(1, 9),
     patientName: "Roberto Pérez",
     patientPhone: "+51923456789",
     patientEmail: "roberto.p@example.com",
@@ -47,14 +44,13 @@ const RESERVATION_DATA = [
     notes: "Seguimiento mensual. Ha perdido 3kg desde la última visita.",
     priceAtBooking: "45.00",
     paymentStatus: "paid" as const,
-    completedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+    completedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
   },
   {
     key: "reservation_cancelled",
     profileKey: "maria",
     serviceKey: "consultation",
-    slotKey: getSlotKey(1, 16), // Day 2 at 4 PM
-    userIndex: 0,
+    slotKey: getSlotKey(1, 16),
     patientName: "Sofía Ramírez",
     patientPhone: "+51934567890",
     patientEmail: null,
@@ -63,14 +59,13 @@ const RESERVATION_DATA = [
     notes: "Canceló por conflicto de horario. Reagendada.",
     priceAtBooking: "80.00",
     paymentStatus: "cancelled" as const,
-    cancelledAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+    cancelledAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
   },
   {
     key: "reservation_no_show",
     profileKey: "maria",
     serviceKey: "consultation",
-    slotKey: getSlotKey(2, 11), // Day 3 at 11 AM
-    userIndex: 0,
+    slotKey: getSlotKey(2, 11),
     patientName: "Diego Torres",
     patientPhone: "+51945678901",
     patientEmail: "diego.t@example.com",
@@ -87,20 +82,13 @@ export async function seedReservations() {
   console.log("📅 Seeding reservations...");
 
   const reservationRepository = new ReservationRepository();
+  const userId = await getTestUserId();
 
   for (const reservationData of RESERVATION_DATA) {
-    const {
-      key,
-      profileKey,
-      serviceKey,
-      slotKey,
-      userIndex,
-      ...data
-    } = reservationData;
+    const { key, profileKey, serviceKey, slotKey, ...data } = reservationData;
     const profileId = createdProfileIds[profileKey];
     const serviceId = createdMedicalServiceIds[serviceKey];
     const slotId = createdTimeSlotIds[slotKey];
-    const userId = SEED_USERS[userIndex].id;
     const ctx = createSeederContext(userId);
 
     if (!profileId) {
@@ -118,13 +106,10 @@ export async function seedReservations() {
     }
 
     if (!slotId) {
-      console.log(
-        `  ⚠️  Slot ${slotKey} not found, skipping reservation`,
-      );
+      console.log(`  ⚠️  Slot ${slotKey} not found, skipping reservation`);
       continue;
     }
 
-    // Check if reservation already exists (idempotent)
     const existingReservation = await db.query.reservation.findFirst({
       where: eq(reservation.patientPhone, data.patientPhone),
     });
@@ -137,7 +122,6 @@ export async function seedReservations() {
       continue;
     }
 
-    // Use repository to create reservation (preserves business logic)
     const created = await reservationRepository.create({
       ...data,
       profileId,

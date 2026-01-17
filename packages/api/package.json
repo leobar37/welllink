@@ -10,7 +10,8 @@
     "lint": "bunx tsc --noEmit",
     "db:seed": "bun run src/db/seed.ts",
     "db:reset": "bun run src/db/reset.ts",
-    "db:reset-seed": "bun run src/db/reset.ts && bun run src/db/seed.ts"
+    "db:reset-seed": "bun run src/db/reset.ts && bun run db:seed",
+    "db:full-reset": "bun run src/db/reset.ts && bunx drizzle-kit push && bun run db:seed"
   },
   "dependencies": {
     "@ai-sdk/fireworks": "^1.0.9",

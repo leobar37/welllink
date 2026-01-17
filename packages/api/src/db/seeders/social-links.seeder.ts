@@ -1,20 +1,17 @@
 import { createSeederContext } from "./helpers";
 import { SocialLinkRepository } from "../../services/repository/social-link";
 import { createdProfileIds } from "./profiles.seeder";
+import { getTestUserId } from "./users.seeder";
 import { eq, and } from "drizzle-orm";
 import { socialLink } from "../schema/social-link";
 import { db } from "../index";
-import { SEED_USERS } from "./users.seeder";
 
-// Store created social link IDs for reference in other seeders
 export const createdSocialLinkIds: Record<string, string> = {};
 
 const SOCIAL_LINK_DATA = [
-  // María's social links
   {
     key: "mariaInstagram",
     profileKey: "maria",
-    userIndex: 0,
     platform: "instagram" as const,
     username: "maria_wellness",
     displayOrder: 1,
@@ -22,7 +19,6 @@ const SOCIAL_LINK_DATA = [
   {
     key: "mariaWhatsapp",
     profileKey: "maria",
-    userIndex: 0,
     platform: "whatsapp" as const,
     username: "51987654321",
     displayOrder: 2,
@@ -30,7 +26,6 @@ const SOCIAL_LINK_DATA = [
   {
     key: "mariaTiktok",
     profileKey: "maria",
-    userIndex: 0,
     platform: "tiktok" as const,
     username: "maria_wellness",
     displayOrder: 3,
@@ -38,7 +33,6 @@ const SOCIAL_LINK_DATA = [
   {
     key: "mariaFacebook",
     profileKey: "maria",
-    userIndex: 0,
     platform: "facebook" as const,
     username: "mariawellness",
     displayOrder: 4,
@@ -49,11 +43,11 @@ export async function seedSocialLinks() {
   console.log("🔗 Seeding social links...");
 
   const socialLinkRepository = new SocialLinkRepository();
+  const userId = await getTestUserId();
 
   for (const linkData of SOCIAL_LINK_DATA) {
-    const { key, profileKey, userIndex, ...data } = linkData;
+    const { key, profileKey, ...data } = linkData;
     const profileId = createdProfileIds[profileKey];
-    const userId = SEED_USERS[userIndex].id;
     const ctx = createSeederContext(userId);
 
     if (!profileId) {
@@ -63,7 +57,6 @@ export async function seedSocialLinks() {
       continue;
     }
 
-    // Check if social link already exists (idempotent)
     const existingLink = await db.query.socialLink.findFirst({
       where: and(
         eq(socialLink.profileId, profileId),
@@ -79,7 +72,6 @@ export async function seedSocialLinks() {
       continue;
     }
 
-    // Use repository to create social link (preserves business logic)
     const created = await socialLinkRepository.create(ctx, {
       ...data,
       profileId,

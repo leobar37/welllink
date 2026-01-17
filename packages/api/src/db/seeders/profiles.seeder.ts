@@ -1,18 +1,16 @@
 import { createSeederContext } from "./helpers";
 import { ProfileRepository } from "../../services/repository/profile";
-import { SEED_USERS } from "./users.seeder";
+import { getTestUserId } from "./users.seeder";
 import { createdAssetIds } from "./assets.seeder";
 import { eq } from "drizzle-orm";
 import { profile } from "../schema/profile";
 import { db } from "../index";
 
-// Store created profile IDs for reference in other seeders
 export const createdProfileIds: Record<string, string> = {};
 
 const PROFILE_DATA = [
   {
     key: "maria",
-    userId: SEED_USERS[0].id,
     username: "maria_wellness",
     displayName: "María Test",
     title: "Coach de Bienestar y Nutrición",
@@ -41,12 +39,12 @@ export async function seedProfiles() {
   console.log("👤 Seeding profiles...");
 
   const profileRepository = new ProfileRepository();
+  const userId = await getTestUserId();
 
   for (const profileData of PROFILE_DATA) {
-    const { key, userId, avatarKey, coverKey, ...data } = profileData;
+    const { key, avatarKey, coverKey, ...data } = profileData;
     const ctx = createSeederContext(userId);
 
-    // Check if profile already exists (idempotent)
     const existingProfile = await db.query.profile.findFirst({
       where: eq(profile.username, data.username),
     });
@@ -57,13 +55,12 @@ export async function seedProfiles() {
       continue;
     }
 
-    // Get asset IDs from the createdAssetIds map
     const avatarId = createdAssetIds[avatarKey];
     const coverImageId = createdAssetIds[coverKey];
 
-    // Use repository to create profile (preserves business logic)
     const created = await profileRepository.create(ctx, {
       ...data,
+      userId,
       avatarId,
       coverImageId,
     });
