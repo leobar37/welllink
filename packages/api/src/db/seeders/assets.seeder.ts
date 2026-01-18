@@ -14,7 +14,6 @@ const ASSET_DATA = [
     filename: "maria-avatar.jpg",
     mimeType: "image/jpeg",
     size: 45000,
-    type: "avatar",
     metadata: { width: 300, height: 300, generator: "ui-avatars" },
   },
   {
@@ -23,7 +22,6 @@ const ASSET_DATA = [
     filename: "maria-cover.jpg",
     mimeType: "image/jpeg",
     size: 120000,
-    type: "cover",
     metadata: { width: 1200, height: 400, generator: "placehold.co" },
   },
   {
@@ -32,7 +30,6 @@ const ASSET_DATA = [
     filename: "maria-story-self-before.jpg",
     mimeType: "image/jpeg",
     size: 320000,
-    type: "story",
     metadata: { width: 1080, height: 1350, scenario: "before" },
   },
   {
@@ -41,7 +38,6 @@ const ASSET_DATA = [
     filename: "maria-story-self-after.jpg",
     mimeType: "image/jpeg",
     size: 315000,
-    type: "story",
     metadata: { width: 1080, height: 1350, scenario: "after" },
   },
   {
@@ -50,7 +46,6 @@ const ASSET_DATA = [
     filename: "maria-story-client-before.jpg",
     mimeType: "image/jpeg",
     size: 305000,
-    type: "story",
     metadata: { width: 1080, height: 1350, subject: "client" },
   },
   {
@@ -59,7 +54,6 @@ const ASSET_DATA = [
     filename: "maria-story-client-after.jpg",
     mimeType: "image/jpeg",
     size: 318000,
-    type: "story",
     metadata: { width: 1080, height: 1350, subject: "client" },
   },
 ];
@@ -86,9 +80,7 @@ export async function seedAssets() {
 
     const created = await assetRepository.create(ctx, { ...data, userId });
     createdAssetIds[key] = created.id;
-    console.log(
-      `  ✓ Created asset: ${data.filename} (${data.type}) - ID: ${created.id}`,
-    );
+    console.log(`  ✓ Created asset: ${data.filename} - ID: ${created.id}`);
   }
 
   console.log("✅ Assets seeded successfully\n");

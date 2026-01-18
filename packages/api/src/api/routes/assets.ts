@@ -11,14 +11,12 @@ const createAssetSchema = z.object({
   storagePath: z.string().min(1),
   filename: z.string().min(1),
   mimeType: z.string().min(1),
-  type: z.string().min(1),
   size: z.number().min(0),
 });
 
 const updateAssetSchema = z.object({
   filename: z.string().min(1).optional(),
   mimeType: z.string().min(1).optional(),
-  type: z.string().min(1).optional(),
   size: z.number().min(0).optional(),
 });
 
@@ -53,14 +51,7 @@ export const assetRoutes = new Elysia({ prefix: "/assets" })
   .use(authGuard)
   .get("/", async ({ ctx, services, query }) => {
     const userId = query.userId as string;
-    const type = query.type as string;
-
-    let assets;
-    if (type) {
-      assets = await services.assetService.getAssetsByType(ctx, type);
-    } else {
-      assets = await services.assetService.getAssets(ctx, userId);
-    }
+    const assets = await services.assetService.getAssets(ctx, userId);
 
     // Resolve URLs for all assets
     return assets.map((asset: Asset) => ({
@@ -84,15 +75,10 @@ export const assetRoutes = new Elysia({ prefix: "/assets" })
       url: services.storage.getPublicUrl(asset.path),
     };
   })
-  .post("/upload", async ({ body, set, ctx, services, query }) => {
-    const type = query.type as string;
-    if (!type) {
-      throw new BadRequestException("File type is required");
-    }
-
+  .post("/upload", async ({ body, set, ctx, services }) => {
     // Handle file upload
     const file = body as File;
-    const asset = await services.assetService.uploadFile(ctx, file, type);
+    const asset = await services.assetService.uploadFile(ctx, file);
     if (!asset) {
       throw new BadRequestException("Failed to upload file");
     }

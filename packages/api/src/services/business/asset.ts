@@ -30,15 +30,11 @@ export class AssetService {
     return asset;
   }
 
-  async getAssetsByType(ctx: RequestContext, type: string) {
-    return this.assetRepository.findByType(ctx, type);
-  }
-
   async createAsset(ctx: RequestContext, data: CreateAssetData) {
     // Validate required fields
-    if (!data.storagePath || !data.type || !data.mimeType) {
+    if (!data.storagePath || !data.mimeType) {
       throw new BadRequestException(
-        "Missing required fields: storagePath, type, mimeType",
+        "Missing required fields: storagePath, mimeType",
       );
     }
 
@@ -84,24 +80,14 @@ export class AssetService {
     return this.assetRepository.delete(ctx, id);
   }
 
-  async uploadFile(ctx: RequestContext, file: File, type: string) {
+  async uploadFile(ctx: RequestContext, file: File) {
     // Validate file
     if (!file) {
       throw new BadRequestException("No file provided");
     }
 
-    if (!type) {
-      throw new BadRequestException("File type is required");
-    }
-
-    // Upload to storage
-    const uploadResult = await this.storage.upload(
-      ctx.userId,
-      file,
-      type === "avatar" || type === "cover" || type === "document"
-        ? "file"
-        : "asset",
-    );
+    // Upload to storage - use "assets" folder for all files
+    const uploadResult = await this.storage.upload(ctx.userId, file, "asset");
 
     // Create asset record
     return this.assetRepository.create(ctx, {
@@ -109,7 +95,6 @@ export class AssetService {
       filename: uploadResult.filename,
       mimeType: uploadResult.mimeType,
       size: uploadResult.size,
-      type,
     });
   }
 
@@ -160,28 +145,13 @@ export class AssetService {
   async getAssetStats(ctx: RequestContext, userId?: string) {
     const assets = await this.assetRepository.findByUser(ctx, userId);
 
-    type AssetStats = Record<string, { count: number; totalSize: number }>;
-
-    const stats = assets.reduce(
-      (acc: AssetStats, asset: Asset & { type?: string | null }) => {
-        const assetType = asset.type || "unknown";
-        if (!acc[assetType]) {
-          acc[assetType] = { count: 0, totalSize: 0 };
-        }
-        acc[assetType].count++;
-        acc[assetType].totalSize += asset.size || 0;
-        return acc;
-      },
-      {} as AssetStats,
-    );
-
+    // Simple stats without type classification
     return {
       totalAssets: assets.length,
       totalSize: assets.reduce(
         (sum: number, asset: Asset) => sum + (asset.size || 0),
         0,
       ),
-      assetsByType: stats,
     };
   }
 }

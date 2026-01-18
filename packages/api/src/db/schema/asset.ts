@@ -21,11 +21,10 @@ export const asset = pgTable(
     filename: varchar("filename", { length: 255 }).notNull(),
     mimeType: varchar("mime_type", { length: 100 }).notNull(),
     size: integer("size").notNull(),
-    type: varchar("type", { length: 50 }), // avatar, cover, image, document, etc.
     metadata: jsonb("metadata"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
-  (table) => [index("asset_user_id_idx").on(table.userId)]
+  (table) => [index("asset_user_id_idx").on(table.userId)],
 );
 
 export type Asset = typeof asset.$inferSelect;

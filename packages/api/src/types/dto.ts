@@ -39,7 +39,6 @@ export interface CreateAssetData {
   storagePath: string;
   filename: string;
   mimeType: string;
-  type: string;
   size: number;
   metadata?: Record<string, unknown>;
 }
@@ -48,7 +47,6 @@ export interface CreateAssetWithPathData {
   path: string;
   filename: string;
   mimeType: string;
-  type: string;
   size: number;
   metadata?: Record<string, unknown>;
 }
@@ -56,7 +54,6 @@ export interface CreateAssetWithPathData {
 export interface UpdateAssetData {
   filename?: string;
   mimeType?: string;
-  type?: string;
   size?: number;
   metadata?: Record<string, unknown>;
 }
@@ -219,7 +216,11 @@ export interface TrackStoryEventData {
 // =============================================================================
 
 import type { WhatsAppConfig } from "../db/schema/whatsapp-config";
-import type { TemplateCategory, TemplateComponent, TemplateVariable } from "../db/schema/whatsapp-template";
+import type {
+  TemplateCategory,
+  TemplateComponent,
+  TemplateVariable,
+} from "../db/schema/whatsapp-template";
 
 export interface CreateWhatsAppConfigData {
   profileId: string;

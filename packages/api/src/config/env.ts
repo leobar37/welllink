@@ -22,8 +22,9 @@ interface EnvConfig {
   // Storage
   STORAGE_PROVIDER: string;
   STORAGE_BUCKET: string;
-  SUPABASE_URL: string;
-  SUPABASE_SERVICE_ROLE_KEY: string;
+  R2_ACCOUNT_ID: string;
+  R2_ACCESS_KEY_ID: string;
+  R2_SECRET_ACCESS_KEY: string;
 
   // Evolution API
   EVOLUTION_API_URL: string;
@@ -56,10 +57,11 @@ const env: EnvConfig = {
 
   CORS_ORIGIN: process.env.CORS_ORIGIN || "",
 
-  STORAGE_PROVIDER: process.env.STORAGE_PROVIDER || "local",
+  STORAGE_PROVIDER: process.env.STORAGE_PROVIDER || "r2",
   STORAGE_BUCKET: process.env.STORAGE_BUCKET || "wellness-assets",
-  SUPABASE_URL: process.env.SUPABASE_URL || "",
-  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+  R2_ACCOUNT_ID: process.env.R2_ACCOUNT_ID || "",
+  R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID || "",
+  R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY || "",
 
   EVOLUTION_API_URL: process.env.EVOLUTION_API_URL || "http://localhost:8080",
   EVOLUTION_API_KEY: process.env.EVOLUTION_API_KEY || "",

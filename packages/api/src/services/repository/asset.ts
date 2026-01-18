@@ -43,14 +43,6 @@ export class AssetRepository {
     });
   }
 
-  async findByType(_ctx: RequestContext, _type: string) {
-    // Note: The 'type' field doesn't exist in the current schema
-    // This method needs schema update to work properly
-    return db.query.asset.findMany({
-      orderBy: (table) => table.createdAt,
-    });
-  }
-
   async update(
     ctx: RequestContext,
     id: string,

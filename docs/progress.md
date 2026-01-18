@@ -244,59 +244,70 @@ All TypeScript errors have been fixed:
 
 ## Storage Strategy Implementation (Latest Update)
 
-### ✅ Completed - Supabase Storage Integration
+### ✅ Completed - Cloudflare R2 Storage Migration
+
+#### Migrated From Supabase to Cloudflare R2
 
 #### New Files Created
 
-- `src/services/storage/storage.interface.ts` - StorageStrategy interface
-- `src/services/storage/supabase.storage.ts` - Supabase Storage implementation
-- `src/services/storage/local.storage.ts` - Local filesystem implementation (for dev)
-- `src/services/storage/index.ts` - Factory function + exports
+- `src/services/storage/r2.storage.ts` - R2 Storage implementation using AWS S3 SDK
 
 #### Modified Files
 
-- `src/services/business/asset.ts` - Uses StorageStrategy via DI
-- `src/services/business/cdn.ts` - Uses StorageStrategy for URLs
-- `src/services/repository/asset.ts` - Fixed table name (`asset` not `assets`)
-- `src/plugins/services.ts` - Initializes storage + injects into services
-- `src/api/routes/assets.ts` - Returns public URLs from storage
-- `src/api/routes/upload.ts` - Uses storage strategy for uploads
-- `src/db/schema/asset.ts` - Added `type` field
-- `.env.example` - Added Supabase configuration variables
+- `src/services/storage/index.ts` - Simplified factory to R2-only provider
+- `src/config/env.ts` - Added R2 environment variables, removed Supabase
+- `packages/api/package.json` - Added AWS SDK dependencies, removed Supabase SDK
+- `.env.example` - Updated with R2 configuration
+
+#### Deleted Files
+
+- `src/services/storage/supabase.storage.ts` - Removed Supabase implementation
+- `src/services/storage/local.storage.ts` - Removed local filesystem implementation
 
 #### New Dependencies
+
+- `@aws-sdk/client-s3` v3.709.0 - S3-compatible client for R2
+- `@aws-sdk/s3-request-presigner` v3.709.0 - Presigned URL generation
+
+#### Removed Dependencies
 
 - `@supabase/supabase-js` v2.86.0
 
 #### Environment Variables
 
 ```env
-STORAGE_PROVIDER=local|supabase
+STORAGE_PROVIDER=r2
 STORAGE_BUCKET=wellness-assets
-SUPABASE_URL=https://xxx.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGc...
-API_BASE_URL=http://localhost:5300
+R2_ACCOUNT_ID=your-account-id
+R2_ACCESS_KEY_ID=your-access-key-id
+R2_SECRET_ACCESS_KEY=your-secret-access-key
 ```
 
 #### Features
 
-- **Strategy Pattern**: Easy to switch between local and Supabase storage
-- **Auto-bucket creation**: Bucket is created automatically if it doesn't exist
-- **Public URLs**: `getPublicUrl()` for public assets
-- **Signed URLs**: `getSignedUrl()` for temporary access
-- **File validation**: Size limits and MIME type validation
+- **S3-Compatible API**: Uses AWS SDK with R2 endpoint
+- **Public URLs**: Default R2 public URL: `https://bucket.accountid.r2.cloudflarestorage.com/key`
+- **Signed URLs**: Presigned URLs for temporary access
+- **File validation**: 10MB size limit and MIME type validation
 - **Path structure**: `{userId}/files/` or `{userId}/assets/`
+- **Zero Egress Fees**: Cloudflare R2 has no egress bandwidth costs
 
 #### Usage
 
 ```typescript
 // Upload returns public URL
 POST /api/upload { file, type: "avatar" }
-// Response: { id, filename, url: "https://xxx.supabase.co/storage/v1/..." }
+// Response: { id, filename, url: "https://wellness-assets.xxx.r2.cloudflarestorage.com/..." }
 
 // Get signed URL for temporary access
 GET /api/assets/:id/signed-url?expiresIn=3600
 ```
+
+#### R2 Setup Requirements
+
+1. **Create R2 Bucket**: Must create bucket manually in Cloudflare dashboard
+2. **Generate API Token**: Create R2 API token with proper permissions
+3. **Update Environment**: Configure R2 credentials in `.env` file
 
 ---
 

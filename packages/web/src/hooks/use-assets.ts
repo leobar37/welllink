@@ -10,18 +10,22 @@ export interface Asset {
   filename: string;
   mimeType: string;
   size: number;
-  type?: string | null;
   metadata?: Record<string, unknown> | null;
   createdAt: string;
   url?: string; // URL generada por el backend
 }
 
-export type AssetType = "image" | "document" | "avatar" | "cover" | "story-image";
-
 export interface AssetStats {
   totalAssets: number;
   totalSize: number;
-  assetsByType: Record<string, { count: number; totalSize: number }>;
+}
+
+// Deducir categoría del mimeType
+export function getAssetCategory(mimeType: string): string {
+  if (mimeType.startsWith("image/")) return "Imagen";
+  if (mimeType.startsWith("video/")) return "Video";
+  if (mimeType === "application/pdf") return "PDF";
+  return "Otro";
 }
 
 export function useAssets(userId?: string) {
@@ -37,7 +41,7 @@ export function useAssets(userId?: string) {
     queryFn: async () => {
       const queryObj: { userId?: string } = {};
       if (userId) queryObj.userId = userId;
-      
+
       const { data, error } = await api.api.assets.get({
         $query: queryObj,
       });
@@ -47,24 +51,6 @@ export function useAssets(userId?: string) {
     enabled: !!userId,
   });
 
-  // Listar assets por tipo
-  const getAssetsByType = (type: AssetType) => {
-    return useQuery({
-      queryKey: ["assets", userId, "type", type],
-      queryFn: async () => {
-        const queryObj: { userId?: string; type: string } = { type };
-        if (userId) queryObj.userId = userId;
-        
-        const { data, error } = await api.api.assets.get({
-          $query: queryObj,
-        });
-        if (error) throw error;
-        return data as unknown as Asset[];
-      },
-      enabled: !!userId && !!type,
-    });
-  };
-
   // Obtener estadísticas
   const getAssetStats = (statsUserId?: string) => {
     return useQuery({
@@ -72,7 +58,7 @@ export function useAssets(userId?: string) {
       queryFn: async () => {
         const queryObj: { userId?: string } = {};
         if (statsUserId) queryObj.userId = statsUserId;
-        
+
         const { data, error } = await api.api.assets.stats.get({
           $query: queryObj,
         });
@@ -85,10 +71,9 @@ export function useAssets(userId?: string) {
 
   // Subir archivo
   const uploadAsset = useMutation({
-    mutationFn: async ({ file, type }: { file: File; type: AssetType }) => {
+    mutationFn: async ({ file }: { file: File }) => {
       const { data, error } = await api.api.upload.post({
         file,
-        type,
       });
       if (error) throw error;
       return data as unknown as Asset;
@@ -116,7 +101,10 @@ export function useAssets(userId?: string) {
       toast.success("Archivo eliminado");
     },
     onError: (err: unknown) => {
-      const errorMessage = extractErrorMessage(err, "Error al eliminar archivo");
+      const errorMessage = extractErrorMessage(
+        err,
+        "Error al eliminar archivo",
+      );
       toast.error(errorMessage);
     },
   });
@@ -125,7 +113,6 @@ export function useAssets(userId?: string) {
     assets,
     isLoading,
     error,
-    getAssetsByType,
     getAssetStats,
     uploadAsset,
     deleteAsset,

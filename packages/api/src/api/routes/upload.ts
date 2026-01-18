@@ -12,42 +12,41 @@ export const uploadRoutes = new Elysia({ prefix: "/upload" })
   .post(
     "/",
     async ({ body, set, ctx, services }) => {
-      const { file, type } = body;
+      const { file } = body;
 
       if (!file) {
         throw new BadRequestException("No file provided");
       }
 
-      // Validate file size (10MB limit)
-      const maxSize = 10 * 1024 * 1024; // 10MB
+      // Validate file size (50MB limit)
+      const maxSize = 50 * 1024 * 1024; // 50MB
       if (file.size > maxSize) {
-        throw new BadRequestException("File size exceeds 10MB limit");
+        throw new BadRequestException("File size exceeds 50MB limit");
       }
 
-      // Validate file type based on asset type
-      const allowedTypes: Record<string, string[]> = {
-        avatar: ["image/jpeg", "image/png", "image/webp"],
-        cover: ["image/jpeg", "image/png", "image/webp"],
-        image: ["image/jpeg", "image/png", "image/webp", "image/gif"],
-        "story-image": ["image/jpeg", "image/png", "image/webp"],
-        document: [
-          "application/pdf",
-          "text/plain",
-          "application/msword",
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        ],
-      };
+      // Validate file type - only allow images, videos, and PDFs
+      const allowedMimeTypes = [
+        // Images
+        "image/jpeg",
+        "image/png",
+        "image/gif",
+        "image/webp",
+        // Videos
+        "video/mp4",
+        "video/webm",
+        "video/quicktime",
+        // PDF
+        "application/pdf",
+      ];
 
-      // @ts-ignore - type is string but we know it's a key
-      const allowedTypesForType = allowedTypes[type];
-      if (!allowedTypesForType || !allowedTypesForType.includes(file.type)) {
+      if (!allowedMimeTypes.includes(file.type)) {
         throw new BadRequestException(
-          `Invalid file type for ${type}. Allowed types: ${allowedTypesForType?.join(", ") || "none"}`,
+          `Invalid file type. Allowed: images (JPEG, PNG, GIF, WebP), videos (MP4, WebM, QuickTime), and PDF`,
         );
       }
 
       // Upload file
-      const asset = await services.assetService.uploadFile(ctx, file, type);
+      const asset = await services.assetService.uploadFile(ctx, file);
       if (!asset) {
         throw new BadRequestException("Failed to upload file");
       }
@@ -59,20 +58,12 @@ export const uploadRoutes = new Elysia({ prefix: "/upload" })
         filename: asset.filename,
         mimeType: asset.mimeType,
         size: asset.size,
-        type: asset.type,
         url,
       };
     },
     {
       body: t.Object({
         file: t.File(),
-        type: t.Union([
-          t.Literal("avatar"),
-          t.Literal("cover"),
-          t.Literal("document"),
-          t.Literal("image"),
-          t.Literal("story-image"),
-        ]),
         folder: t.Optional(t.String({ default: "uploads" })),
       }),
     },
@@ -80,7 +71,7 @@ export const uploadRoutes = new Elysia({ prefix: "/upload" })
   .post(
     "/multiple",
     async ({ set, ctx, services, body }) => {
-      const { files, type } = body;
+      const { files } = body;
 
       if (!files || files.length === 0) {
         throw new BadRequestException("No files provided");
@@ -91,14 +82,13 @@ export const uploadRoutes = new Elysia({ prefix: "/upload" })
         filename: string;
         mimeType: string;
         size: number | null;
-        type: string | null;
         url: string;
       }> = [];
       const errors: Array<{ filename: string; error: string }> = [];
 
       for (const file of files) {
         try {
-          const asset = await services.assetService.uploadFile(ctx, file, type);
+          const asset = await services.assetService.uploadFile(ctx, file);
           if (!asset) {
             throw new Error("Failed to upload file");
           }
@@ -108,7 +98,6 @@ export const uploadRoutes = new Elysia({ prefix: "/upload" })
             filename: asset.filename,
             mimeType: asset.mimeType,
             size: asset.size,
-            type: asset.type,
             url,
           });
         } catch (error: unknown) {
@@ -135,7 +124,6 @@ export const uploadRoutes = new Elysia({ prefix: "/upload" })
     {
       body: t.Object({
         files: t.Files(),
-        type: t.Optional(t.String({ default: "image" })),
       }),
     },
   )
