@@ -34,8 +34,7 @@ env:
   REGISTRY: gcr.io
   DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
   DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
-  DOKPLOY_PROJECT_ID: ${{ secrets.DOKPLOY_PROJECT_ID }}
-  DOKPLOY_SERVICE_ID: ${{ secrets.DOKPLOY_SERVICE_ID }}
+  DOKPLOY_APPLICATION_ID: ${{ secrets.DOKPLOY_APPLICATION_ID }}
 
 permissions:
   contents: write
@@ -176,13 +175,13 @@ jobs:
         run: |
           echo "🚀 Triggering Dokploy deployment..."
           echo "URL: $DOKPLOY_URL"
-          echo "Project: $DOKPLOY_PROJECT_ID"
-          echo "Service: $DOKPLOY_SERVICE_ID"
+          echo "Application ID: $DOKPLOY_APPLICATION_ID"
 
           RESPONSE=$(curl -s -X POST \
-            "$DOKPLOY_URL/api/projects/$DOKPLOY_PROJECT_ID/services/$DOKPLOY_SERVICE_ID/redeploy" \
-            -H "Authorization: Bearer $DOKPLOY_API_KEY" \
+            "$DOKPLOY_URL/api/application.redeploy" \
+            -H "x-api-key: $DOKPLOY_API_KEY" \
             -H "Content-Type: application/json" \
+            -d '{"applicationId":"'"$DOKPLOY_APPLICATION_ID"'"}' \
             -w "\n%{http_code}")
 
           HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
@@ -191,7 +190,7 @@ jobs:
           echo "Response Code: $HTTP_CODE"
           echo "Response Body: $BODY"
 
-          if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "201" ] || [ "$HTTP_CODE" = "202" ]; then
+          if [ "$HTTP_CODE" = "200" ]; then
             echo "✅ Dokploy deployment triggered successfully!"
           else
             echo "❌ Failed to trigger Dokploy deployment"
@@ -254,7 +253,7 @@ jobs:
           echo "- **Web**: \`gcr.io/${{ env.GCP_PROJECT_ID }}/wellness-link-web:sha-${{ needs.version.outputs.short_sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Dokploy" >> $GITHUB_STEP_SUMMARY
-          echo "- **Dashboard**: [\`$DOKPLOY_URL/dashboard/project/$DOKPLOY_PROJECT_ID\`]($DOKPLOY_URL/dashboard/project/$DOKPLOY_PROJECT_ID)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dashboard**: [\`$DOKPLOY_URL\`]($DOKPLOY_URL)" >> $GITHUB_STEP_SUMMARY
           echo "- **Status**: Check Dokploy dashboard for deployment status" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
