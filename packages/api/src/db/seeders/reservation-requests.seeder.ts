@@ -2,8 +2,9 @@ import { createdProfileIds } from "./profiles.seeder";
 import { createdMedicalServiceIds } from "./medical-services.seeder";
 import { createdTimeSlotIds } from "./time-slots.seeder";
 import { getTestUserId } from "./users.seeder";
-import { sql } from "drizzle-orm";
+import { sql, eq } from "drizzle-orm";
 import { db } from "../index";
+import { reservationRequest } from "../schema/reservation-request";
 
 export const createdReservationRequestIds: Record<string, string> = {};
 
@@ -124,6 +125,18 @@ const RESERVATION_REQUEST_DATA = [
 export async function seedReservationRequests() {
   console.log("📝 Seeding reservation requests...");
 
+  // CLEANUP: Remove existing reservation requests for this user's profiles
+  console.log(`  🧹 Cleaning up existing reservation requests...`);
+  const userProfileIds = Object.values(createdProfileIds);
+  let deletedCount = 0;
+  for (const profileId of userProfileIds) {
+    const result = await db
+      .delete(reservationRequest)
+      .where(eq(reservationRequest.profileId, profileId));
+    deletedCount += result.count || 0;
+  }
+  console.log(`  ✓ Removed ${deletedCount} request(s)`);
+
   for (const requestData of RESERVATION_REQUEST_DATA) {
     const { key, profileKey, serviceKey, slotKey, ...data } = requestData;
 
@@ -146,19 +159,6 @@ export async function seedReservationRequests() {
       continue;
     }
 
-    // Check if request already exists
-    const existingRequest = await db.execute(
-      sql`SELECT id FROM reservation_request WHERE patient_phone = ${data.patientPhone}`,
-    );
-
-    if (existingRequest.length > 0) {
-      console.log(
-        `  ✓ Request from ${data.patientName} already exists, skipping`,
-      );
-      createdReservationRequestIds[key] = existingRequest[0].id;
-      continue;
-    }
-
     // Insert using SQL directly
     const result = await db.execute(sql`
       INSERT INTO reservation_request (
@@ -175,10 +175,12 @@ export async function seedReservationRequests() {
     `);
 
     const createdId = result[0]?.id || result[0]?.insertedId;
-    createdReservationRequestIds[key] = createdId;
-    console.log(
-      `  ✓ Created request: ${data.patientName} (${data.status}) - ID: ${createdId}`,
-    );
+    if (createdId) {
+      createdReservationRequestIds[key] = String(createdId);
+      console.log(
+        `  ✓ Created request: ${data.patientName} (${data.status}) - ID: ${createdId}`,
+      );
+    }
   }
 
   console.log("✅ Reservation requests seeded successfully\n");

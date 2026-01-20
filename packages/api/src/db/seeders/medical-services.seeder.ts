@@ -65,6 +65,16 @@ export async function seedMedicalServices() {
   const medicalServiceRepository = new MedicalServiceRepository();
   const userId = await getTestUserId();
 
+  // CLEANUP: Get profile IDs for this user and clean up their medical services
+  console.log(`  🧹 Cleaning up existing medical services...`);
+  const userProfileIds = Object.values(createdProfileIds);
+  for (const profileId of userProfileIds) {
+    await db
+      .delete(medicalService)
+      .where(eq(medicalService.profileId, profileId));
+  }
+  console.log(`  ✓ Removed ${userProfileIds.length} profile(s) worth of medical services`);
+
   for (const serviceData of MEDICAL_SERVICE_DATA) {
     const { key, profileKey, ...data } = serviceData;
     const profileId = createdProfileIds[profileKey];
@@ -74,18 +84,6 @@ export async function seedMedicalServices() {
       console.log(
         `  ⚠️  Profile ${profileKey} not found, skipping medical service`,
       );
-      continue;
-    }
-
-    const existingService = await db.query.medicalService.findFirst({
-      where: eq(medicalService.name, data.name),
-    });
-
-    if (existingService) {
-      console.log(
-        `  ✓ Medical service "${data.name}" already exists, skipping`,
-      );
-      createdMedicalServiceIds[key] = existingService.id;
       continue;
     }
 

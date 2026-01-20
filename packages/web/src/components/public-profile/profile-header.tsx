@@ -27,7 +27,7 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
     <>
       <div className="flex flex-col items-center text-center space-y-4">
         <Avatar
-          className="h-24 w-24 border-4 border-background shadow-lg cursor-pointer transition-transform hover:scale-105"
+          className="h-28 w-28 border-4 border-background shadow-xl cursor-pointer transition-transform hover:scale-105"
           onClick={() => avatarUrl && setIsImageOpen(true)}
         >
           <AvatarImage src={avatarUrl} alt={profile.displayName} />

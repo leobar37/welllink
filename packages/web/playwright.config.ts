@@ -13,11 +13,17 @@ export default defineConfig({
   reporter: [["line"], ["html", { outputFolder: "playwright-report" }]],
 
   // Configuración de servidor web para tests E2E
+  // IMPORTANTE: Primero corre el seeder de la base de datos, luego levanta el servidor
   webServer: {
-    command: "bun run dev",
+    command: "cd ../api && bun run db:seed && bun run dev",
     url: "http://localhost:5179",
     reuseExistingServer: !process.env.CI,
-    timeout: 120000,
+    timeout: 180000,
+    env: {
+      DATABASE_URL:
+        process.env.DATABASE_URL ||
+        "postgres://postgres:postgres@localhost:5432/wellness_link_dev",
+    },
   },
 
   // Configuración global para todos los tests

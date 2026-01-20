@@ -1,6 +1,6 @@
 import { useParams } from "react-router";
 import { Link } from "react-router";
-import type { Feature } from "@/lib/types";
+import type { Feature, MedicalService, WhatsAppCtaFeature } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, Calendar } from "lucide-react";
 import { useWhatsApp } from "@/hooks/use-whatsapp";
@@ -8,7 +8,7 @@ import { useWhatsApp } from "@/hooks/use-whatsapp";
 interface ActionButtonsProps {
   features: Feature[];
   whatsappNumber?: string | null;
-  medicalServices?: any[];
+  medicalServices?: MedicalService[];
 }
 
 export function ActionButtons({
@@ -20,19 +20,22 @@ export function ActionButtons({
   const { config } = useWhatsApp();
   const activeFeatures = features.filter((f) => f.isEnabled);
 
-  // No buttons to show
-  if (!activeFeatures.length) return null;
-
   // Filter to only show WhatsApp CTA
-  const whatsappFeature = activeFeatures.find((f) => f.type === "whatsapp-cta");
+  const whatsappFeature = activeFeatures.find(
+    (f): f is WhatsAppCtaFeature => f.type === "whatsapp-cta",
+  );
 
-  // Check if medical services feature is enabled
   const hasMedicalServices = medicalServices && medicalServices.length > 0;
+
+  const showBookingButton = hasMedicalServices;
+
+  // No buttons to show
+  if (!showBookingButton && !whatsappFeature) return null;
 
   return (
     <div className="w-full max-w-sm space-y-3">
       {/* Booking Button */}
-      {hasMedicalServices && (
+      {showBookingButton && (
         <Button
           className="w-full h-12 text-base font-medium shadow-sm transition-all hover:scale-[1.02]"
           size="lg"
@@ -53,9 +56,13 @@ export function ActionButtons({
           variant={hasMedicalServices ? "outline" : "default"}
           asChild
         >
-          <a href={`https://wa.me/${whatsappNumber.replace(/[^\d+]/g, "")}`} target="_blank" rel="noopener noreferrer">
+          <a
+            href={`https://wa.me/${whatsappNumber.replace(/[^\d+]/g, "")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <MessageCircle className="mr-2 h-4 w-4" />
-            {(whatsappFeature.config.buttonText as string) || "Escríbeme por WhatsApp"}
+            {whatsappFeature.config.buttonText || "Escríbeme por WhatsApp"}
           </a>
         </Button>
       )}

@@ -9,6 +9,7 @@ import { seedAnalytics } from "./seeders/analytics.seeder";
 import { seedProfileCustomizations } from "./seeders/profile-customization.seeder";
 import { seedMedicalServices } from "./seeders/medical-services.seeder";
 import { seedTimeSlots } from "./seeders/time-slots.seeder";
+import { seedAvailabilityRules } from "./seeders/availability-rules.seeder";
 import { seedClients } from "./seeders/clients.seeder";
 import { seedReservations } from "./seeders/reservations.seeder";
 import { seedCampaigns } from "./seeders/campaigns.seeder";
@@ -189,10 +190,13 @@ async function seed() {
     // 6. Health Survey Responses (depends on profiles)
     await seedHealthSurveys();
 
-    // 7. Medical Services (depends on profiles)
+    // 7. Availability Rules (depends on profiles)
+    await seedAvailabilityRules();
+
+    // 8. Medical Services (depends on profiles)
     await seedMedicalServices();
 
-    // 8. Time Slots (depends on profiles & medical services)
+    // 9. Time Slots (depends on profiles & medical services)
     await seedTimeSlots();
 
     // 9. Clients (depends on profiles)
@@ -224,6 +228,7 @@ async function seed() {
     console.log("  - 4 social links created");
     console.log("  - 1 profile customization created");
     console.log("  - 2 health survey responses created");
+    console.log("  - 10 availability rules created (Mon-Fri, morning & afternoon)");
     console.log("  - 4 medical services created");
     console.log("  - 30+ time slots for the next 7 days");
     console.log("  - 5 clients created");

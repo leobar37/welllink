@@ -1,0 +1,262 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: "Version bump type for image tags"
+        required: false
+        default: "patch"
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      skip_api:
+        description: "Skip API build and deployment"
+        required: false
+        default: false
+        type: boolean
+      skip_web:
+        description: "Skip Web build and deployment"
+        required: false
+        default: false
+        type: boolean
+      skip_db:
+        description: "Skip database migrations"
+        required: false
+        default: false
+        type: boolean
+
+env:
+  BUN_VERSION: "1.1.38"
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGISTRY: gcr.io
+  DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
+  DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+  DOKPLOY_PROJECT_ID: ${{ secrets.DOKPLOY_PROJECT_ID }}
+  DOKPLOY_SERVICE_ID: ${{ secrets.DOKPLOY_SERVICE_ID }}
+
+permissions:
+  contents: write
+
+jobs:
+  # ============================================
+  # Job 1: Determine Versions
+  # ============================================
+  version:
+    name: 📦 Determine Versions
+    runs-on: ubuntu-latest
+    outputs:
+      short_sha: ${{ steps.sha.outputs.sha }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get short SHA
+        id: sha
+        run: echo "sha=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_OUTPUT
+
+  # ============================================
+  # Job 2: Build and Push API Image to GCR
+  # ============================================
+  build-api:
+    name: 🔨 Build API Image
+    needs: version
+    runs-on: ubuntu-latest
+    if: ${{ inputs.skip_api != true }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker ${{ env.REGISTRY }} --quiet
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push API image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./packages/api
+          file: ./packages/api/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/wellness-link-api:sha-${{ needs.version.outputs.short_sha }}
+            ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/wellness-link-api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ============================================
+  # Job 3: Build and Push Web Image to GCR
+  # ============================================
+  build-web:
+    name: 🔨 Build Web Image
+    needs: version
+    runs-on: ubuntu-latest
+    if: ${{ inputs.skip_web != true }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker ${{ env.REGISTRY }} --quiet
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Web image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./packages/web
+          file: ./packages/web/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/wellness-link-web:sha-${{ needs.version.outputs.short_sha }}
+            ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/wellness-link-web:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ============================================
+  # Job 4: Update docker-compose.yml
+  # ============================================
+  update-compose:
+    name: 📝 Update Docker Compose
+    needs: [version, build-api, build-web]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update API image tag in docker-compose.yml
+        if: ${{ inputs.skip_api != true }}
+        run: |
+          SHORT_SHA="${{ needs.version.outputs.short_sha }}"
+          sed -i "s|gcr.io/.*wellness-link-api:[^ ]*|gcr.io/${{ env.GCP_PROJECT_ID }}/wellness-link-api:sha-${SHORT_SHA}|g" docker-compose.yml
+
+      - name: Update Web image tag in docker-compose.yml
+        if: ${{ inputs.skip_web != true }}
+        run: |
+          SHORT_SHA="${{ needs.version.outputs.short_sha }}"
+          sed -i "s|gcr.io/.*wellness-link-web:[^ ]*|gcr.io/${{ env.GCP_PROJECT_ID }}/wellness-link-web:sha-${SHORT_SHA}|g" docker-compose.yml
+
+      - name: Commit and push docker-compose changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docker-compose.yml
+          git status
+          git commit -m "chore: update docker images to sha-${{ needs.version.outputs.short_sha }}" || echo "No changes to commit"
+          git push
+
+  # ============================================
+  # Job 5: Trigger Dokploy Deployment
+  # ============================================
+  deploy-dokploy:
+    name: 🚀 Deploy to Dokploy
+    needs: [version, build-api, build-web, update-compose]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Dokploy Redeploy
+        run: |
+          echo "🚀 Triggering Dokploy deployment..."
+          echo "URL: $DOKPLOY_URL"
+          echo "Project: $DOKPLOY_PROJECT_ID"
+          echo "Service: $DOKPLOY_SERVICE_ID"
+
+          RESPONSE=$(curl -s -X POST \
+            "$DOKPLOY_URL/api/projects/$DOKPLOY_PROJECT_ID/services/$DOKPLOY_SERVICE_ID/redeploy" \
+            -H "Authorization: Bearer $DOKPLOY_API_KEY" \
+            -H "Content-Type: application/json" \
+            -w "\n%{http_code}")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "Response Code: $HTTP_CODE"
+          echo "Response Body: $BODY"
+
+          if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "201" ] || [ "$HTTP_CODE" = "202" ]; then
+            echo "✅ Dokploy deployment triggered successfully!"
+          else
+            echo "❌ Failed to trigger Dokploy deployment"
+            exit 1
+          fi
+
+  # ============================================
+  # Job 6: Run Database Migrations
+  # ============================================
+  migrate-db:
+    name: 🗄️ Database Migrations
+    needs: [version, build-api, build-web, deploy-dokploy]
+    runs-on: ubuntu-latest
+    if: ${{ inputs.skip_db != true && inputs.skip_api != true }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Doppler CLI
+        uses: dopplerhq/cli-action@v1
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run database migrations
+        working-directory: packages/api
+        run: |
+          doppler run -- bun run db:push
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+
+  # ============================================
+  # Summary
+  # ============================================
+  summary:
+    name: ✅ Deployment Summary
+    needs:
+      [
+        version,
+        build-api,
+        build-web,
+        update-compose,
+        deploy-dokploy,
+        migrate-db,
+      ]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Generate Deployment Summary
+        run: |
+          echo "## 🚀 Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Image Tags" >> $GITHUB_STEP_SUMMARY
+          echo "- **API**: \`gcr.io/${{ env.GCP_PROJECT_ID }}/wellness-link-api:sha-${{ needs.version.outputs.short_sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Web**: \`gcr.io/${{ env.GCP_PROJECT_ID }}/wellness-link-web:sha-${{ needs.version.outputs.short_sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Dokploy" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dashboard**: [\`$DOKPLOY_URL/dashboard/project/$DOKPLOY_PROJECT_ID\`]($DOKPLOY_URL/dashboard/project/$DOKPLOY_PROJECT_ID)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: Check Dokploy dashboard for deployment status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "**Workflow**: [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) | **Commit**: [\`${{ needs.version.outputs.short_sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})" >> $GITHUB_STEP_SUMMARY
+          cat $GITHUB_STEP_SUMMARY

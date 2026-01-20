@@ -132,7 +132,18 @@ export async function seedClientNotes() {
 
   const clientNoteRepository = new ClientNoteRepository();
   const userId = await getTestUserId();
-  const mariaId = createdProfileIds.maria;
+
+  // CLEANUP: Remove existing client notes for this user's profiles
+  console.log(`  🧹 Cleaning up existing client notes...`);
+  const userProfileIds = Object.values(createdProfileIds);
+  let deletedCount = 0;
+  for (const profileId of userProfileIds) {
+    const result = await db
+      .delete(clientNote)
+      .where(eq(clientNote.profileId, profileId));
+    deletedCount += result.count || 0;
+  }
+  console.log(`  ✓ Removed ${deletedCount} note(s)`);
 
   for (const noteData of CLIENT_NOTE_DATA) {
     const { key, profileKey, clientKey, content, ...data } = noteData;
@@ -147,17 +158,6 @@ export async function seedClientNotes() {
 
     if (!clientId) {
       console.log(`  ⚠️  Client ${clientKey} not found, skipping note`);
-      continue;
-    }
-
-    // Check if note already exists (by content)
-    const existingNote = await db.query.clientNote.findFirst({
-      where: eq(clientNote.note, content.slice(0, 50)),
-    });
-
-    if (existingNote) {
-      console.log(`  ✓ Note for client ${clientKey} already exists, skipping`);
-      createdClientNoteIds[key] = existingNote.id;
       continue;
     }
 

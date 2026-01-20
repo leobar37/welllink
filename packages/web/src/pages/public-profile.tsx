@@ -97,6 +97,7 @@ export function PublicProfilePage() {
           <ActionButtons
             features={data.features}
             whatsappNumber={data.profile.whatsappNumber}
+            medicalServices={data.medicalServices || []}
           />
         </main>
 

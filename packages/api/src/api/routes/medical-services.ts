@@ -5,6 +5,8 @@ import { errorMiddleware } from "../../middleware/error";
 import { MedicalServiceBusinessService } from "../../services/business/medical-service";
 import { MedicalServiceRepository } from "../../services/repository/medical-service";
 import { AssetRepository } from "../../services/repository/asset";
+import { db } from "../../db";
+import { medicalService } from "../../db/schema/medical-service";
 
 export const medicalServiceRoutes = new Elysia({ prefix: "/medical-services" })
   .use(errorMiddleware)

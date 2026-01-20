@@ -20,6 +20,9 @@ export interface FeaturesConfig {
     enabled: boolean;
     buttonText: string;
   };
+  appointments?: {
+    enabled: boolean;
+  };
 }
 import { user } from "./auth";
 import { asset } from "./asset";

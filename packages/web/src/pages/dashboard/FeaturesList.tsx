@@ -13,19 +13,20 @@ import { Button } from "@/components/ui/button";
 import {
   Settings2,
   Loader2,
-  Sparkles,
   MessageCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useProfile } from "@/hooks/use-profile";
 import { WhatsAppCtaConfigModal } from "@/components/dashboard/WhatsAppCtaConfigModal";
-import { useNavigate } from "react-router";
 
 interface FeaturesConfig {
   whatsappCta?: {
     enabled: boolean;
     buttonText: string;
+  };
+  appointments?: {
+    enabled: boolean;
   };
 }
 
@@ -37,7 +38,6 @@ interface ProfileWithFeatures {
 
 export function FeaturesList() {
   const [whatsappCtaModalOpen, setWhatsappCtaModalOpen] = useState(false);
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const { profile: rawProfile, isLoading } = useProfile();
@@ -48,6 +48,9 @@ export function FeaturesList() {
   const whatsappCtaConfig = featuresConfig.whatsappCta || {
     enabled: false,
     buttonText: "Escríbeme por WhatsApp",
+  };
+  const appointmentsConfig = featuresConfig.appointments || {
+    enabled: false,
   };
 
   // Mutation for updating features config
@@ -95,6 +98,25 @@ export function FeaturesList() {
     );
   };
 
+  const toggleAppointments = async () => {
+    const newEnabled = !appointmentsConfig.enabled;
+    updateFeaturesConfig.mutate(
+      {
+        appointments: {
+          ...appointmentsConfig,
+          enabled: newEnabled,
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success(
+            `Citas ${newEnabled ? "activado" : "desactivado"}`,
+          );
+        },
+      },
+    );
+  };
+
   const handleSaveWhatsappCtaConfig = async (data: { buttonText: string }) => {
     updateFeaturesConfig.mutate(
       {
@@ -128,8 +150,8 @@ export function FeaturesList() {
       id: "appointments",
       name: "Citas",
       description: "Permite a los clientes reservar consultas directamente.",
-      enabled: false,
-      comingSoon: true,
+      enabled: appointmentsConfig.enabled,
+      comingSoon: false,
       icon: Settings2,
     },
   ];
@@ -177,6 +199,10 @@ export function FeaturesList() {
                     }
                     if (feature.id === "whatsapp-cta") {
                       toggleWhatsappCta();
+                      return;
+                    }
+                    if (feature.id === "appointments") {
+                      toggleAppointments();
                       return;
                     }
                   }}

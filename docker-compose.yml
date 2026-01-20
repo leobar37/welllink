@@ -1,0 +1,67 @@
+# ================================
+# MediApp Docker Compose
+# Production deployment for Dokploy
+#
+# Usage: doppler run -- docker compose up -d
+# ================================
+
+services:
+  api:
+    image: gcr.io/${GCP_PROJECT_ID}/wellness-link-api:${API_IMAGE_TAG:-latest}
+    container_name: wellness-link-api
+    restart: unless-stopped
+    networks:
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wellness-link-api.rule=Host(`api.wellness-link.com`)"
+      - "traefik.http.routers.wellness-link-api.entrypoints=websecure"
+      - "traefik.http.routers.wellness-link-api.tls.certResolver=letsencrypt"
+      - "traefik.http.services.wellness-link-api.loadbalancer.server.port=5300"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://127.0.0.1:5300/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      start_period: 10s
+      retries: 3
+
+  web:
+    image: gcr.io/${GCP_PROJECT_ID}/wellness-link-web:${WEB_IMAGE_TAG:-latest}
+    container_name: wellness-link-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    networks:
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wellness-link-web.rule=Host(`wellness-link.com`)"
+      - "traefik.http.routers.wellness-link-web.entrypoints=websecure"
+      - "traefik.http.routers.wellness-link-web.tls.certResolver=letsencrypt"
+      - "traefik.http.services.wellness-link-web.loadbalancer.server.port=3000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://127.0.0.1:3000/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      start_period: 5s
+      retries: 3
+
+networks:
+  dokploy-network:
+    external: true

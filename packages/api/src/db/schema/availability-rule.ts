@@ -2,8 +2,9 @@ import {
   pgTable,
   uuid,
   integer,
-  timestamp,
+  time,
   boolean,
+  timestamp,
   index,
 } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
@@ -16,19 +17,10 @@ export const availabilityRule = pgTable(
       .notNull()
       .references(() => profile.id, { onDelete: "cascade" }),
     dayOfWeek: integer("day_of_week").notNull(),
-    startTime: timestamp("start_time").notNull(),
-    endTime: timestamp("end_time").notNull(),
-    slotDuration: integer("slot_duration").notNull().default(30),
-    bufferTime: integer("buffer_time").default(0),
-    maxAppointmentsPerSlot: integer("max_appointments_per_slot").default(1),
-    isActive: boolean("is_active").notNull().default(true),
-    effectiveFrom: timestamp("effective_from").notNull().defaultNow(),
-    effectiveTo: timestamp("effective_to"),
+    startTime: time("start_time").notNull(),
+    endTime: time("end_time").notNull(),
+    isActive: boolean("is_available").notNull().default(true),
     createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at")
-      .notNull()
-      .defaultNow()
-      .$onUpdate(() => new Date()),
   },
   (table) => ({
     profileIdIdx: index("idx_availability_profile_id").on(table.profileId),

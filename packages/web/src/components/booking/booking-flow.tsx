@@ -10,6 +10,7 @@ import type { MedicalService } from "@/lib/types";
 import type { PublicSlot } from "@/hooks/use-booking";
 import type { BookingData } from "@/hooks/use-booking";
 import { usePublicSlots } from "@/hooks/use-booking";
+import { api } from "@/lib/api";
 
 interface BookingFlowProps {
   username: string;
@@ -23,6 +24,12 @@ export function BookingFlow({ username, services, onBookingComplete }: BookingFl
   const [selectedSlot, setSelectedSlot] = useState<PublicSlot | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [patientData, setPatientData] = useState<Partial<BookingData>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [bookingSuccess, setBookingSuccess] = useState<{
+    requestId: string;
+    expiresAt: string;
+  } | null>(null);
 
   // Fetch slots when a service is selected
   const { data: slotsData, isLoading: slotsLoading } = usePublicSlots(
@@ -47,28 +54,50 @@ export function BookingFlow({ username, services, onBookingComplete }: BookingFl
     setStep(4);
   };
 
-  const handleConfirmBooking = () => {
+  const handleConfirmBooking = async () => {
     if (!selectedService || !selectedSlot) return;
 
-    const bookingData: BookingData = {
-      slotId: selectedSlot.id,
-      serviceId: selectedService.id,
-      patientName: patientData.patientName || "",
-      patientPhone: patientData.patientPhone || "",
-      patientEmail: patientData.patientEmail,
-      patientAge: patientData.patientAge,
-      patientGender: patientData.patientGender,
-      chiefComplaint: patientData.chiefComplaint,
-      symptoms: patientData.symptoms,
-      medicalHistory: patientData.medicalHistory,
-      currentMedications: patientData.currentMedications,
-      allergies: patientData.allergies,
-      urgencyLevel: patientData.urgencyLevel,
-    };
+    setIsSubmitting(true);
+    setSubmitError(null);
 
-    // Here you would call the booking API
-    console.log("Booking data:", bookingData);
-    onBookingComplete?.();
+    try {
+      const bookingData = {
+        slotId: selectedSlot.id,
+        serviceId: selectedService.id,
+        patientName: patientData.patientName || "",
+        patientPhone: patientData.patientPhone || "",
+        patientEmail: patientData.patientEmail,
+        patientAge: patientData.patientAge,
+        patientGender: patientData.patientGender,
+        chiefComplaint: patientData.chiefComplaint,
+        symptoms: patientData.symptoms,
+        medicalHistory: patientData.medicalHistory,
+        currentMedications: patientData.currentMedications,
+        allergies: patientData.allergies,
+        urgencyLevel: patientData.urgencyLevel,
+      };
+
+      const { data: result, error } = await api.api.public[username].booking.post(bookingData);
+
+      if (error) {
+        throw new Error(error.value ? String(error.value) : "Error al crear la cita");
+      }
+
+      if (result?.success && result.requestId) {
+        setBookingSuccess({
+          requestId: result.requestId,
+          expiresAt: result.expiresAt?.toString() || "",
+        });
+        onBookingComplete?.();
+      } else {
+        throw new Error(result?.message || "Error al crear la cita");
+      }
+    } catch (err: any) {
+      console.error("Booking error:", err);
+      setSubmitError(err.message || "Error al procesar tu solicitud. Por favor intenta de nuevo.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const steps = [
@@ -181,13 +210,38 @@ export function BookingFlow({ username, services, onBookingComplete }: BookingFl
             slot={selectedSlot}
             patientData={patientData}
           />
+          
+          {submitError && (
+            <div className="bg-destructive/10 text-destructive p-4 rounded-lg mb-4">
+              {submitError}
+            </div>
+          )}
+          
+          {bookingSuccess && (
+            <div className="bg-green-500/10 text-green-600 p-4 rounded-lg mb-4">
+              <p className="font-medium">¡Solicitud enviada exitosamente!</p>
+              <p className="text-sm mt-1">
+                Tu código de solicitud es: <strong>{bookingSuccess.requestId}</strong>
+              </p>
+              <p className="text-sm mt-1">
+                El profesional confirmará tu cita pronto. Te enviaremos una notificación cuando sea confirmada.
+              </p>
+            </div>
+          )}
+          
           <div className="flex justify-between mt-4">
-            <Button variant="outline" onClick={() => setStep(3)}>
+            <Button variant="outline" onClick={() => setStep(3)} disabled={isSubmitting || bookingSuccess}>
               Atrás
             </Button>
-            <Button onClick={handleConfirmBooking}>
-              Enviar Solicitud
-            </Button>
+            {!bookingSuccess ? (
+              <Button onClick={handleConfirmBooking} disabled={isSubmitting}>
+                {isSubmitting ? "Enviando..." : "Enviar Solicitud"}
+              </Button>
+            ) : (
+              <Button asChild>
+                <a href={`/${username}`}>Volver al perfil</a>
+              </Button>
+            )}
           </div>
         </>
       )}

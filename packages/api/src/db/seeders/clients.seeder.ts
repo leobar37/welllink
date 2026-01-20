@@ -71,6 +71,18 @@ export async function seedClients() {
   const clientRepository = new ClientRepository();
   const userId = await getTestUserId();
 
+  // CLEANUP: Remove existing clients for this user's profiles to avoid duplicates
+  console.log(`  🧹 Cleaning up existing clients...`);
+  const userProfileIds = Object.values(createdProfileIds);
+  let deletedCount = 0;
+  for (const profileId of userProfileIds) {
+    const result = await db
+      .delete(client)
+      .where(eq(client.profileId, profileId));
+    deletedCount += result.count || 0;
+  }
+  console.log(`  ✓ Removed ${deletedCount} client(s)`);
+
   for (const clientData of CLIENT_DATA) {
     const { key, profileKey, ...data } = clientData;
     const profileId = createdProfileIds[profileKey];
@@ -78,16 +90,6 @@ export async function seedClients() {
 
     if (!profileId) {
       console.log(`  ⚠️  Profile ${profileKey} not found, skipping client`);
-      continue;
-    }
-
-    const existingClient = await db.query.client.findFirst({
-      where: eq(client.phone, data.phone),
-    });
-
-    if (existingClient) {
-      console.log(`  ✓ Client ${data.name} already exists, skipping`);
-      createdClientIds[key] = existingClient.id;
       continue;
     }
 

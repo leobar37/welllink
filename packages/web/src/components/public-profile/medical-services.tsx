@@ -1,7 +1,10 @@
 import { Link } from "react-router";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { formatDuration, formatPrice } from "@/components/medical-services/utils/formatters";
+import {
+  formatDuration,
+  formatPrice,
+} from "@/components/medical-services/utils/formatters";
 import { useAssetUrl } from "@/hooks/use-asset-url";
 import type { MedicalService } from "@/lib/types";
 import { Stethoscope } from "lucide-react";
@@ -15,8 +18,7 @@ export function MedicalServices({ services, username }: MedicalServicesProps) {
   if (!services.length) return null;
 
   return (
-    <section className="w-full space-y-4">
-      <h2 className="text-lg font-semibold text-center">Servicios</h2>
+    <section className="w-full">
       <div className="grid grid-cols-1 gap-3">
         {services.map((service) => (
           <ServiceCard key={service.id} service={service} username={username} />
@@ -35,16 +37,13 @@ function ServiceCard({ service, username }: ServiceCardProps) {
   const { data: imageUrl } = useAssetUrl(service.imageAssetId || undefined);
 
   return (
-    <Link
-      to={`/profile/${username}/services/${service.id}`}
-      className="block group"
-    >
+    <Link to={`/${username}/services/${service.id}`} className="block group">
       <article
         className={cn(
           "flex gap-4 p-3 rounded-lg border bg-card",
           "transition-all duration-200",
           "hover:shadow-md hover:border-primary/50",
-          "active:scale-[0.98]"
+          "active:scale-[0.98]",
         )}
       >
         {/* Service Image */}

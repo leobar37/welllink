@@ -84,6 +84,18 @@ export async function seedReservations() {
   const reservationRepository = new ReservationRepository();
   const userId = await getTestUserId();
 
+  // CLEANUP: Remove existing reservations for this user's profiles
+  console.log(`  🧹 Cleaning up existing reservations...`);
+  const userProfileIds = Object.values(createdProfileIds);
+  let deletedCount = 0;
+  for (const profileId of userProfileIds) {
+    const result = await db
+      .delete(reservation)
+      .where(eq(reservation.profileId, profileId));
+    deletedCount += result.count || 0;
+  }
+  console.log(`  ✓ Removed ${deletedCount} reservation(s)`);
+
   for (const reservationData of RESERVATION_DATA) {
     const { key, profileKey, serviceKey, slotKey, ...data } = reservationData;
     const profileId = createdProfileIds[profileKey];
@@ -107,18 +119,6 @@ export async function seedReservations() {
 
     if (!slotId) {
       console.log(`  ⚠️  Slot ${slotKey} not found, skipping reservation`);
-      continue;
-    }
-
-    const existingReservation = await db.query.reservation.findFirst({
-      where: eq(reservation.patientPhone, data.patientPhone),
-    });
-
-    if (existingReservation) {
-      console.log(
-        `  ✓ Reservation for ${data.patientName} already exists, skipping`,
-      );
-      createdReservationIds[key] = existingReservation.id;
       continue;
     }
 

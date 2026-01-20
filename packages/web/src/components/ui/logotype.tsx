@@ -22,11 +22,11 @@ export function Logotype({ size = "md", className }: LogotypeProps) {
       className={cn(
         "font-bold tracking-tight whitespace-nowrap",
         textSize,
-        className
+        className,
       )}
     >
-      <span className="text-foreground">Well</span>
-      <span className="text-primary">link</span>
+      <span className="text-foreground">Medi</span>
+      <span className="text-primary">App</span>
     </span>
   );
 }

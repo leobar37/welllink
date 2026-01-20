@@ -6,6 +6,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { AssetSelector } from "@/components/forms/asset-selector";
@@ -61,11 +62,11 @@ export function ServiceForm({ form, profileId }: ServiceFormProps) {
           <FormItem>
             <FormLabel>Duración (minutos) *</FormLabel>
             <FormControl>
-              <Input
+              <NumberInput
                 type="number"
                 placeholder="30"
-                {...field}
-                onChange={(e) => field.onChange(Number(e.target.value))}
+                value={field.value}
+                onChange={field.onChange}
               />
             </FormControl>
             <FormMessage />

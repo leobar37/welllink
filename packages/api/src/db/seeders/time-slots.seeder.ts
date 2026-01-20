@@ -77,6 +77,18 @@ export async function seedTimeSlots() {
   const userId = await getTestUserId();
   const SLOT_DATA = generateTimeSlots();
 
+  // CLEANUP: Remove existing time slots for this user's profiles
+  console.log(`  🧹 Cleaning up existing time slots...`);
+  const userProfileIds = Object.values(createdProfileIds);
+  let deletedCount = 0;
+  for (const profileId of userProfileIds) {
+    const result = await db
+      .delete(timeSlot)
+      .where(eq(timeSlot.profileId, profileId));
+    deletedCount += result.count || 0;
+  }
+  console.log(`  ✓ Removed ${deletedCount} time slot(s)`);
+
   for (const slotData of SLOT_DATA) {
     const { key, profileKey, serviceKey, ...data } = slotData;
     const profileId = createdProfileIds[profileKey];
@@ -90,18 +102,6 @@ export async function seedTimeSlots() {
 
     if (!serviceId) {
       console.log(`  ⚠️  Service ${serviceKey} not found, skipping time slot`);
-      continue;
-    }
-
-    const existingSlot = await db.query.timeSlot.findFirst({
-      where: and(
-        eq(timeSlot.profileId, profileId),
-        eq(timeSlot.serviceId, serviceId),
-      ),
-    });
-
-    if (existingSlot) {
-      createdTimeSlotIds[key] = existingSlot.id;
       continue;
     }
 

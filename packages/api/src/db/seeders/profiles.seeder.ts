@@ -41,26 +41,23 @@ export async function seedProfiles() {
   const profileRepository = new ProfileRepository();
   const userId = await getTestUserId();
 
+  // CLEANUP: Remove existing profiles for this user to avoid duplicates
+  console.log(`  🧹 Cleaning up existing profiles for user...`);
+  await db
+    .delete(profile)
+    .where(eq(profile.userId, userId));
+  console.log(`  ✓ Removed old profiles for user`);
+
   for (const profileData of PROFILE_DATA) {
     const { key, avatarKey, coverKey, ...data } = profileData;
     const ctx = createSeederContext(userId);
 
-    const existingProfile = await db.query.profile.findFirst({
-      where: eq(profile.username, data.username),
-    });
-
-    if (existingProfile) {
-      console.log(`  ✓ Profile @${data.username} already exists, skipping`);
-      createdProfileIds[key] = existingProfile.id;
-      continue;
-    }
-
     const avatarId = createdAssetIds[avatarKey];
     const coverImageId = createdAssetIds[coverKey];
 
+    // userId is added internally by the repository
     const created = await profileRepository.create(ctx, {
       ...data,
-      userId,
       avatarId,
       coverImageId,
     });

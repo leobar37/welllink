@@ -4,6 +4,7 @@ import { z } from "zod";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import {
   Form,
   FormControl,
@@ -20,7 +21,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { AvailabilityRule, CreateAvailabilityRuleData } from "@/hooks/use-availability-rules";
+import type {
+  AvailabilityRule,
+  CreateAvailabilityRuleData,
+} from "@/hooks/use-availability-rules";
 
 const availabilityRuleSchema = z
   .object({
@@ -31,9 +35,11 @@ const availabilityRuleSchema = z
     endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, {
       message: "Formato inválido. Use HH:MM",
     }),
-    slotDuration: z.number({ required_error: "La duración es requerida" }).min(15, {
-      message: "Mínimo 15 minutos",
-    }),
+    slotDuration: z
+      .number({ required_error: "La duración es requerida" })
+      .min(15, {
+        message: "Mínimo 15 minutos",
+      }),
     bufferTime: z.number().min(0).optional(),
     maxAppointmentsPerSlot: z.number().min(1).optional(),
     effectiveFrom: z.string().optional(),
@@ -105,7 +111,9 @@ export function AvailabilityRuleForm({
       slotDuration: data.slotDuration,
       bufferTime: data.bufferTime,
       maxAppointmentsPerSlot: data.maxAppointmentsPerSlot,
-      effectiveFrom: data.effectiveFrom ? new Date(data.effectiveFrom) : undefined,
+      effectiveFrom: data.effectiveFrom
+        ? new Date(data.effectiveFrom)
+        : undefined,
       effectiveTo: data.effectiveTo ? new Date(data.effectiveTo) : undefined,
     };
 
@@ -122,7 +130,10 @@ export function AvailabilityRuleForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Día de la semana</FormLabel>
-                <Select onValueChange={(value) => field.onChange(Number(value))} defaultValue={String(field.value)}>
+                <Select
+                  onValueChange={(value) => field.onChange(Number(value))}
+                  defaultValue={String(field.value)}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona un día" />
@@ -147,7 +158,10 @@ export function AvailabilityRuleForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Duración de cada cita</FormLabel>
-                <Select onValueChange={(value) => field.onChange(Number(value))} defaultValue={String(field.value)}>
+                <Select
+                  onValueChange={(value) => field.onChange(Number(value))}
+                  defaultValue={String(field.value)}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Duración" />
@@ -161,9 +175,7 @@ export function AvailabilityRuleForm({
                     ))}
                   </SelectContent>
                 </Select>
-                <FormDescription>
-                  Cuánto tiempo dura cada cita
-                </FormDescription>
+                <FormDescription>Cuánto tiempo dura cada cita</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -208,13 +220,13 @@ export function AvailabilityRuleForm({
               <FormItem>
                 <FormLabel>Tiempo de espera</FormLabel>
                 <FormControl>
-                  <Input
+                  <NumberInput
                     type="number"
                     min="0"
                     step="5"
                     placeholder="0"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    value={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormDescription>
@@ -232,12 +244,12 @@ export function AvailabilityRuleForm({
               <FormItem>
                 <FormLabel>Máximo de citas por slot</FormLabel>
                 <FormControl>
-                  <Input
+                  <NumberInput
                     type="number"
                     min="1"
                     placeholder="1"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    value={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormDescription>

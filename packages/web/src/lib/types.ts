@@ -14,8 +14,9 @@ export type SocialLink = DbSocialLink & {
   url: string;
 };
 
-// Medical service type for public profile
-export type MedicalService = DbMedicalService;
+export type MedicalService = DbMedicalService & {
+  imageAssetId?: string | null;
+};
 
 interface BaseFeature<Config = Record<string, unknown>> {
   id: string;
@@ -30,9 +31,13 @@ export interface WhatsAppCtaFeature extends BaseFeature<{
   type: "whatsapp-cta";
 }
 
-export type Feature =
-  | WhatsAppCtaFeature
-  | BaseFeature;
+export interface AppointmentsFeature extends BaseFeature<
+  Record<string, never>
+> {
+  type: "appointments";
+}
+
+export type Feature = WhatsAppCtaFeature | AppointmentsFeature | BaseFeature;
 
 export interface PublicProfileData {
   profile: Profile;
