@@ -34,7 +34,7 @@ env:
   REGISTRY: gcr.io
   DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
   DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
-  DOKPLOY_APPLICATION_ID: ${{ secrets.DOKPLOY_APPLICATION_ID }}
+  DOKPLOY_COMPOSE_ID: ${{ secrets.DOKPLOY_COMPOSE_ID }}
 
 permissions:
   contents: write
@@ -175,13 +175,13 @@ jobs:
         run: |
           echo "🚀 Triggering Dokploy deployment..."
           echo "URL: $DOKPLOY_URL"
-          echo "Application ID: $DOKPLOY_APPLICATION_ID"
+          echo "Compose ID: $DOKPLOY_COMPOSE_ID"
 
           RESPONSE=$(curl -s -X POST \
-            "$DOKPLOY_URL/api/application.redeploy" \
+            "$DOKPLOY_URL/api/compose.redeploy" \
             -H "x-api-key: $DOKPLOY_API_KEY" \
             -H "Content-Type: application/json" \
-            -d '{"applicationId":"'"$DOKPLOY_APPLICATION_ID"'"}' \
+            -d '{"composeId":"'"$DOKPLOY_COMPOSE_ID"'"}' \
             -w "\n%{http_code}")
 
           HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
