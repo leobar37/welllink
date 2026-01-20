@@ -12,9 +12,9 @@ const PROFILE_DATA = [
   {
     key: "maria",
     username: "maria_wellness",
-    displayName: "María Test",
-    title: "Coach de Bienestar y Nutrición",
-    bio: "Ayudo a personas a encontrar su mejor versión a través de hábitos saludables y nutrición consciente 🌱",
+    displayName: "Dra. María García",
+    title: "Médico General - Medicina Familiar",
+    bio: "Cuidando la salud de tu familia con atención personalizada y warmth. Medicina preventiva y atención primaria para todas las edades 🩺",
     avatarKey: "mariaAvatar",
     coverKey: "mariaCover",
     whatsappNumber: "+51987654321",

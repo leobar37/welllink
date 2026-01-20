@@ -44,7 +44,7 @@ Este script de medios debe usarse en los siguientes escenarios:
 
 2. **Contenido Sin Relación con Wellness**
    - Evitar generar contenido no relacionado con el propósito de la plataforma
-   - No usar para proyectos externos ajenos a Wellness Link
+   - No usar para proyectos externos ajenos a MediApp
 
 3. **Como Reemplazo de Contenido Humano**
    - No intended para reemplazar fotografía profesional real
@@ -52,12 +52,14 @@ Este script de medios debe usarse en los siguientes escenarios:
 
 ### Integración con el Proyecto
 
-Este script complementa las funcionalidades del proyecto Wellness Link, que utiliza:
+Este script complementa las funcionalidades del proyecto MediApp, que utiliza:
+
 - **Frontend:** React 19 + Vite + Tailwind v4 + shadcn/ui
 - **Backend:** Bun + Elysia REST API
 - **Documentación:** PRDs en `docs/global-prd.md` y módulos en `docs/modules/`
 
 **📖 Referencias:**
+
 - Guía general del proyecto: [`Agents.md`](./Agents.md)
 - PRD Global (español): [`docs/global-prd.md`](./global-prd.md)
 - Módulos del proyecto: [`docs/modules/`](./modules/)
@@ -97,6 +99,7 @@ bun run media nano [opciones]
 ```
 
 **Opciones:**
+
 - `-p, --prompt <prompt>`: Prompt de texto para la generación (por defecto: "Make the sheets in the style of the logo. Make the scene natural.")
 - `-i, --images <images...>`: URLs de imágenes o rutas locales (opcional, puede especificar múltiples)
 - `-o, --output <filename>`: Nombre del archivo de salida (por defecto: "output.jpg")
@@ -125,6 +128,7 @@ bun run media flux [opciones]
 ```
 
 **Opciones:**
+
 - `-p, --prompt <prompt>`: Prompt de texto (por defecto: "Make the letters 3D, floating in space on a city street")
 - `-i, --input-image <url>`: URL de imagen o ruta local para contexto
 - `-f, --format <format>`: Formato de salida (jpg, png) - por defecto: jpg
@@ -158,6 +162,7 @@ bun run media remove-bg [opciones]
 ```
 
 **Opciones:**
+
 - `-i, --image <path>`: Ruta o URL de la imagen (requerido)
 - `-o, --output <filename>`: Nombre del archivo de salida (por defecto: "no-bg.png")
 
@@ -182,6 +187,7 @@ bun run media enhance [opciones]
 ```
 
 **Opciones:**
+
 - `-i, --image <path>`: Ruta o URL de la imagen (requerido)
 - `-s, --scale <number>`: Factor de aumento de resolución (2, 4, o 8) - por defecto: 4
 - `-o, --output <filename>`: Nombre del archivo de salida
@@ -212,6 +218,7 @@ bun run media hailuo [opciones]
 ```
 
 **Opciones:**
+
 - `-p, --prompt <prompt>`: Prompt de texto para el video
 - `-i, --image <path>`: Ruta de imagen para conversión imagen-a-video
 - `-d, --duration <duration>`: Duración del video (6s, 10s) - por defecto: 6s
@@ -242,6 +249,7 @@ bun run media hailuo2 [opciones]
 ```
 
 **Opciones:**
+
 - `-p, --prompt <prompt>`: Prompt de texto para el video
 - `-i, --image <path>`: Ruta de imagen para conversión imagen-a-video
 - `-d, --duration <duration>`: Duración del video (6s, 10s) - por defecto: 6s
@@ -269,6 +277,7 @@ bun run media hailuo-fast [opciones]
 ```
 
 **Opciones:**
+
 - `-p, --prompt <prompt>`: Prompt de texto para el video
 - `-i, --image <path>`: Ruta de imagen para conversión imagen-a-video
 - `-d, --duration <duration>`: Duración del video (6s, 10s) - por defecto: 6s
@@ -295,6 +304,7 @@ bun run media director [opciones]
 ```
 
 **Opciones:**
+
 - `-p, --prompt <prompt>`: Prompt de texto para el video
 - `-i, --image <path>`: Ruta o URL de imagen
 - `-c, --camera <movement>`: Movimiento de cámara (ej: pan-left, zoom-in, orbit, tracking-shot, tilt-up, etc.)
@@ -317,6 +327,7 @@ bun run media director -p "Coche en movimiento" -c tracking-shot -o tracking.mp4
 ```
 
 **Movimientos de cámara disponibles:**
+
 - `pan-left`, `pan-right`: Paneo horizontal
 - `tilt-up`, `tilt-down`: Inclinación vertical
 - `zoom-in`, `zoom-out`: Zoom
@@ -335,6 +346,7 @@ bun run media live [opciones]
 ```
 
 **Opciones:**
+
 - `-i, --image <path>`: Ruta o URL de imagen (requerido)
 - `-p, --prompt <prompt>`: Prompt opcional para el estilo de animación
 - `-o, --output <filename>`: Nombre del archivo de salida
@@ -385,13 +397,16 @@ project-root/
 ## Solución de Problemas
 
 ### Error: "File does not exist"
+
 - Verifica que la ruta de la imagen sea correcta
 - Usa rutas absolutas o relativas desde el directorio del proyecto
 
 ### Error: "Either --prompt or --image is required"
+
 - Para videos, debes proporcionar al menos uno de: `-p` (prompt) o `-i` (imagen)
 
 ### Error de autenticación
+
 - El script incluye un token de API preconfigurado
 - Si encuentras errores, contacta al administrador para actualizar el token
 

@@ -1,4 +1,4 @@
-# Wellness Link - Backend Implementation Progress
+# MediApp - Backend Implementation Progress
 
 ## Module: Better Auth + Service Architecture + Assets + Onboarding
 
@@ -391,7 +391,7 @@ CREATE TABLE qr_download (
   qrCode: "data:image/png;base64,...",
   format: "png",
   mimeType: "image/png",
-  profileUrl: "https://wellnesslink.com/username"
+  profileUrl: "https://mediapp.app/username"
 }
 
 // GET /api/qr/profiles/:id/card
@@ -407,14 +407,14 @@ CREATE TABLE qr_download (
     { platform: "instagram", url: "https://..." }
   ],
   qrCodeDataUrl: "data:image/png;base64,...",
-  profileUrl: "https://wellnesslink.com/john"
+  profileUrl: "https://mediapp.app/john"
 }
 ```
 
 #### Environment Variables
 
 ```env
-PUBLIC_URL=https://wellnesslink.com  # Base URL for QR codes
+PUBLIC_URL=https://mediapp.app  # Base URL for QR codes
 ```
 
 ---

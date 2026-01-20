@@ -23,7 +23,7 @@ Deliver the web and API experiences described in [`docs/global-prd.md`](./docs/g
 ## Project Structure
 
 ```
-wellness-link/
+mediapp/
 ├── docs/                           # Documentation and PRDs
 ├── packages/
 │   ├── web/                       # React 19 + Vite + React Router + Tailwind v4 + shadcn/ui
@@ -52,38 +52,45 @@ wellness-link/
 ## Development Preferences
 
 ### Language Support
+
 - **User-facing text**: Spanish (dashboard, forms, buttons, etc.)
 - **Technical documentation**: English (API, code comments, README)
 - All UI text must be in Spanish
 
 ### Design System
+
 - **Theme-aware**: All components must support light/dark theme switching
 - **Responsive**: Mobile-first design, check breakpoints for all new components
 - Use Tailwind v4 utilities and CSS variables from `src/index.css`
 - Prefer shadcn/ui components when available
 
 ### Runtime
+
 - Uses **Bun** for both frontend and backend development
 - Monorepo with workspaces configuration
 
 ## Backend Rules (Drizzle + Elysia)
 
 ### Schema First
+
 - Always check table names in `packages/api/src/db/schema/index.ts` before importing
 - Tables use **SINGULAR** names: `profile`, `asset`, `socialClick`
 - Check field names - not all use `createdAt` (some use `viewedAt`, `clickedAt`)
 
 ### Service Pattern
+
 1. Create repository in `src/services/repository/`
 2. Create business service in `src/services/business/`
 3. **REGISTER in `src/plugins/services.ts`** - services won't work without this
 4. Use dependency injection, never `new` inside classes
 
 ### TypeScript Strict Mode
+
 - Always type callback parameters in `reduce`, `map`, `filter`
 - Import types from schema: `import type { Asset } from "../../db/schema/asset"`
 
 ### Relations Access
+
 - Access nested fields via relation name, not directly:
   ```typescript
   // Schema: socialClick has relation to socialLink
@@ -94,21 +101,23 @@ wellness-link/
 ## Architecture Notes
 
 ### Authentication
+
 - Better Auth with email/password
 - Sessions: 7 days expiry, 1 day update age
 - Auth routes handled automatically by Better Auth handler
 - Frontend uses `authClient` hook for session management
 
 ### API Communication
+
 - Backend: port 5300, Frontend: port 5176 (development)
 - Type safety through edenTreaty with shared App type
 - CORS configured for development
 
 ### Frontend Routing
+
 - File-based routing via @react-router/fs-routes
 - Layout hierarchy: AuthLayout, DashboardLayout, PublicLayout
 - Protected dashboard routes require authentication
-
 
 ## Key Database Tables
 
@@ -127,6 +136,7 @@ A CLI script for generating images and videos using Replicate AI models. Useful 
 **Documentation:** `docs/media-script.md`
 
 **Example usage:**
+
 ```bash
 # Generate a profile image
 bun run media nano -p "Professional wellness coach headshot" -o profile.jpg

@@ -45,7 +45,7 @@ Si tienes alguna pregunta o preocupación, no dudes en contactarnos.
 ¡Tu salud es nuestra prioridad!
 
 ---
-*Wellness Link*`;
+*MediApp*`;
 
       const formattedPhone = evolutionService.formatPhoneNumber(
         eventData.patientPhone,

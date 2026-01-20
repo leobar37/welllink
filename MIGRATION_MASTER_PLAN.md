@@ -12,7 +12,7 @@
 
 ## 🎯 Visión General
 
-Transformar el sistema **Wellness Link** (plataforma de tarjetas digitales de bienestar) en una **Plataforma de Configuración de Chatbot Médico** para profesionales de la salud.
+Transformar el sistema **MediApp** (plataforma de tarjetas digitales de bienestar) en una **Plataforma de Configuración de Chatbot Médico** para profesionales de la salud.
 
 ### 🔄 Cambios Clave
 
@@ -232,15 +232,15 @@ Doctores configuran en 15 minutos un asistente virtual en WhatsApp que:
 
 ## 📈 Progreso General
 
-| Fase                | Estado         | Progreso | Archivos     | Estado Archivos              |
-| ------------------- | -------------- | -------- | ------------ | ---------------------------- |
-| 1 - Textos          | ✅ COMPLETADA  | 100%     | 6 archivos   | ✅ Completados               |
-| 2 - Infraestructura | ✅ COMPLETADA | 100%      | 6/6 archivos | ✅ 6 completos, 0 pendientes |
-| 3 - Solicitudes     | ✅ COMPLETADA  | 100%     | 5/5 archivos | ✅ 5 completos, 0 pendientes |
-| 4 - Edición         | 📋 PENDIENTE   | 0%       | 0/4 archivos | ⏳ 4 pendientes              |
-| 5 - Workflows       | 📋 PENDIENTE   | 0%       | 0/5 archivos | ⏳ 5 pendientes              |
-| 6 - UI              | 📋 PENDIENTE   | 0%       | 0/5 archivos | ⏳ 5 pendientes              |
-| 7 - Testing         | 📋 PENDIENTE   | 0%       | 0/5 archivos | ⏳ 5 pendientes              |
+| Fase                | Estado        | Progreso | Archivos     | Estado Archivos              |
+| ------------------- | ------------- | -------- | ------------ | ---------------------------- |
+| 1 - Textos          | ✅ COMPLETADA | 100%     | 6 archivos   | ✅ Completados               |
+| 2 - Infraestructura | ✅ COMPLETADA | 100%     | 6/6 archivos | ✅ 6 completos, 0 pendientes |
+| 3 - Solicitudes     | ✅ COMPLETADA | 100%     | 5/5 archivos | ✅ 5 completos, 0 pendientes |
+| 4 - Edición         | 📋 PENDIENTE  | 0%       | 0/4 archivos | ⏳ 4 pendientes              |
+| 5 - Workflows       | 📋 PENDIENTE  | 0%       | 0/5 archivos | ⏳ 5 pendientes              |
+| 6 - UI              | 📋 PENDIENTE  | 0%       | 0/5 archivos | ⏳ 5 pendientes              |
+| 7 - Testing         | 📋 PENDIENTE  | 0%       | 0/5 archivos | ⏳ 5 pendientes              |
 
 **Total:** 18 archivos completados de 37 archivos planeados (49%)
 

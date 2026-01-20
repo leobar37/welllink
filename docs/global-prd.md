@@ -1,4 +1,4 @@
-# Wellness Link — CRM para Médicos
+# MediApp — CRM para Médicos
 
 > Plataforma de gestión integral para profesionales de la salud
 
@@ -8,7 +8,8 @@
 
 ### ¿Qué es?
 
-Wellness Link es una plataforma web CRM diseñada específicamente para médicos y profesionales de la salud que combina:
+MediApp es una plataforma web CRM diseñada específicamente para médicos y profesionales de la salud que combina:
+
 - **Página de presentación profesional** con servicios, galería y información
 - **Agente de IA** para atención 24/7 vía WhatsApp y web
 - **Sistema de agendamiento de citas** con approval workflow
@@ -17,6 +18,7 @@ Wellness Link es una plataforma web CRM diseñada específicamente para médicos
 ### ¿Para quién?
 
 Médicos generales, especialistas, dentistas, y profesionales de la salud que:
+
 - Necesitan una presencia digital profesional
 - Quieren automatizar la atención al paciente
 - Requieren gestionar su agenda y pacientes de forma eficiente
@@ -25,6 +27,7 @@ Médicos generales, especialistas, dentistas, y profesionales de la salud que:
 ### Problema que resuelve
 
 Los médicos actualmente:
+
 - Pierden tiempo respondiendo las mismas preguntas repetitivas
 - No tienen sistema de citas centralizado
 - Dependen de múltiples herramientas desconectadas
@@ -34,6 +37,7 @@ Los médicos actualmente:
 ### Solución
 
 Una plataforma todo-en-uno con:
+
 - Página pública profesional siempre accesible
 - Agente IA que responde 24/7
 - Citas con confirmación automática
@@ -49,6 +53,7 @@ Una plataforma todo-en-uno con:
 Registro e inicio de sesión de médicos.
 
 **Funcionalidades:**
+
 - Registro con email o Google
 - Verificación de cuenta
 - Onboarding guiado (datos profesionales, especialidad, servicios iniciales)
@@ -61,6 +66,7 @@ Registro e inicio de sesión de médicos.
 La página web profesional que ven los pacientes.
 
 **Elementos:**
+
 - Foto de perfil profesional
 - Nombre y título/m特殊idad
 - Bio corta y credentials médicos
@@ -70,10 +76,11 @@ La página web profesional que ven los pacientes.
 - Botones de acción (WhatsApp, Agendar Cita)
 
 **Barra de acciones (floating):**
+
 - 🔗 Compartir link
 - 📱 Mostrar QR
 
-**URL pública:** `wellnesslink.com/{username}`
+**URL pública:** `mediapp.app/{username}`
 
 ---
 
@@ -82,6 +89,7 @@ La página web profesional que ven los pacientes.
 Gestión de servicios y procedimientos.
 
 **Funcionalidades:**
+
 - Crear/editar/eliminar servicios
 - Nombre, descripción, precio, duración
 - Categorías (consulta, procedimiento, paquete)
@@ -94,6 +102,7 @@ Gestión de servicios y procedimientos.
 Imágenes del consultorio y práctica médica.
 
 **Funcionalidades:**
+
 - Subir fotos del consultorio
 - Fotos del equipo médico
 - Imágenes de procedimientos (antes/después)
@@ -107,10 +116,12 @@ Imágenes del consultorio y práctica médica.
 Asistente virtual para atención 24/7.
 
 **Canales:**
+
 - WhatsApp (Evolution API)
 - Web (chat en vivo en página pública)
 
 **Capacidades:**
+
 - Responder preguntas frecuentes
 - Proporcionar información sobre servicios y precios
 - Agendar citas via chat
@@ -118,6 +129,7 @@ Asistente virtual para atención 24/7.
 - Derivar al médico cuando sea necesario
 
 **Configuración:**
+
 - FAQ personalizada
 - Tono de respuesta
 - Información del consultorio
@@ -130,6 +142,7 @@ Asistente virtual para atención 24/7.
 Agendamiento con approval workflow.
 
 **Flujo:**
+
 1. Paciente selecciona servicio y horario
 2. Envía solicitud
 3. Médico aprueba/rechaza/modifica
@@ -137,6 +150,7 @@ Agendamiento con approval workflow.
 5. Recordatorios automáticos (24h, 2h)
 
 **Características:**
+
 - Slots configurables con capacidad
 - Reglas de disponibilidad
 - Nivel de urgencia
@@ -149,12 +163,14 @@ Agendamiento con approval workflow.
 Base de datos de pacientes con notas y seguimiento.
 
 **Datos del paciente:**
+
 - Nombre, teléfono, email, fecha de nacimiento
 - Labels: Nuevo/Recurrente/VIP/Potencial/Inactivo
 - Notas médicas y preferencias
 - Historial de citas
 
 **Automatizaciones:**
+
 - Recordatorios post-consulta
 - Cumpleaños
 - Reactivación de pacientes inactivos
@@ -166,6 +182,7 @@ Base de datos de pacientes con notas y seguimiento.
 Panel principal del médico.
 
 **Métricas:**
+
 - Pacientes nuevos (semana/mes)
 - Citas agendadas
 - Tasa de respuesta del Agente IA
@@ -173,6 +190,7 @@ Panel principal del médico.
 - Ingresos estimados
 
 **Acciones rápidas:**
+
 - Ver página pública
 - Agendar nueva cita
 - Ver pacientes
@@ -185,6 +203,7 @@ Panel principal del médico.
 Ajustes de la cuenta y práctica.
 
 **Opciones:**
+
 - Datos del perfil profesional
 - Configuración de WhatsApp Business
 - Configuración del Agente IA
@@ -200,20 +219,20 @@ El sistema de features permite agregar funcionalidades modulares al perfil públ
 
 ### Features Principales
 
-| # | Feature | Descripción | Texto default |
-|---|---------|-------------|---------------|
-| 1 | Encuesta de Salud | Evaluación inicial del paciente | "Evalúate gratis" |
-| 2 | Agente IA | Asistente virtual 24/7 | "Pregúntame" |
-| 3 | Agendar Cita | Sistema de reservas | "Agendar Cita" |
-| 4 | WhatsApp | Contacto directo | "Escríbeme" |
+| #   | Feature           | Descripción                     | Texto default     |
+| --- | ----------------- | ------------------------------- | ----------------- |
+| 1   | Encuesta de Salud | Evaluación inicial del paciente | "Evalúate gratis" |
+| 2   | Agente IA         | Asistente virtual 24/7          | "Pregúntame"      |
+| 3   | Agendar Cita      | Sistema de reservas             | "Agendar Cita"    |
+| 4   | WhatsApp          | Contacto directo                | "Escríbeme"       |
 
 ### Features Opcionales
 
-| # | Feature | Descripción |
-|---|---------|-------------|
-| 5 | Galería | Fotos del consultorio |
-| 6 | Testimonios | Reseñas de pacientes |
-| 7 | Servicios | Lista de servicios |
+| #   | Feature     | Descripción           |
+| --- | ----------- | --------------------- |
+| 5   | Galería     | Fotos del consultorio |
+| 6   | Testimonios | Reseñas de pacientes  |
+| 7   | Servicios   | Lista de servicios    |
 
 ---
 
@@ -260,18 +279,18 @@ El sistema de features permite agregar funcionalidades modulares al perfil públ
 
 ## 5. Prioridades MVP
 
-| Módulo | Prioridad | Notas |
-|--------|-----------|-------|
-| Autenticación (2.1) | 🔴 Alta | Base del sistema |
-| Página Pública (2.2) | 🔴 Alta | Presencia digital |
-| Servicios (2.3) | 🔴 Alta | Core de la oferta |
-| Agente IA (2.5) | 🔴 Alta | Diferenciador clave |
-| Citas (2.6) | 🔴 Alta | Revenue driver |
-| CRM Pacientes (2.7) | 🟡 Media | Gestión de base |
-| Dashboard (2.8) | 🟡 Media | Métricas y acciones |
-| Configuración (2.9) | 🟡 Media | Personalización |
-| Galería (2.4) | 🟢 Baja | Complementario |
-| Testimonios | ⚪ Post-MVP | Social proof |
+| Módulo               | Prioridad   | Notas               |
+| -------------------- | ----------- | ------------------- |
+| Autenticación (2.1)  | 🔴 Alta     | Base del sistema    |
+| Página Pública (2.2) | 🔴 Alta     | Presencia digital   |
+| Servicios (2.3)      | 🔴 Alta     | Core de la oferta   |
+| Agente IA (2.5)      | 🔴 Alta     | Diferenciador clave |
+| Citas (2.6)          | 🔴 Alta     | Revenue driver      |
+| CRM Pacientes (2.7)  | 🟡 Media    | Gestión de base     |
+| Dashboard (2.8)      | 🟡 Media    | Métricas y acciones |
+| Configuración (2.9)  | 🟡 Media    | Personalización     |
+| Galería (2.4)        | 🟢 Baja     | Complementario      |
+| Testimonios          | ⚪ Post-MVP | Social proof        |
 
 ---
 
@@ -338,13 +357,13 @@ Cita completada → Paciente agregado al CRM
 
 ## 7. Diferenciadores
 
-| Herramienta Genérica | Wellness Link |
-|---------------------|---------------|
-| Sin IA | Agente IA 24/7 |
-| Citas manuales | Agendamiento automatizado |
-| Sin CRM | Gestión completa de pacientes |
-| Solo web | WhatsApp + Web |
-| Genérico | 100% enfocado en médicos |
+| Herramienta Genérica | MediApp                       |
+| -------------------- | ----------------------------- |
+| Sin IA               | Agente IA 24/7                |
+| Citas manuales       | Agendamiento automatizado     |
+| Sin CRM              | Gestión completa de pacientes |
+| Solo web             | WhatsApp + Web                |
+| Genérico             | 100% enfocado en médicos      |
 
 ---
 

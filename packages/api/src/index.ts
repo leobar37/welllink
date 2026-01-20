@@ -45,6 +45,12 @@ import { availabilityRoutes } from "./api/routes/availability";
 import { slotsRoutes } from "./api/routes/slots";
 import { createStorageStrategy } from "./services/storage";
 
+// Test routes - ONLY enabled via ENABLE_TEST_ROUTES=true (SECURITY: never in production)
+const enableTestRoutes = env.ENABLE_TEST_ROUTES === "true";
+const testRoutes = enableTestRoutes
+  ? (await import("./api/routes/test")).testRoutes
+  : null;
+
 // Inngest
 import { serve } from "inngest/bun";
 import { inngest } from "./lib/inngest-client";
@@ -113,6 +119,10 @@ const app = new Elysia()
         },
       });
     } catch (error) {
+      console.warn(
+        "File serving not available (storage not configured):",
+        error instanceof Error ? error.message : error,
+      );
       set.status = 404;
       return { error: "File not found" };
     }
@@ -145,7 +155,13 @@ const app = new Elysia()
       .use(clientRoutes)
       .use(medicalServiceRoutes)
       .use(availabilityRoutes)
-      .use(slotsRoutes),
+      .use(slotsRoutes)
+      // Test routes - ONLY enabled via ENABLE_TEST_ROUTES=true (SECURITY: never in production)
+      .use(
+        enableTestRoutes
+          ? testRoutes!
+          : new Elysia({ name: "noop" }).derive(() => ({})),
+      ),
   )
   // Inngest serve endpoint for workflow orchestration
   .all("/api/inngest", ({ request }) =>

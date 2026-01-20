@@ -4,22 +4,26 @@ const features = [
   {
     icon: MessageCircle,
     title: "Conversación Natural",
-    description: "El agente responde preguntas sobre tus servicios, horarios y precios automáticamente.",
+    description:
+      "El agente responde preguntas sobre tus servicios, horarios y precios automáticamente.",
   },
   {
     icon: Clock,
     title: "24/7 Disponible",
-    description: "Nunca pierdes un lead. Atiende pacientes incluso mientras duermes.",
+    description:
+      "Nunca pierdes un lead. Atiende pacientes incluso mientras duermes.",
   },
   {
     icon: CheckCircle,
     title: "Cierra Citas",
-    description: "El agente propone horarios disponibles y confirma la cita directamente.",
+    description:
+      "El agente propone horarios disponibles y confirma la cita directamente.",
   },
   {
     icon: Zap,
     title: "Sin Intervención",
-    description: "Solo intervienes en casos complejos. El resto se gestiona solo.",
+    description:
+      "Solo intervienes en casos complejos. El resto se gestiona solo.",
   },
 ];
 
@@ -54,13 +58,16 @@ export function AgentExplanation() {
                     <Zap className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <div className="font-medium">Welllink Agent</div>
-                    <div className="text-xs text-muted-foreground">Activo ahora</div>
+                    <div className="font-medium">MediApp Agent</div>
+                    <div className="text-xs text-muted-foreground">
+                      Activo ahora
+                    </div>
                   </div>
                 </div>
                 <div className="space-y-3">
                   <div className="p-3 rounded-lg bg-secondary text-sm">
-                    Hola Dr. García, el agente acaba de cerrar una cita para mañana a las 10:00 AM.
+                    Hola Dr. García, el agente acaba de cerrar una cita para
+                    mañana a las 10:00 AM.
                   </div>
                   <div className="text-xs text-muted-foreground">
                     Paciente: María González • Servicio: Limpieza Dental
@@ -80,7 +87,9 @@ export function AgentExplanation() {
                       <div className="bg-white rounded-2xl rounded-tl-sm p-3 shadow-sm text-sm">
                         Hola, tienes disponibilidad para esta semana?
                       </div>
-                      <div className="text-xs text-muted-foreground mt-1">10:23 AM</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        10:23 AM
+                      </div>
                     </div>
                   </div>
 
@@ -90,9 +99,12 @@ export function AgentExplanation() {
                     </div>
                     <div className="flex-1">
                       <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-sm p-3 shadow-sm text-sm">
-                        Hola! Tengo disponibles el martes a las 10:00 o 15:00, o el viernes a las 11:00. Cuál te funciona mejor?
+                        Hola! Tengo disponibles el martes a las 10:00 o 15:00, o
+                        el viernes a las 11:00. Cuál te funciona mejor?
                       </div>
-                      <div className="text-xs text-muted-foreground mt-1 text-right">10:24 AM</div>
+                      <div className="text-xs text-muted-foreground mt-1 text-right">
+                        10:24 AM
+                      </div>
                     </div>
                   </div>
 
@@ -104,7 +116,9 @@ export function AgentExplanation() {
                       <div className="bg-white rounded-2xl rounded-tl-sm p-3 shadow-sm text-sm">
                         Me viene bien el martes a las 10:00!
                       </div>
-                      <div className="text-xs text-muted-foreground mt-1">10:25 AM</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        10:25 AM
+                      </div>
                     </div>
                   </div>
 
@@ -114,9 +128,12 @@ export function AgentExplanation() {
                     </div>
                     <div className="flex-1">
                       <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-sm p-3 shadow-sm text-sm">
-                        Perfecto! Tu cita está confirmada para martes 10:00 AM. Te enviaré un recordatorio mañana. Saludos!
+                        Perfecto! Tu cita está confirmada para martes 10:00 AM.
+                        Te enviaré un recordatorio mañana. Saludos!
                       </div>
-                      <div className="text-xs text-muted-foreground mt-1 text-right">10:25 AM</div>
+                      <div className="text-xs text-muted-foreground mt-1 text-right">
+                        10:25 AM
+                      </div>
                     </div>
                   </div>
                 </div>

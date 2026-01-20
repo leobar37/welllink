@@ -1,18 +1,22 @@
 # Module 10 — CRM Médico con Agente IA
 
 ## Visión General
-Este módulo transforma Wellness Link en un **CRM inteligente para profesionales de la salud** que combina gestión de pacientes, agente de IA para atención 24/7, y automatización de comunicación vía WhatsApp y web.
+
+Este módulo transforma MediApp en un **CRM inteligente para profesionales de la salud** que combina gestión de pacientes, agente de IA para atención 24/7, y automatización de comunicación vía WhatsApp y web.
 
 ## Objetivos del Módulo
 
 ### Objetivo Principal
+
 Empoderar a médicos y profesionales de la salud con un asistente de IA que:
+
 - Atiende pacientes las 24/7 vía WhatsApp y web
 - Gestiona la base de pacientes de forma inteligente
 - Automatiza recordatorios y seguimientos
 - Mejora la comunicación médico-paciente
 
 ### Objetivos Secundarios
+
 - **Disponibilidad 24/7**: Agente IA responde cuando el médico no está disponible
 - **Personalización**: Comunicación específica por tipo de paciente (nuevo, recurrente, VIP)
 - **Eficiencia**: Automatizar recordatorios de citas y seguimientos post-consulta
@@ -21,12 +25,14 @@ Empoderar a médicos y profesionales de la salud con un asistente de IA que:
 ## Alcance MVP
 
 ### Fase 1 - CRM Básico + Agente IA ✅
+
 - [x] Gestión básica de pacientes
 - [x] Sistema de etiquetas por tipo de paciente
 - [x] Notas por paciente
 - [x] Integración WhatsApp (Evolution API)
 
 ### Fase 2 - Agente IA + Automatización (Implementación Actual)
+
 - [ ] **Agente de IA para WhatsApp**
   - Respuestas automáticas a preguntas frecuentes
   - Información sobre servicios y precios
@@ -36,7 +42,7 @@ Empoderar a médicos y profesionales de la salud con un asistente de IA que:
 - [ ] **Agente de IA para Web**
   - Chat en vivo en la página pública
   - FAQs dinámicas basadas en servicios del médico
-  -links a agendamiento
+    -links a agendamiento
 
 - [ ] **Sistema de Pacientes Completo**
   - Registro con datos médicos básicos
@@ -51,6 +57,7 @@ Empoderar a médicos y profesionales de la salud con un asistente de IA que:
   - Campañas de salud preventiva
 
 ### Fase 3 - Pro (Futuro)
+
 - [ ] Integración con sistemas externos (historial clínico)
 - [ ] Teleconsulta integrada
 - [ ] Recetas y órdenes digitales
@@ -61,6 +68,7 @@ Empoderar a médicos y profesionales de la salud con un asistente de IA que:
 ### 1. Agente de IA
 
 #### Características
+
 - **Respuestas Automáticas**:
   - Información sobre servicios y especialidades
   - Precios de consultas y procedimientos
@@ -81,6 +89,7 @@ Empoderar a médicos y profesionales de la salud con un asistente de IA que:
   - Palabras clave a evitar (términos médicos sensibles)
 
 #### Flujo del Agente IA
+
 ```
 Paciente envía mensaje WhatsApp
             ↓
@@ -98,6 +107,7 @@ Agente IA procesa mensaje
 ### 2. Gestión de Pacientes
 
 #### Registro de Pacientes
+
 - **Formulario de Registro**:
   - Nombre completo (requerido)
   - Teléfono WhatsApp (requerido)
@@ -115,6 +125,7 @@ Agente IA procesa mensaje
   - Acciones: ver, editar, eliminar, enviar mensaje
 
 #### Sistema de Notas
+
 - **Agregar Nota**:
   - Texto libre con timestamp
   - Visible solo para el médico/propietario
@@ -130,26 +141,28 @@ Agente IA procesa mensaje
 
 ### 3. Labels por Paciente
 
-| Label | Descripción | Uso |
-|-------|-------------|-----|
-| **Nuevo** | Primera consulta o primer contacto | Seguimiento intensivo |
-| **Recurrente** | Paciente con múltiples consultas | Mantenimiento regular |
-| **VIP** | Paciente importante/fijo | Atención preferencial |
-| **Potencial** | Contacto que aún no ha consultado | Conversión a nuevo |
-| **Inactivo** | Sin consulta en X meses | Campaña de reactivación |
+| Label          | Descripción                        | Uso                     |
+| -------------- | ---------------------------------- | ----------------------- |
+| **Nuevo**      | Primera consulta o primer contacto | Seguimiento intensivo   |
+| **Recurrente** | Paciente con múltiples consultas   | Mantenimiento regular   |
+| **VIP**        | Paciente importante/fijo           | Atención preferencial   |
+| **Potencial**  | Contacto que aún no ha consultado  | Conversión a nuevo      |
+| **Inactivo**   | Sin consulta en X meses            | Campaña de reactivación |
 
 ### 4. Automatizaciones
 
 #### Recordatorios Automáticos
-| Tipo | Timing | Contenido |
-|------|--------|-----------|
-| Confirmación | Inmediato tras agendar | Fecha, hora, dirección, preparación |
-| Recordatorio 24h | 24h antes | Recordatorio + información relevante |
-| Recordatorio 2h | 2h antes | recordatorio final + ubicación |
-| Seguimiento | 48h post-consulta | "¿Cómo se siente? ¿Tiene dudas?" |
-| Cumpleaños | Día del cumpleaños | Mensaje personalizado + descuento |
+
+| Tipo             | Timing                 | Contenido                            |
+| ---------------- | ---------------------- | ------------------------------------ |
+| Confirmación     | Inmediato tras agendar | Fecha, hora, dirección, preparación  |
+| Recordatorio 24h | 24h antes              | Recordatorio + información relevante |
+| Recordatorio 2h  | 2h antes               | recordatorio final + ubicación       |
+| Seguimiento      | 48h post-consulta      | "¿Cómo se siente? ¿Tiene dudas?"     |
+| Cumpleaños       | Día del cumpleaños     | Mensaje personalizado + descuento    |
 
 #### Flujo de Automatización
+
 ```
 Evento disparador (agendar/cumpleaños)
             ↓
@@ -165,12 +178,14 @@ Registrar estado (enviado/entregado/fallido)
 ### 5. Integración Web
 
 #### Chat en Vivo
+
 - Widget en la página pública del médico
 - Mismo Agente IA que WhatsApp
--links directos a servicios y agendamiento
+  -links directos a servicios y agendamiento
 - Historial de conversación
 
 #### Preguntas Frecuentes Dinámicas
+
 - FAQ basada en servicios configurados
 - Respuestas automáticas a consultas comunes
 - links a información detallada
@@ -178,6 +193,7 @@ Registrar estado (enviado/entregado/fallido)
 ## Experiencia de Usuario (UX)
 
 ### Pantalla Principal CRM
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  🏥 CRM Médico con IA                                   │
@@ -200,6 +216,7 @@ Registrar estado (enviado/entregado/fallido)
 ```
 
 ### Configuración del Agente IA
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  ⚙️ Configuración del Agente IA                         │
@@ -229,12 +246,14 @@ Registrar estado (enviado/entregado/fallido)
 ## Arquitectura Técnica
 
 ### Dependencias
+
 - **Module 01 (Auth)**: Autenticación de usuarios médicos
 - **Module 09 (WhatsApp)**: Infraestructura base de WhatsApp
 - **Module 11 (Reservations)**: Sistema de citas
 - **Module 06 (Dashboard)**: Interfaz de gestión
 
 ### Stack Tecnológico
+
 - **Backend**: Bun + Elysia + Drizzle ORM
 - **Base de Datos**: PostgreSQL
 - **IA**: OpenAI GPT-4 / DeepSeek
@@ -242,6 +261,7 @@ Registrar estado (enviado/entregado/fallido)
 - **Web**: Webhooks para chat en vivo
 
 ### Integraciones
+
 - **OpenAI/DeepSeek API**: Agente conversacional
 - **Evolution API**: WhatsApp Business
 - **PostgreSQL**: Base de datos
@@ -249,18 +269,21 @@ Registrar estado (enviado/entregado/fallido)
 ## Reglas de Negocio
 
 ### Privacidad y HIPAA
+
 1. **Datos sensibles cifrados**: Historiales médicos encriptados
 2. **Acceso controlado**: Solo el médico owner accede a sus pacientes
 3. **Consentimiento**: Paciente debe aceptar términos de IA
 4. **Audit log**: Registro de todos los accesos
 
 ### Limitaciones del Agente IA
+
 1. **No da diagnósticos**: Deriva siempre al médico
 2. **No prescribe**: Solo información general
 3. **Urgencias**: Derige a servicios de emergencia
 4. **Revisión humana**: Médico puede revisar conversaciones
 
 ### Comunicación Responsable
+
 1. **Rate limiting**: Máx 100 mensajes/hora por paciente
 2. **Opt-out**: Paciente puede desactivar notificaciones
 3. **Horario**: Respetar horario de oficina para automensajes
@@ -269,6 +292,7 @@ Registrar estado (enviado/entregado/fallido)
 ## Métricas de Éxito
 
 ### KPIs Principales
+
 1. **Tasa de Respuesta IA**: % de consultas resueltas por IA
 2. **Citas Agendadas via IA**: Conversión chat → cita
 3. **Pacientes Nuevos**: Registros por mes
@@ -276,6 +300,7 @@ Registrar estado (enviado/entregado/fallido)
 5. **Tasa de No-Show**: Citas perdidas vs confirmadas
 
 ### Dashboard de Métricas
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  📊 Métricas del CRM (Últimos 30 días)                  │
@@ -293,24 +318,28 @@ Registrar estado (enviado/entregado/fallido)
 ## Casos de Uso
 
 ### Caso 1: Consulta de Precio
+
 **Paciente**: "¿Cuánto cuesta una consulta de cardiología?"
 **Agente IA**: "La consulta de cardiología tiene un costo de $500 MXN.
- Incluye revisión inicial y electrocardiograma. ¿Te gustaría agendar
- una cita? Estos son nuestros horarios disponibles..."
+Incluye revisión inicial y electrocardiograma. ¿Te gustaría agendar
+una cita? Estos son nuestros horarios disponibles..."
 
 ### Caso 2: Agendamiento de Cita
+
 **Paciente**: "Sí, quiero agendar para mañana en la mañana"
 **Agente IA**: "Tengo los siguientes horarios disponibles mañana:
- - 10:00 AM
- - 11:30 AM
-¿Cuál prefieres? También necesito tu nombre completo."
+
+- 10:00 AM
+- 11:30 AM
+  ¿Cuál prefieres? También necesito tu nombre completo."
 
 ### Caso 3: Pregunta Médica
+
 **Paciente**: "¿Es normal tener dolor de cabeza después de la vacuna?"
 **Agente IA**: "El dolor de cabeza leve puede ser una reacción normal
- a la vacuna. Sin embargo, si el dolor es intenso o viene acompañado
- de fiebre alta, te recomiendo consultar. ¿Te gustaría agendar una
- valoración?"
+a la vacuna. Sin embargo, si el dolor es intenso o viene acompañado
+de fiebre alta, te recomiendo consultar. ¿Te gustaría agendar una
+valoración?"
 
 ## FAQ
 
@@ -330,73 +359,78 @@ R: Sí, puedes configurar FAQ, tono de respuesta e información específica de t
 
 ## Conclusión
 
-El Módulo 10 transforma Wellness Link en un CRM médico completo que combina lo mejor de la automatización (Agente IA 24/7) con la atención personalizada que requieren los pacientes. Permite a los profesionales de la salud escalar su práctica sin perder la calidad en la comunicación.
+El Módulo 10 transforma MediApp en un CRM médico completo que combina lo mejor de la automatización (Agente IA 24/7) con la atención personalizada que requieren los pacientes. Permite a los profesionales de la salud escalar su práctica sin perder la calidad en la comunicación.
 
 ---
 
 ## Database Schema
 
 ### patient (cliente renombrado para contexto médico)
-| Field | Type | Description |
-|-------|------|-------------|
-| id | uuid | Primary key |
-| profileId | uuid | Médico profile (FK) |
-| healthSurveyId | uuid | Linked survey (FK, optional) |
-| name | varchar | Patient full name |
-| phone | varchar | WhatsApp number |
-| email | varchar | Email address (optional) |
-| birthDate | date | Date of birth |
-| label | enum | nuevo/recurrente/vip/potencial/inactivo |
-| medicalNotes | text | Clinical notes |
-| preferences | jsonb | Patient preferences |
-| lastVisitAt | timestamp | Last visit date |
-| nextAppointmentAt | timestamp | Scheduled appointment |
-| createdAt | timestamp | Creation date |
-| updatedAt | timestamp | Last update |
+
+| Field             | Type      | Description                             |
+| ----------------- | --------- | --------------------------------------- |
+| id                | uuid      | Primary key                             |
+| profileId         | uuid      | Médico profile (FK)                     |
+| healthSurveyId    | uuid      | Linked survey (FK, optional)            |
+| name              | varchar   | Patient full name                       |
+| phone             | varchar   | WhatsApp number                         |
+| email             | varchar   | Email address (optional)                |
+| birthDate         | date      | Date of birth                           |
+| label             | enum      | nuevo/recurrente/vip/potencial/inactivo |
+| medicalNotes      | text      | Clinical notes                          |
+| preferences       | jsonb     | Patient preferences                     |
+| lastVisitAt       | timestamp | Last visit date                         |
+| nextAppointmentAt | timestamp | Scheduled appointment                   |
+| createdAt         | timestamp | Creation date                           |
+| updatedAt         | timestamp | Last update                             |
 
 ### patient-note
-| Field | Type | Description |
-|-------|------|-------------|
-| id | uuid | Primary key |
-| patientId | uuid | Patient (FK) |
-| profileId | uuid | Médico profile (FK) |
-| note | text | Note content |
-| type | enum | general/medical/followup |
-| createdAt | timestamp | Creation date |
+
+| Field     | Type      | Description              |
+| --------- | --------- | ------------------------ |
+| id        | uuid      | Primary key              |
+| patientId | uuid      | Patient (FK)             |
+| profileId | uuid      | Médico profile (FK)      |
+| note      | text      | Note content             |
+| type      | enum      | general/medical/followup |
+| createdAt | timestamp | Creation date            |
 
 ### agent-conversation
-| Field | Type | Description |
-|-------|------|-------------|
-| id | uuid | Primary key |
-| patientId | uuid | Patient (FK, optional) |
-| profileId | uuid | Médico profile (FK) |
-| channel | enum | whatsapp/web |
-| messageCount | integer | Message count |
-| status | enum | active/completed/escalated |
-| startedAt | timestamp | Conversation start |
-| endedAt | timestamp | Conversation end |
+
+| Field        | Type      | Description                |
+| ------------ | --------- | -------------------------- |
+| id           | uuid      | Primary key                |
+| patientId    | uuid      | Patient (FK, optional)     |
+| profileId    | uuid      | Médico profile (FK)        |
+| channel      | enum      | whatsapp/web               |
+| messageCount | integer   | Message count              |
+| status       | enum      | active/completed/escalated |
+| startedAt    | timestamp | Conversation start         |
+| endedAt      | timestamp | Conversation end           |
 
 ### agent-message
-| Field | Type | Description |
-|-------|------|-------------|
-| id | uuid | Primary key |
-| conversationId | uuid | Conversation (FK) |
-| role | enum | user/assistant/system |
-| content | text | Message content |
-| metadata | jsonb | Extra data (intent, action) |
-| createdAt | timestamp | Creation date |
+
+| Field          | Type      | Description                 |
+| -------------- | --------- | --------------------------- |
+| id             | uuid      | Primary key                 |
+| conversationId | uuid      | Conversation (FK)           |
+| role           | enum      | user/assistant/system       |
+| content        | text      | Message content             |
+| metadata       | jsonb     | Extra data (intent, action) |
+| createdAt      | timestamp | Creation date               |
 
 ### automation
-| Field | Type | Description |
-|-------|------|-------------|
-| id | uuid | Primary key |
-| profileId | uuid | Médico profile (FK) |
-| type | enum | reminder/followup/birthday/campaign |
-| trigger | enum | appointment/date/manual |
-| template | text | Message template |
-| timing | interval | When to send |
-| isActive | boolean | Active status |
-| createdAt | timestamp | Creation date |
+
+| Field     | Type      | Description                         |
+| --------- | --------- | ----------------------------------- |
+| id        | uuid      | Primary key                         |
+| profileId | uuid      | Médico profile (FK)                 |
+| type      | enum      | reminder/followup/birthday/campaign |
+| trigger   | enum      | appointment/date/manual             |
+| template  | text      | Message template                    |
+| timing    | interval  | When to send                        |
+| isActive  | boolean   | Active status                       |
+| createdAt | timestamp | Creation date                       |
 
 ---
 
@@ -404,35 +438,35 @@ El Módulo 10 transforma Wellness Link en un CRM médico completo que combina lo
 
 ### Patients API (`/api/patients`)
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/` | List all patients |
-| GET | `/:id` | Get single patient |
-| POST | `/` | Create new patient |
-| PUT | `/:id` | Update patient |
-| DELETE | `/:id` | Delete patient |
-| GET | `/label/:label` | Get patients by label |
-| GET | `/without-visit/:months` | Get inactive patients |
-| GET | `/:id/notes` | Get patient notes |
-| POST | `/:id/notes` | Add note to patient |
+| Method | Endpoint                 | Description           |
+| ------ | ------------------------ | --------------------- |
+| GET    | `/`                      | List all patients     |
+| GET    | `/:id`                   | Get single patient    |
+| POST   | `/`                      | Create new patient    |
+| PUT    | `/:id`                   | Update patient        |
+| DELETE | `/:id`                   | Delete patient        |
+| GET    | `/label/:label`          | Get patients by label |
+| GET    | `/without-visit/:months` | Get inactive patients |
+| GET    | `/:id/notes`             | Get patient notes     |
+| POST   | `/:id/notes`             | Add note to patient   |
 
 ### Agent IA API (`/api/agent`)
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/chat` | Send message to agent |
-| GET | `/conversations` | List conversations |
-| GET | `/conversations/:id` | Get conversation details |
-| GET | `/conversations/:id/messages` | Get conversation messages |
-| POST | `/conversations/:id/end` | End conversation |
-| POST | `/escalate` | Escalate to human |
+| Method | Endpoint                      | Description               |
+| ------ | ----------------------------- | ------------------------- |
+| POST   | `/chat`                       | Send message to agent     |
+| GET    | `/conversations`              | List conversations        |
+| GET    | `/conversations/:id`          | Get conversation details  |
+| GET    | `/conversations/:id/messages` | Get conversation messages |
+| POST   | `/conversations/:id/end`      | End conversation          |
+| POST   | `/escalate`                   | Escalate to human         |
 
 ### Automations API (`/api/automations`)
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/` | List automations |
-| POST | `/` | Create automation |
-| PUT | `/:id` | Update automation |
-| DELETE | `/:id` | Delete automation |
-| POST | `/:id/test` | Test automation |
+| Method | Endpoint    | Description       |
+| ------ | ----------- | ----------------- |
+| GET    | `/`         | List automations  |
+| POST   | `/`         | Create automation |
+| PUT    | `/:id`      | Update automation |
+| DELETE | `/:id`      | Delete automation |
+| POST   | `/:id/test` | Test automation   |

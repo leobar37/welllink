@@ -21,15 +21,14 @@ export function HeroSection() {
 
             {/* Heading */}
             <h1 className="mt-6 text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
-              Tu agente de IA{" "}
-              <span className="text-primary">cierra citas</span>{" "}
+              Tu agente de IA <span className="text-primary">cierra citas</span>{" "}
               mientras duermes
             </h1>
 
             {/* Subtitle */}
             <p className="mt-4 text-lg text-muted-foreground max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
-              Convierte leads en pacientes 24/7. El agente conversa por WhatsApp,
-              responde preguntas y agenda citas automáticamente.
+              Convierte leads en pacientes 24/7. El agente conversa por
+              WhatsApp, responde preguntas y agenda citas automáticamente.
             </p>
 
             {/* Key benefits */}
@@ -80,7 +79,7 @@ export function HeroSection() {
                       <Bot className="w-5 h-5" />
                     </div>
                     <div>
-                      <div className="font-semibold text-sm">Welllink Agent</div>
+                      <div className="font-semibold text-sm">MediApp Agent</div>
                       <div className="text-xs opacity-80">En línea ahora</div>
                     </div>
                   </div>
@@ -143,14 +142,16 @@ export function HeroSection() {
 
                 {/* Quick actions */}
                 <div className="p-3 border-t bg-card flex gap-2 overflow-x-auto">
-                  {["Hola", "Precios", "Horarios", "Ubicación"].map((action) => (
-                    <button
-                      key={action}
-                      className="px-3 py-1.5 rounded-full bg-secondary text-xs font-medium whitespace-nowrap hover:bg-secondary/80 transition-colors"
-                    >
-                      {action}
-                    </button>
-                  ))}
+                  {["Hola", "Precios", "Horarios", "Ubicación"].map(
+                    (action) => (
+                      <button
+                        key={action}
+                        className="px-3 py-1.5 rounded-full bg-secondary text-xs font-medium whitespace-nowrap hover:bg-secondary/80 transition-colors"
+                      >
+                        {action}
+                      </button>
+                    ),
+                  )}
                 </div>
               </div>
 

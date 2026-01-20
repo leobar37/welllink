@@ -34,9 +34,7 @@ export interface OnboardingProgress {
 }
 
 export class OnboardingService {
-  constructor(
-    private profileService: ProfileService,
-  ) {}
+  constructor(private profileService: ProfileService) {}
 
   async getOnboardingProgress(
     ctx: RequestContext,
@@ -45,15 +43,19 @@ export class OnboardingService {
     const hasProfiles = profiles.length > 0;
 
     // Get onboarding step from profile if exists
-    const currentOnboardingStep = hasProfiles ? profiles[0]?.onboardingStep || 0 : 0;
-    const onboardingCompletedAt = hasProfiles ? profiles[0]?.onboardingCompletedAt : null;
+    const currentOnboardingStep = hasProfiles
+      ? profiles[0]?.onboardingStep || 0
+      : 0;
+    const onboardingCompletedAt = hasProfiles
+      ? profiles[0]?.onboardingCompletedAt
+      : null;
 
     // Build onboarding steps based on user state
     const steps: OnboardingStep[] = [
       {
         id: "welcome",
         name: "welcome",
-        title: "Welcome to Wellness Link",
+        title: "Welcome to MediApp",
         description: "Let's set up your profile to connect with others.",
         type: "profile",
         completed: currentOnboardingStep > 0, // Welcome is completed if user has moved beyond step 0
@@ -117,14 +119,17 @@ export class OnboardingService {
 
     // Mark steps as completed based on onboardingStep progress
     for (let i = 0; i < currentOnboardingStep && i < steps.length; i++) {
-      if (steps[i].id !== "upload_avatar") { // Avatar has its own logic
+      if (steps[i].id !== "upload_avatar") {
+        // Avatar has its own logic
         steps[i].completed = true;
       }
     }
 
     const completedSteps = steps.filter((step) => step.completed).length;
     const totalSteps = steps.length;
-    const currentStepIndex = onboardingCompletedAt ? steps.length : currentOnboardingStep;
+    const currentStepIndex = onboardingCompletedAt
+      ? steps.length
+      : currentOnboardingStep;
     const currentStep = Math.min(currentStepIndex, totalSteps - 1);
 
     // Calculate estimated time remaining (2 minutes per incomplete step)

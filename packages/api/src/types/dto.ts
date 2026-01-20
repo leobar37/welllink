@@ -1,5 +1,5 @@
 /**
- * Data Transfer Objects (DTOs) for the Wellness Link API
+ * Data Transfer Objects (DTOs) for the MediApp API
  * These types replace `any` usage throughout the codebase
  */
 

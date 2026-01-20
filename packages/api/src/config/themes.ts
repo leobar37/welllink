@@ -1,5 +1,5 @@
 /**
- * Theme Configuration for Wellness Link
+ * Theme Configuration for MediApp
  *
  * Defines the available themes for public profile customization.
  * Colors use OKLCH format for consistency with the frontend CSS system.

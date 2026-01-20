@@ -1,21 +1,45 @@
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const profileSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
-  slug: z.string().min(3, "El usuario debe tener al menos 3 caracteres").regex(/^[a-z0-9-]+$/, "Solo letras minúsculas, números y guiones"),
-  bio: z.string().max(160, "La bio debe tener menos de 160 caracteres").optional(),
-})
+  slug: z
+    .string()
+    .min(3, "El usuario debe tener al menos 3 caracteres")
+    .regex(/^[a-z0-9-]+$/, "Solo letras minúsculas, números y guiones"),
+  bio: z
+    .string()
+    .max(160, "La bio debe tener menos de 160 caracteres")
+    .optional(),
+});
 
-type ProfileValues = z.infer<typeof profileSchema>
+type ProfileValues = z.infer<typeof profileSchema>;
 
-export function StepCreateProfile({ onNext }: { onNext: (data: ProfileValues) => void }) {
+export function StepCreateProfile({
+  onNext,
+}: {
+  onNext: (data: ProfileValues) => void;
+}) {
   const form = useForm<ProfileValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -23,7 +47,7 @@ export function StepCreateProfile({ onNext }: { onNext: (data: ProfileValues) =>
       slug: "",
       bio: "",
     },
-  })
+  });
 
   return (
     <Card>
@@ -58,9 +82,13 @@ export function StepCreateProfile({ onNext }: { onNext: (data: ProfileValues) =>
                   <FormControl>
                     <div className="flex items-center">
                       <span className="bg-muted px-3 py-2 border border-r-0 rounded-l-md text-muted-foreground text-sm">
-                        wellness.link/
+                        mediapp.app/
                       </span>
-                      <Input className="rounded-l-none" placeholder="maria-lopez" {...field} />
+                      <Input
+                        className="rounded-l-none"
+                        placeholder="maria-lopez"
+                        {...field}
+                      />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -93,5 +121,5 @@ export function StepCreateProfile({ onNext }: { onNext: (data: ProfileValues) =>
         </form>
       </Form>
     </Card>
-  )
+  );
 }

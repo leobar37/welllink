@@ -150,7 +150,7 @@ export function QRTools() {
 
                 <div className="flex items-end justify-between z-10">
                   <div className="text-sm font-medium opacity-90">
-                    wellness.link/{profile.username}
+                    mediapp.app/{profile.username}
                   </div>
                   <div className="bg-white p-1 rounded-md">
                     <img src={qrUrl} className="w-12 h-12" alt="QR" />

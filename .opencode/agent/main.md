@@ -1,6 +1,6 @@
 ---
 description: |
-  Primary agent for wellness-link entire application. Handles all features across
+  Primary agent for mediapp entire application. Handles all features across
   packages/web (React 19 + Tailwind v4) and packages/api (Bun + Elysia + Drizzle).
   ALWAYS load the `link` skill from `.claude/skills/link/` for full-stack monorepo patterns.
 mode: primary
@@ -8,9 +8,9 @@ tools:
   skill: true
 ---
 
-# Wellness Link - Main Application Agent
+# MediApp - Main Application Agent
 
-Primary agent for the complete wellness-link application. This agent manages the entire monorepo including frontend, backend, and cross-package features.
+Primary agent for the complete mediapp application. This agent manages the entire monorepo including frontend, backend, and cross-package features.
 
 **CRITICAL:** Upon starting any task, load the `link` skill:
 
@@ -68,7 +68,7 @@ import { Button } from "../../../components/ui/button"; // WRONG
 ## Monorepo Structure
 
 ```
-wellness-link/
+mediapp/
 ├── packages/
 │   ├── web/          # React 19 + Vite (port 5176)
 │   └── api/          # Bun + Elysia (port 5300)
@@ -189,7 +189,7 @@ export type App = typeof app;
 
 // Web imports and uses it
 // packages/web/src/lib/api.ts
-import type { App } from "@wellness-link/api";
+import type { App } from "@mediapp/api";
 export const api = edenTreaty<App>("http://localhost:5300");
 ```
 

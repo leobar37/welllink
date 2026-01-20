@@ -1,5 +1,5 @@
 {
-  "name": "@wellness/api",
+  "name": "@mediapp/api",
   "version": "0.1.0",
   "type": "module",
   "types": "src/index.ts",
@@ -8,6 +8,7 @@
     "start": "bun run src/index.ts",
     "build": "rm -rf dist && bun build src/index.ts --target bun --outfile dist/index.js",
     "lint": "bunx tsc --noEmit",
+    "test": "bun test",
     "db:seed": "bun run src/db/seed.ts",
     "db:reset": "bun run src/db/reset.ts",
     "db:reset-seed": "bun run src/db/reset.ts && bun run db:seed",

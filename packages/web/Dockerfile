@@ -1,5 +1,5 @@
 # ================================
-# Wellness Link Web - Dockerfile
+# MediApp Web - Dockerfile
 # Runtime: Bun (builder) + Nginx (production)
 # Optimized for Dokploy
 # ================================

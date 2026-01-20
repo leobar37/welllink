@@ -1,6 +1,6 @@
-# Wellness Link Monorepo
+# MediApp Monorepo
 
-Plataforma para tarjetas digitales de asesores de bienestar conforme al [PRD funcional](./docs/global-prd.md). Este repositorio usa Bun workspaces para agrupar el frontend (React Router + Tailwind CSS v4 + shadcn/ui) y el backend (Bun + Elysia).
+Plataforma CRM para profesionales de la salud conforme al [PRD funcional](./docs/global-prd.md). Este repositorio usa Bun workspaces para agrupar el frontend (React Router + Tailwind CSS v4 + shadcn/ui) y el backend (Bun + Elysia).
 
 ## Repository layout
 
@@ -33,8 +33,8 @@ Referencias clave consultadas:
 
 ```bash
 bun install                # instala dependencias de todos los packages
-bun run dev:web            # inicia Vite + React Router + Tailwind v4
-bun run dev:api            # levanta Bun + Elysia en http://localhost:3000
+bun run dev:web            # inicia Vite + React Router + Tailwind v4 (puerto 5176)
+bun run dev:api            # levanta Bun + Elysia en http://localhost:5300
 bun run dev                # helper: abre frontend en modo dev
 
 # utilidades adicionales
@@ -44,10 +44,10 @@ bun run lint               # lint de ambos paquetes (web usa ESLint, api ejecuta
 
 ## Packages
 
-| Package        | Stack / Notas |
-|----------------|----------------|
-| `packages/web` | Vite + React 19 + React Router 7, Tailwind CSS v4 sin `tailwind.config.js`, shadcn/ui (`components.json` con estilo *new-york*, `tw-animate-css`, `@tailwindcss/vite`). Incluye rutas básicas (Home + Modules) para validar el router y la capa de estilos. |
-| `packages/api` | Bun + Elysia con prefijo `/api`, endpoints `/health` y `/modules` (placeholders) alineados al PRD. Scripts `dev`, `start`, `lint`. |
+| Package        | Stack / Notas                                                                                                                                                                                                                                               |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/web` | Vite + React 19 + React Router 7, Tailwind CSS v4 sin `tailwind.config.js`, shadcn/ui (`components.json` con estilo _new-york_, `tw-animate-css`, `@tailwindcss/vite`). Incluye rutas básicas (Home + Modules) para validar el router y la capa de estilos. |
+| `packages/api` | Bun + Elysia con prefijo `/api`, endpoints `/health` y `/modules` (placeholders) alineados al PRD. Scripts `dev`, `start`, `lint`.                                                                                                                          |
 
 ## Module docs
 

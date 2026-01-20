@@ -1,16 +1,16 @@
 # Monorepo Commands Reference
 
-Common commands for working with the wellness-link monorepo using Bun workspaces.
+Common commands for working with the mediapp monorepo using Bun workspaces.
 
 ## Workspace Structure
 
 ```
-wellness-link/
+mediapp/
 ├── package.json          # Root workspace
 ├── bunfig.toml          # Bun workspace config
 └── packages/
-    ├── web/             # @wellness-link/web
-    └── api/             # @wellness-link/api
+    ├── web/             # @mediapp/web
+    └── api/             # @mediapp/api
 ```
 
 ## Installation
@@ -20,11 +20,11 @@ wellness-link/
 bun install
 
 # Install dependency in specific package
-bun --filter @wellness-link/web add react-query
-bun --filter @wellness-link/api add elysia
+bun --filter @mediapp/web add react-query
+bun --filter @mediapp/api add elysia
 
 # Install dev dependency
-bun --filter @wellness-link/web add -d @types/node
+bun --filter @mediapp-web add -d @types/node
 ```
 
 ## Development
@@ -34,12 +34,12 @@ bun --filter @wellness-link/web add -d @types/node
 bun run dev
 
 # Run specific package
-bun --filter @wellness-link/web dev
-bun --filter @wellness-link/api dev
+bun --filter @mediapp/web dev
+bun --filter @mediapp/api dev
 
 # Build specific package
-bun --filter @wellness-link/web build
-bun --filter @wellness-link/api build
+bun --filter @mediapp/web build
+bun --filter @mediapp/api build
 
 # Build all packages
 bun run build
@@ -145,7 +145,7 @@ git commit -m "feat: add feature name"
 
 ```bash
 # packages/api/.env
-DATABASE_URL=postgresql://user:pass@localhost:5432/wellness_link
+DATABASE_URL=postgresql://user:pass@localhost:5432/mediapp
 BETTER_AUTH_SECRET=your-secret-here
 BETTER_AUTH_URL=http://localhost:5300
 CORS_ORIGIN=http://localhost:5176
@@ -268,16 +268,16 @@ Add to your shell profile:
 
 ```bash
 # Navigate
-alias wl="cd ~/code/wellness-link"
-alias wlw="cd ~/code/wellness-link/packages/web"
-alias wla="cd ~/code/wellness-link/packages/api"
+alias ma="cd ~/code/mediapp"
+alias maw="cd ~/code/mediapp/packages/web"
+alias maa="cd ~/code/mediapp/packages/api"
 
 # Development
-alias wldev="cd ~/code/wellness-link && bun run dev"
-alias wlweb="cd ~/code/wellness-link && bun --filter @wellness-link/web dev"
-alias wlapi="cd ~/code/wellness-link && bun --filter @wellness-link/api dev"
+alias madev="cd ~/code/mediapp && bun run dev"
+alias maweb="cd ~/code/mediapp && bun --filter @mediapp/web dev"
+alias maapi="cd ~/code/mediapp && bun --filter @mediapp/api dev"
 
 # Database
-alias wldb="cd ~/code/wellness-link/packages/api && bun run db:studio"
-alias wlseed="cd ~/code/wellness-link/packages/api && bun run db:seed"
+alias madb="cd ~/code/mediapp/packages/api && bun run db:studio"
+alias maseed="cd ~/code/mediapp/packages/api && bun run db:seed"
 ```

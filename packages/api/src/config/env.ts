@@ -42,6 +42,9 @@ interface EnvConfig {
   // Upstash Redis
   UPSTASH_REDIS_REST_URL: string;
   UPSTASH_REDIS_REST_TOKEN: string;
+
+  // Test routes (only for local development)
+  ENABLE_TEST_ROUTES: string;
 }
 
 const env: EnvConfig = {
@@ -76,6 +79,9 @@ const env: EnvConfig = {
 
   UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL || "",
   UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN || "",
+
+  // Test routes (only for local development)
+  ENABLE_TEST_ROUTES: process.env.ENABLE_TEST_ROUTES || "false",
 };
 
 export { env };

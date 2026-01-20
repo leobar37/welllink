@@ -1,11 +1,11 @@
 ---
-description: Load wellness-link full-stack monorepo expert skill. Use for features spanning web (React 19) and api (Bun + Elysia).
+description: Load mediapp full-stack monorepo expert skill. Use for features spanning web (React 19) and api (Bun + Elysia).
 subtask: false
 ---
 
-# Wellness Link - Full-Stack Monorepo Expert
+# MediApp - Full-Stack Monorepo Expert
 
-This command loads the `link` skill which provides expert guidance for wellness-link monorepo development.
+This command loads the `link` skill which provides expert guidance for mediapp monorepo development.
 
 ## How It Works
 
@@ -51,8 +51,8 @@ This command loads the `link` skill which provides expert guidance for wellness-
 ```bash
 # Monorepo
 bun run dev              # Both packages
-bun --filter @wellness-link/web dev    # Web only
-bun --filter @wellness-link/api dev    # API only
+bun --filter @mediapp/web dev    # Web only
+bun --filter @mediapp/api dev    # API only
 
 # Web
 cd packages/web

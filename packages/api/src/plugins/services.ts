@@ -51,22 +51,58 @@ import { NotificationService } from "../services/business/notification";
 
 let storageInstance: StorageStrategy | null = null;
 let initialized = false;
+let storageInitializationFailed = false;
 
-async function getStorageInstance(): Promise<StorageStrategy> {
+async function getStorageInstance(): Promise<StorageStrategy | null> {
+  if (storageInitializationFailed) {
+    return null;
+  }
+
   if (!storageInstance) {
-    storageInstance = await createStorageStrategy();
-    if (!initialized) {
-      await storageInstance.initialize();
-      initialized = true;
+    try {
+      storageInstance = await createStorageStrategy();
+      if (!initialized) {
+        await storageInstance.initialize();
+        initialized = true;
+      }
+    } catch (error) {
+      console.warn(
+        "Storage initialization failed (R2 credentials not configured):",
+        error instanceof Error ? error.message : error,
+      );
+      storageInitializationFailed = true;
+      return null;
     }
   }
   return storageInstance;
 }
 
+function createMockStorage(): StorageStrategy {
+  return {
+    async upload() {
+      throw new Error("Storage not available");
+    },
+    async download() {
+      throw new Error("Storage not available");
+    },
+    async delete() {},
+    async initialize() {},
+    async exists() {
+      return false;
+    },
+    getPublicUrl(path: string) {
+      return path;
+    },
+    async getSignedUrl() {
+      throw new Error("Storage not available");
+    },
+  };
+}
+
 export const servicesPlugin = new Elysia({ name: "services" }).derive(
   { as: "global" },
   async () => {
-    const storage = await getStorageInstance();
+    const storage = (await getStorageInstance()) || createMockStorage();
 
     // Repositories
     const assetRepository = new AssetRepository();

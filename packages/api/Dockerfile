@@ -1,5 +1,5 @@
 # ================================
-# Wellness Link API - Dockerfile
+# MediApp API - Dockerfile
 # Runtime: Bun + Elysia
 # Optimized for Dokploy
 # ================================

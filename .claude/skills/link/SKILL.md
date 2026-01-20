@@ -1,30 +1,33 @@
 ---
 name: link
 description: |
-  Full-stack monorepo expert for wellness-link project. Handles features spanning
+  Full-stack monorepo expert for mediapp project. Handles features spanning
   packages/web (React 19 + Tailwind v4) and packages/api (Bun + Elysia). Use for
   full-stack features, cross-package types, monorepo workflows, workspace commands.
-  Keywords: fullstack, monorepo, wellness-link, cross-package, workspace, bun.
+  Keywords: fullstack, monorepo, mediapp, cross-package, workspace, bun.
 ---
 
-# Wellness Link - Full-Stack Monorepo Expert
+# MediApp - Full-Stack Monorepo Expert
 
-Expert for the wellness-link monorepo. Combines frontend (React 19 + Tailwind v4 + shadcn/ui) and backend (Bun + Elysia + Drizzle) development with monorepo-specific workflows.
+Expert for the mediapp monorepo. Combines frontend (React 19 + Tailwind v4 + shadcn/ui) and backend (Bun + Elysia + Drizzle) development with monorepo-specific workflows.
 
 ## Available Documentation
 
 ### Patterns
+
 - **[Full-Stack Workflow](patterns/fullstack-workflow.md)** - Complete guide for implementing features across packages
 - **[Monorepo Commands](patterns/monorepo-commands.md)** - Bun workspace commands, development, and troubleshooting
+- **[E2E Testing](patterns/e2e-testing.md)** - Playwright testing guide with fixtures, helpers, and best practices
 
 ### Agent References
+
 - **[Web Agent](reference/web-agent.md)** - Quick reference to `.claude/agent/web.md`
 - **[API Agent](reference/api-agent.md)** - Quick reference to `.claude/agent/api.md`
 
 ## Monorepo Structure
 
 ```
-wellness-link/
+mediapp/
 ├── packages/
 │   ├── web/          # React 19 + Vite (port 5176)
 │   └── api/          # Bun + Elysia (port 5300)
@@ -35,26 +38,29 @@ wellness-link/
 ## Critical Cross-Package Rules
 
 ### 1. Type Sharing
+
 ```typescript
 // API defines types, web imports via edenTreaty
 // packages/api/src/index.ts
 export const app = new Elysia()...
 
 // packages/web/src/lib/api.ts
-import type { App } from "@wellness-link/api"
+import type { App } from "@mediapp/api"
 export const api = edenTreaty<App>("http://localhost:5300")
 ```
 
 ### 2. Language & Theme
+
 - **User-facing text**: Spanish (buttons, forms, messages)
 - **Technical docs**: English (code, comments, README)
 - **Theme**: Always use CSS variables (`bg-background`, `text-foreground`)
 
 ### 3. Workspace Commands
+
 ```bash
 # Run from root
-bun --filter @wellness-link/web dev    # Frontend only
-bun --filter @wellness-link/api dev    # Backend only
+bun --filter @mediapp/web dev    # Frontend only
+bun --filter @mediapp/api dev    # Backend only
 
 # Development (both in parallel)
 bun run dev                             # Runs both packages
@@ -63,12 +69,14 @@ bun run dev                             # Runs both packages
 ## Web Package (packages/web)
 
 ### Stack
+
 - React 19 + React Router 7 (file-based)
 - Tailwind CSS v4 + shadcn/ui
 - TanStack Query (server state)
 - React Hook Form + Zod (forms)
 
 ### Critical Rules
+
 ```typescript
 // ALWAYS use @/ alias
 import { Button } from "@/components/ui/button"
@@ -83,29 +91,32 @@ toast.success("Perfil actualizado")
 ```
 
 ### Data Fetching
+
 ```typescript
 const { data, isLoading } = useQuery({
   queryKey: ["profiles"],
   queryFn: async () => {
-    const { data, error } = await api.api.profiles.get()
-    if (error) throw error
-    return data
+    const { data, error } = await api.api.profiles.get();
+    if (error) throw error;
+    return data;
   },
-})
+});
 ```
 
 ## API Package (packages/api)
 
 ### Stack
+
 - Bun (runtime)
 - Elysia (framework)
 - Drizzle ORM (PostgreSQL)
 - Better Auth (authentication)
 
 ### Critical Rules
+
 ```typescript
 // Table names are SINGULAR
-import { profile, asset, socialLink } from "../../db/schema"
+import { profile, asset, socialLink } from "../../db/schema";
 
 // ALWAYS register services in plugins/services.ts
 export const servicesPlugin = new Elysia({ name: "services" }).derive(
@@ -119,25 +130,31 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
 
 // Access relations via name
 const platform = click.socialLink.platform; // ✅
-const platform = click.platform;            // ❌
+const platform = click.platform; // ❌
 ```
 
 ### Route Pattern
+
 ```typescript
 export const featureRoutes = new Elysia({ prefix: "/feature" })
   .use(errorMiddleware)
   .use(servicesPlugin)
   .use(authGuard)
   .get("/", ({ ctx, services }) => services.featureService.getAll(ctx!))
-  .post("/", ({ body, ctx, services, set }) => {
-    set.status = 201;
-    return services.featureService.create(ctx!, body);
-  }, { body: t.Object({ name: t.String() }) });
+  .post(
+    "/",
+    ({ body, ctx, services, set }) => {
+      set.status = 201;
+      return services.featureService.create(ctx!, body);
+    },
+    { body: t.Object({ name: t.String() }) },
+  );
 ```
 
 ## Full-Stack Feature Workflow
 
 ### 1. Define API Contract
+
 ```typescript
 // packages/api/src/api/routes/feature.ts
 export const featureRoutes = new Elysia({ prefix: "/feature" })
@@ -151,6 +168,7 @@ export const featureRoutes = new Elysia({ prefix: "/feature" })
 ```
 
 ### 2. Add Route to App
+
 ```typescript
 // packages/api/src/index.ts
 import { featureRoutes } from "./api/routes/feature"
@@ -161,32 +179,34 @@ export const app = new Elysia()
 ```
 
 ### 3. Frontend Integration
+
 ```typescript
 // packages/web/src/hooks/use-features.ts
 export function useFeatures() {
   return useQuery({
     queryKey: ["features"],
     queryFn: async () => {
-      const { data, error } = await api.api.feature.get()
-      if (error) throw error
-      return data
+      const { data, error } = await api.api.feature.get();
+      if (error) throw error;
+      return data;
     },
-  })
+  });
 }
 
 // packages/web/src/components/FeatureForm.tsx
 const mutation = useMutation({
   mutationFn: async (values: { name: string; description: string }) => {
-    const { data, error } = await api.api.feature.post(values)
-    if (error) throw error
-    return data
+    const { data, error } = await api.api.feature.post(values);
+    if (error) throw error;
+    return data;
   },
-})
+});
 ```
 
 ## Common Patterns
 
 ### Authentication Flow
+
 ```typescript
 // API: Better Auth automatic
 // packages/api/src/lib/auth.ts
@@ -198,39 +218,42 @@ const { data: session } = useSession()
 ```
 
 ### File Upload (Full-Stack)
+
 ```typescript
 // API: Asset service
 const asset = await services.assetService.create(ctx, {
   file: request.file,
   type: "avatar",
-})
+});
 
 // Web: Form with file input
 const { mutate } = useMutation({
   mutationFn: async (file: File) => {
-    const formData = new FormData()
-    formData.append("file", file)
-    const { data } = await api.api.assets.post(formData)
-    return data
+    const formData = new FormData();
+    formData.append("file", file);
+    const { data } = await api.api.assets.post(formData);
+    return data;
   },
-})
+});
 ```
 
 ### Error Handling
+
 ```typescript
 // API: HTTP exceptions
-throw new NotFoundException("Profile not found")     // 404
-throw new ConflictException("Username exists")       // 409
+throw new NotFoundException("Profile not found"); // 404
+throw new ConflictException("Username exists"); // 409
 
 // Web: React Query + toast
 onError: (error) => {
-  toast.error(error.message || "Error al guardar")
-}
+  toast.error(error.message || "Error al guardar");
+};
 ```
 
 ## Monorepo Best Practices
 
 ### 1. Development Setup
+
 ```bash
 # Install all dependencies
 bun install
@@ -243,6 +266,7 @@ bun run typecheck
 ```
 
 ### 2. Database Migrations
+
 ```bash
 # Generate migration
 cd packages/api && bun run db:generate
@@ -255,7 +279,9 @@ bun run db:seed
 ```
 
 ### 3. Cross-Package Changes
+
 **Order**: API first, then Web
+
 1. Add DB schema/migration
 2. Create repository + service
 3. Add API route
@@ -263,13 +289,14 @@ bun run db:seed
 5. Build UI component
 
 ### 4. Type Safety
+
 ```typescript
 // API exports App type
-export type App = typeof app
+export type App = typeof app;
 
 // Web imports and uses it
-import type { App } from "@wellness-link/api"
-export const api = edenTreaty<App>("http://localhost:5300")
+import type { App } from "@mediapp/api";
+export const api = edenTreaty<App>("http://localhost:5300");
 ```
 
 ## Key Tables

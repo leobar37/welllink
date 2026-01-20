@@ -2,7 +2,7 @@
 
 ## Overview
 
-Este documento describe el patrón arquitectónico utilizado en wellness-link para mantener una clara separación de responsabilidades entre tres capas fundamentales: **Estado (State)**, **Servicios (Services)** y **Interfaz de Usuario (UI)**.
+Este documento describe el patrón arquitectónico utilizado en mediapp para mantener una clara separación de responsabilidades entre tres capas fundamentales: **Estado (State)**, **Servicios (Services)** y **Interfaz de Usuario (UI)**.
 
 ## Principios Fundamentales
 
@@ -16,6 +16,7 @@ Este documento describe el patrón arquitectónico utilizado en wellness-link pa
 ## 1. Capa de Estado (State Layer)
 
 ### Responsabilidades
+
 - Gestionar el estado de la aplicación
 - Manejar operaciones de lectura y escritura de datos
 - Proporcionar caché y sincronización
@@ -24,18 +25,14 @@ Este documento describe el patrón arquitectónico utilizado en wellness-link pa
 ### Patrón Principal: Custom Hooks con TanStack Query
 
 #### Estructura Base
+
 ```typescript
 // hooks/use-feature.ts
 export function useFeature() {
   const queryClient = useQueryClient();
 
   // Lectura de datos
-  const {
-    data,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["feature", id],
     queryFn: async () => {
       const { data, error } = await api.feature[id].get();
@@ -80,6 +77,7 @@ export function useFeature() {
 4. **Invalidación Selectiva**: Solo se invalida lo necesario con `invalidateQueries`
 
 #### Ejemplo Real: useProfile
+
 ```typescript
 // hooks/use-profile.ts
 export function useProfile() {
@@ -102,7 +100,13 @@ export function useProfile() {
   const profile = profiles?.[0];
 
   const updateProfile = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<Profile> }) => {
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Partial<Profile>;
+    }) => {
       const { data: resData, error } = await api.profiles[id].put(data);
       if (error) throw error;
       return resData;
@@ -151,6 +155,7 @@ export function useWhatsApp() {
 ## 2. Capa de Servicios (Service Layer)
 
 ### Responsabilidades
+
 - Contener la lógica de negocio
 - Orquestrar múltiples repositorios
 - Validaciones y reglas de negocio
@@ -159,6 +164,7 @@ export function useWhatsApp() {
 ### Patrón de Repositorio
 
 #### Repositorio de Datos
+
 ```typescript
 // services/repository/profile.ts
 export class ProfileRepository {
@@ -186,6 +192,7 @@ export class ProfileRepository {
 ### Patrón de Servicio de Negocio
 
 #### Servicio con Múltiples Dependencias
+
 ```typescript
 // services/business/profile.ts
 export class ProfileService {
@@ -197,16 +204,17 @@ export class ProfileService {
 
   async createProfile(ctx: RequestContext, data: CreateProfileData) {
     // Validaciones de negocio
-    const existingProfile = await this.profileRepository
-      .findByUsername(ctx, data.username);
+    const existingProfile = await this.profileRepository.findByUsername(
+      ctx,
+      data.username,
+    );
     if (existingProfile) {
       throw new ConflictException("Username already exists");
     }
 
     // Validación de recursos relacionados
     if (data.avatarId) {
-      const avatar = await this.assetRepository
-        .findOne(ctx, data.avatarId);
+      const avatar = await this.assetRepository.findOne(ctx, data.avatarId);
       if (!avatar || avatar.type !== "avatar") {
         throw new BadRequestException("Invalid avatar");
       }
@@ -237,10 +245,12 @@ export class ProfileService {
 ### Inyección de Dependencias
 
 #### Plugin de Servicios
+
 ```typescript
 // plugins/services.ts
-export const servicesPlugin = new Elysia({ name: "services" })
-  .derive({ as: "global" }, async () => {
+export const servicesPlugin = new Elysia({ name: "services" }).derive(
+  { as: "global" },
+  async () => {
     // Repositorios
     const profileRepository = new ProfileRepository();
     const assetRepository = new AssetRepository();
@@ -249,7 +259,7 @@ export const servicesPlugin = new Elysia({ name: "services" })
     const profileService = new ProfileService(
       profileRepository,
       assetRepository,
-      analyticsRepository
+      analyticsRepository,
     );
 
     return {
@@ -257,10 +267,12 @@ export const servicesPlugin = new Elysia({ name: "services" })
       profileService,
       // ... otros servicios
     };
-  });
+  },
+);
 ```
 
 #### Uso en Rutas
+
 ```typescript
 // routes/profiles.ts
 export const profileRoutes = new Elysia({ prefix: "/profiles" })
@@ -279,6 +291,7 @@ export const profileRoutes = new Elysia({ prefix: "/profiles" })
 ## 3. Capa de Interfaz de Usuario (UI Layer)
 
 ### Responsabilidades
+
 - Presentar datos al usuario
 - Capturar interacciones del usuario
 - Ser agnóstica a la fuente de datos
@@ -287,6 +300,7 @@ export const profileRoutes = new Elysia({ prefix: "/profiles" })
 ### Patrón de Componentes Puros
 
 #### Componente de UI Base
+
 ```typescript
 // components/ui/button.tsx
 const buttonVariants = cva(
@@ -340,6 +354,7 @@ export function Button({
 ### Patrón de Componentes Contenedor
 
 #### Componente de Página/Ruta
+
 ```typescript
 // pages/dashboard/ProfileSettings.tsx
 export function ProfileSettings() {
@@ -383,6 +398,7 @@ export function ProfileSettings() {
 ### Patrón de Layout
 
 #### Layout con Autenticación
+
 ```typescript
 // layouts/DashboardLayout.tsx
 export function DashboardLayout() {
@@ -413,29 +429,31 @@ export function DashboardLayout() {
 ## 4. Manejo de Errores
 
 ### Excepciones Tipadas del Backend
+
 ```typescript
 // utils/http-exceptions.ts
 export class NotFoundException extends HttpException {
-  constructor(message: string = 'Not Found', code?: string) {
+  constructor(message: string = "Not Found", code?: string) {
     super(message, 404, code);
-    this.name = 'NotFoundException';
+    this.name = "NotFoundException";
   }
 }
 
 export class ConflictException extends HttpException {
-  constructor(message: string = 'Conflict', code?: string) {
+  constructor(message: string = "Conflict", code?: string) {
     super(message, 409, code);
-    this.name = 'ConflictException';
+    this.name = "ConflictException";
   }
 }
 ```
 
 ### Manejo Centralizado en el Frontend
+
 ```typescript
 // lib/error-handler.ts
 export function extractErrorMessage(
   error: unknown,
-  fallback = "An error occurred"
+  fallback = "An error occurred",
 ): string {
   if (isEdenError(error)) {
     const { value } = error;
@@ -459,25 +477,29 @@ export function extractErrorMessage(
 ### Flujo Típico: Actualización de Perfil
 
 1. **UI Layer**: Usuario interactúa con formulario
+
    ```typescript
    <ProfileForm onSave={handleSave} />
    ```
 
 2. **State Layer**: Hook maneja la mutación
+
    ```typescript
    const updateProfile = useMutation({
      mutationFn: async ({ id, data }) => api.profiles[id].put(data),
-     onSuccess: () => toast.success("Updated!")
+     onSuccess: () => toast.success("Updated!"),
    });
    ```
 
 3. **API Layer**: edenTreaty genera llamada tipada
+
    ```typescript
    // Genera: PUT /api/profiles/:id
-   api.profiles[id].put(data)
+   api.profiles[id].put(data);
    ```
 
 4. **Service Layer**: Lógica de negocio
+
    ```typescript
    async updateProfile(id: string, data: UpdateProfileData) {
      // Validaciones
@@ -491,6 +513,7 @@ export function extractErrorMessage(
    ```
 
 5. **Repository Layer**: Acceso a datos
+
    ```typescript
    async update(id: string, data: Partial<Profile>) {
      return db.update(profile)
@@ -501,6 +524,7 @@ export function extractErrorMessage(
    ```
 
 6. **State Update**: TanStack Query actualiza caché
+
    ```typescript
    queryClient.invalidateQueries({ queryKey: ["profiles"] });
    ```
@@ -539,24 +563,26 @@ export function extractErrorMessage(
 ### Anti-Patrones a Evitar
 
 1. ❌ Llamadas a la API directamente en componentes
+
    ```typescript
    // MAL
    function Component() {
      const [data, setData] = useState();
      useEffect(() => {
-       fetch('/api/data').then(setData);
+       fetch("/api/data").then(setData);
      }, []);
    }
    ```
 
 2. ❌ Lógica de negocio en el UI
+
    ```typescript
    // MAL
    function Component() {
      const [isValid, setIsValid] = useState(false);
      const validate = (email) => {
        // Lógica de validación compleja
-       if (email.includes('@')) {
+       if (email.includes("@")) {
          setIsValid(true);
        }
      };
@@ -568,7 +594,7 @@ export function extractErrorMessage(
    // MAL
    const globalState = {
      profile: null,
-     theme: 'light',
+     theme: "light",
    };
    ```
 
@@ -577,10 +603,11 @@ export function extractErrorMessage(
 ## 7. Testing Strategy
 
 ### Unit Tests
+
 ```typescript
 // __tests__/hooks/useProfile.test.ts
-describe('useProfile', () => {
-  it('should fetch profile data', async () => {
+describe("useProfile", () => {
+  it("should fetch profile data", async () => {
     const { result } = renderHook(() => useProfile());
 
     await waitFor(() => {
@@ -588,22 +615,23 @@ describe('useProfile', () => {
     });
   });
 
-  it('should update profile', async () => {
+  it("should update profile", async () => {
     const { result } = renderHook(() => useProfile());
 
     await act(async () => {
-      await result.current.updateProfile('id', { name: 'New Name' });
+      await result.current.updateProfile("id", { name: "New Name" });
     });
 
-    expect(toast.success).toHaveBeenCalledWith('Profile updated');
+    expect(toast.success).toHaveBeenCalledWith("Profile updated");
   });
 });
 ```
 
 ### Integration Tests
+
 ```typescript
 // __tests__/services/profileService.test.ts
-describe('ProfileService', () => {
+describe("ProfileService", () => {
   let profileService: ProfileService;
   let mockProfileRepo: jest.Mocked<ProfileRepository>;
 
@@ -612,7 +640,7 @@ describe('ProfileService', () => {
     profileService = new ProfileService(mockProfileRepo);
   });
 
-  it('should create profile with validation', async () => {
+  it("should create profile with validation", async () => {
     mockProfileRepo.findByUsername.mockResolvedValue(null);
 
     const profile = await profileService.createProfile(ctx, data);
