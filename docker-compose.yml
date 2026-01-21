@@ -10,6 +10,8 @@ services:
     image: gcr.io/sunlit-monolith-477721-q1/wellness-link-api:sha-19e109a
     container_name: wellness-link-api
     restart: unless-stopped
+    environment:
+      DOPPLER_TOKEN: ${DOPPLER_TOKEN}
     networks:
       - dokploy-network
     labels:
