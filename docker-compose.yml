@@ -21,7 +21,7 @@ services:
       - dokploy-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.wellness-link-api.rule=Host(`api.wellink.theelena.me`)"
+      - "traefik.http.routers.wellness-link-api.rule=Host(`wellinkapi.theelena.me`)"
       - "traefik.http.routers.wellness-link-api.entrypoints=websecure"
       - "traefik.http.routers.wellness-link-api.tls.certResolver=letsencrypt"
       - "traefik.http.services.wellness-link-api.loadbalancer.server.port=5300"
