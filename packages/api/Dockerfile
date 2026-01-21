@@ -20,7 +20,7 @@ COPY package.json ./
 RUN bun install
 
 # Install Doppler CLI for environment variable injection
-RUN curl -Ls https://cli.doppler.com/install.sh | sh
+RUN curl -Ls https://cli.doppler.com/install.sh | sudo sh
 
 # Copy source code
 COPY . .
