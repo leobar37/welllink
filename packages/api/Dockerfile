@@ -19,6 +19,9 @@ COPY package.json ./
 # Install all dependencies
 RUN bun install
 
+# Install Doppler CLI for environment variable injection
+RUN curl -Ls https://cli.doppler.com/install.sh | sh
+
 # Copy source code
 COPY . .
 
