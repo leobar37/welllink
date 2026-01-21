@@ -19,8 +19,8 @@ COPY package.json ./
 # Install all dependencies
 RUN bun install
 
-# Install curl for Doppler CLI download
-RUN apt-get update && apt-get install -y curl
+# Install curl and gnupg for Doppler CLI download
+RUN apt-get update && apt-get install -y curl gnupg
 
 # Install Doppler CLI for environment variable injection
 RUN curl -Ls https://cli.doppler.com/install.sh | sh
