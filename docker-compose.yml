@@ -12,6 +12,8 @@ services:
     restart: unless-stopped
     environment:
       DOPPLER_TOKEN: ${DOPPLER_TOKEN}
+      # CORS: Allow requests from the frontend
+      CORS_ORIGIN: "https://wellness-link.com"
     networks:
       - dokploy-network
     labels:
@@ -41,6 +43,9 @@ services:
     restart: unless-stopped
     depends_on:
       - api
+    environment:
+      # API URL for frontend to connect to backend
+      VITE_API_URL: "https://api.wellness-link.com"
     networks:
       - dokploy-network
     labels:
