@@ -7,7 +7,7 @@
 
 services:
   api:
-    image: gcr.io/sunlit-monolith-477721-q1/wellness-link-api:sha-337c870
+    image: gcr.io/sunlit-monolith-477721-q1/wellness-link-api:sha-d45a0fc
     container_name: wellness-link-api
     restart: unless-stopped
     environment:
@@ -36,7 +36,7 @@ services:
       retries: 3
 
   web:
-    image: gcr.io/sunlit-monolith-477721-q1/wellness-link-web:sha-337c870
+    image: gcr.io/sunlit-monolith-477721-q1/wellness-link-web:sha-d45a0fc
     container_name: wellness-link-web
     restart: unless-stopped
     depends_on:
