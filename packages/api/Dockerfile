@@ -29,5 +29,5 @@ RUN mkdir -p /app/uploads
 EXPOSE 5300
 
 # No health check (let Dokploy handle it)
-# Run source directly with bun (no build step - more reliable)
-CMD ["bun", "run", "src/index.ts"]
+# Run with Doppler to inject environment variables
+CMD ["doppler", "run", "--", "bun", "run", "src/index.ts"]
