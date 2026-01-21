@@ -127,6 +127,8 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/wellness-link-web:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            VITE_API_URL=https://wellinkapi.theelena.me
 
   # ============================================
   # Job 4: Update docker-compose.yml
