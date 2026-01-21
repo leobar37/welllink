@@ -223,6 +223,7 @@ jobs:
       - name: Run database migrations
         working-directory: packages/api
         run: |
+          doppler run -- bun run scripts/baseline-migrations.ts
           doppler run -- bunx drizzle-kit migrate
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
