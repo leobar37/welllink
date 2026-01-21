@@ -27,11 +27,6 @@ on:
         required: false
         default: false
         type: boolean
-      reset_db:
-        description: "Reset database before migrations (DESTRUCTIVE)"
-        required: false
-        default: false
-        type: boolean
 
 env:
   BUN_VERSION: "1.1.38"
@@ -228,9 +223,6 @@ jobs:
       - name: Run database migrations
         working-directory: packages/api
         run: |
-          if [ "${{ inputs.reset_db }}" = "true" ]; then
-            doppler run -- bun run src/db/reset.ts
-          fi
           doppler run -- bunx drizzle-kit migrate
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
