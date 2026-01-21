@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "bunx react-router dev",
     "build": "bunx react-router build",
+    "start": "bun server.ts",
     "lint": "eslint .",
     "preview": "bunx react-router preview",
     "test": "playwright test",
