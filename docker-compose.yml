@@ -3,17 +3,20 @@
 # Production deployment for Dokploy
 #
 # Usage: doppler run -- docker compose up -d
+# Variables from Dokploy:
+# - DOPPLER_TOKEN (api): Token for Doppler secrets
+# - VITE_API_URL (web): URL of the backend API
+# - CORS_ORIGIN (api): Frontend URL for CORS
 # ================================
 
 services:
   api:
-    image: gcr.io/sunlit-monolith-477721-q1/wellness-link-api:sha-d45a0fc
+    image: gcr.io/sunlit-monolith-477721-q1/wellness-link-api:sha-337c870
     container_name: wellness-link-api
     restart: unless-stopped
     environment:
       DOPPLER_TOKEN: ${DOPPLER_TOKEN}
-      # CORS: Allow requests from the frontend
-      CORS_ORIGIN: "https://wellness-link.com"
+      CORS_ORIGIN: ${CORS_ORIGIN}
     networks:
       - dokploy-network
     labels:
@@ -38,14 +41,13 @@ services:
       retries: 3
 
   web:
-    image: gcr.io/sunlit-monolith-477721-q1/wellness-link-web:sha-d45a0fc
+    image: gcr.io/sunlit-monolith-477721-q1/wellness-link-web:sha-337c870
     container_name: wellness-link-web
     restart: unless-stopped
     depends_on:
       - api
     environment:
-      # API URL for frontend to connect to backend
-      VITE_API_URL: "https://api.wellness-link.com"
+      VITE_API_URL: ${VITE_API_URL}
     networks:
       - dokploy-network
     labels:
