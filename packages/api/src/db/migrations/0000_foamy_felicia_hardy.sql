@@ -1,5 +1,13 @@
-CREATE TYPE "public"."social_platform" AS ENUM('whatsapp', 'instagram', 'tiktok', 'facebook', 'youtube');--> statement-breakpoint
-CREATE TYPE "public"."view_source" AS ENUM('qr', 'direct_link', 'referral');--> statement-breakpoint
+DO $$ BEGIN
+  CREATE TYPE "public"."social_platform" AS ENUM('whatsapp', 'instagram', 'tiktok', 'facebook', 'youtube');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  CREATE TYPE "public"."view_source" AS ENUM('qr', 'direct_link', 'referral');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
 CREATE TABLE "account" (
 	"id" text PRIMARY KEY NOT NULL,
 	"account_id" text NOT NULL,
