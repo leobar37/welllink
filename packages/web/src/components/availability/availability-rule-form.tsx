@@ -28,18 +28,16 @@ import type {
 
 const availabilityRuleSchema = z
   .object({
-    dayOfWeek: z.number({ required_error: "El día es requerido" }),
+    dayOfWeek: z.number(),
     startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, {
       message: "Formato inválido. Use HH:MM",
     }),
     endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, {
       message: "Formato inválido. Use HH:MM",
     }),
-    slotDuration: z
-      .number({ required_error: "La duración es requerida" })
-      .min(15, {
-        message: "Mínimo 15 minutos",
-      }),
+    slotDuration: z.number().min(15, {
+      message: "Mínimo 15 minutos",
+    }),
     bufferTime: z.number().min(0).optional(),
     maxAppointmentsPerSlot: z.number().min(1).optional(),
     effectiveFrom: z.string().optional(),
@@ -87,8 +85,12 @@ export function AvailabilityRuleForm({
           slotDuration: rule.slotDuration,
           bufferTime: rule.bufferTime,
           maxAppointmentsPerSlot: rule.maxAppointmentsPerSlot,
-          effectiveFrom: rule.effectiveFrom,
-          effectiveTo: rule.effectiveTo,
+          effectiveFrom: rule.effectiveFrom
+            ? new Date(rule.effectiveFrom).toISOString().split("T")[0]
+            : undefined,
+          effectiveTo: rule.effectiveTo
+            ? new Date(rule.effectiveTo).toISOString().split("T")[0]
+            : undefined,
         }
       : {
           dayOfWeek: 1,
@@ -112,9 +114,11 @@ export function AvailabilityRuleForm({
       bufferTime: data.bufferTime,
       maxAppointmentsPerSlot: data.maxAppointmentsPerSlot,
       effectiveFrom: data.effectiveFrom
-        ? new Date(data.effectiveFrom)
+        ? new Date(data.effectiveFrom).toISOString()
         : undefined,
-      effectiveTo: data.effectiveTo ? new Date(data.effectiveTo) : undefined,
+      effectiveTo: data.effectiveTo
+        ? new Date(data.effectiveTo).toISOString()
+        : undefined,
     };
 
     onSubmit(submitData);
@@ -122,150 +126,163 @@ export function AvailabilityRuleForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <div className="grid gap-4 md:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="dayOfWeek"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Día de la semana</FormLabel>
-                <Select
-                  onValueChange={(value) => field.onChange(Number(value))}
-                  defaultValue={String(field.value)}
-                >
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="flex flex-col h-full"
+      >
+        <div className="flex-1 space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="dayOfWeek"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Día de la semana</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(Number(value))}
+                    defaultValue={String(field.value)}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona un día" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {DAYS.map((day) => (
+                        <SelectItem key={day.value} value={String(day.value)}>
+                          {day.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="slotDuration"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Duración de cada cita</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(Number(value))}
+                    defaultValue={String(field.value)}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Duración" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {DURATIONS.map((duration) => (
+                        <SelectItem key={duration} value={String(duration)}>
+                          {duration} minutos
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Cuánto tiempo dura cada cita
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="startTime"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Hora de inicio</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona un día" />
-                    </SelectTrigger>
+                    <Input type="time" {...field} />
                   </FormControl>
-                  <SelectContent>
-                    {DAYS.map((day) => (
-                      <SelectItem key={day.value} value={String(day.value)}>
-                        {day.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="slotDuration"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Duración de cada cita</FormLabel>
-                <Select
-                  onValueChange={(value) => field.onChange(Number(value))}
-                  defaultValue={String(field.value)}
-                >
+            <FormField
+              control={form.control}
+              name="endTime"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Hora de fin</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Duración" />
-                    </SelectTrigger>
+                    <Input type="time" {...field} />
                   </FormControl>
-                  <SelectContent>
-                    {DURATIONS.map((duration) => (
-                      <SelectItem key={duration} value={String(duration)}>
-                        {duration} minutos
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormDescription>Cuánto tiempo dura cada cita</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="bufferTime"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tiempo de espera</FormLabel>
+                  <FormControl>
+                    <NumberInput
+                      type="number"
+                      min="0"
+                      step="5"
+                      placeholder="0"
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Minutos de espera entre citas (opcional)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="maxAppointmentsPerSlot"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Máximo de citas por slot</FormLabel>
+                  <FormControl>
+                    <NumberInput
+                      type="number"
+                      min="1"
+                      placeholder="1"
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Cuántos pacientes pueden agendar el mismo horario
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="startTime"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Hora de inicio</FormLabel>
-                <FormControl>
-                  <Input type="time" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="endTime"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Hora de fin</FormLabel>
-                <FormControl>
-                  <Input type="time" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="bufferTime"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tiempo de espera</FormLabel>
-                <FormControl>
-                  <NumberInput
-                    type="number"
-                    min="0"
-                    step="5"
-                    placeholder="0"
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Minutos de espera entre citas (opcional)
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="maxAppointmentsPerSlot"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Máximo de citas por slot</FormLabel>
-                <FormControl>
-                  <NumberInput
-                    type="number"
-                    min="1"
-                    placeholder="1"
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Cuántos pacientes pueden agendar el mismo horario
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="flex justify-end gap-3">
-          <Button type="submit" disabled={isLoading}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {rule ? "Actualizar" : "Crear"} Regla
-          </Button>
+        <div className="sticky bottom-0 bg-background pt-6 mt-6 border-t">
+          <div className="flex justify-end gap-3 pb-2">
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full sm:w-auto"
+            >
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {rule ? "Actualizar" : "Crear"} Regla
+            </Button>
+          </div>
         </div>
       </form>
     </Form>

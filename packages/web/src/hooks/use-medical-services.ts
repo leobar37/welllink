@@ -48,6 +48,7 @@ export function useMedicalServices(profileId: string) {
     data: services,
     isLoading,
     error,
+    refetch,
   } = useQuery({
     queryKey: ["medical-services", profileId],
     queryFn: async () => {
@@ -58,6 +59,8 @@ export function useMedicalServices(profileId: string) {
       return data as unknown as MedicalService[];
     },
     enabled: !!profileId,
+    refetchOnMount: "always",
+    staleTime: 0,
   });
 
   const createService = useMutation({
@@ -131,6 +134,7 @@ export function useMedicalServices(profileId: string) {
     services,
     isLoading,
     error,
+    refetch,
     createService,
     updateService,
     deleteService,

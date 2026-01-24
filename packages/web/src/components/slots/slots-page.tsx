@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Plus, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Calendar } from "lucide-react";
 import { useProfile } from "@/hooks/use-profile";
 import { useMedicalServices } from "@/hooks/use-medical-services";
 import { useGenerateSlots } from "@/hooks/use-availability-rules";
@@ -12,23 +12,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { SlotsList } from "@/components/slots";
+import { SlotsList, EmptySlotsState } from "@/components/slots";
 import {
   useSlots,
   useBlockSlot,
@@ -36,6 +26,9 @@ import {
   useDeleteSlot,
 } from "@/hooks/use-slots";
 import { addDays, startOfWeek } from "date-fns";
+import { WeekNavigator } from "@/components/slots/week-navigator";
+import { SlotGeneratorPanel } from "@/components/slots/slot-generator-panel";
+import { toast } from "sonner";
 
 export function SlotsPage() {
   const { profile, isLoading: isLoadingProfile } = useProfile();
@@ -49,37 +42,47 @@ export function SlotsPage() {
     addDays(new Date(), 6),
   );
 
-  const { services, isLoading: isLoadingServices } = useMedicalServices(
-    profile?.id || "",
-  );
+  const profileId = profile?.id || "";
 
-  const { data: slots, isLoading: isLoadingSlots } = useSlots({
-    profileId: profile?.id || "",
+  const {
+    services,
+    isLoading: isLoadingServices,
+    refetch: refetchServices,
+  } = useMedicalServices(profileId);
+
+  // Refetch services when profileId becomes available
+  useEffect(() => {
+    if (profileId) {
+      refetchServices();
+    }
+  }, [profileId, refetchServices]);
+
+  const {
+    data: slots,
+    isLoading: isLoadingSlots,
+    refetch: refetchSlots,
+  } = useSlots({
+    profileId,
     serviceId: selectedServiceId,
     startDate: currentWeekStart,
     endDate: addDays(currentWeekStart, 6),
   });
+
+  // Refetch slots when profileId becomes available
+  useEffect(() => {
+    if (profileId) {
+      refetchSlots();
+    }
+  }, [profileId, refetchSlots]);
 
   const generateSlots = useGenerateSlots();
   const blockSlot = useBlockSlot();
   const unblockSlot = useUnblockSlot();
   const deleteSlot = useDeleteSlot();
 
-  const handlePreviousWeek = () => {
-    setCurrentWeekStart((prev) => addDays(prev, -7));
-  };
-
-  const handleNextWeek = () => {
-    setCurrentWeekStart((prev) => addDays(prev, 7));
-  };
-
-  const handleToday = () => {
-    setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }));
-  };
-
   const handleGenerateNextWeek = () => {
     if (!selectedServiceId) {
-      alert("Por favor selecciona un servicio");
+      toast.error("Por favor selecciona un servicio");
       return;
     }
     generateSlots.mutate({
@@ -91,7 +94,7 @@ export function SlotsPage() {
 
   const handleGenerateCustomRange = () => {
     if (!selectedServiceId) {
-      alert("Por favor selecciona un servicio");
+      toast.error("Por favor selecciona un servicio");
       return;
     }
     generateSlots.mutate(
@@ -105,6 +108,7 @@ export function SlotsPage() {
       {
         onSuccess: () => {
           setIsGenerateModalOpen(false);
+          toast.success("Slots generados exitosamente");
         },
       },
     );
@@ -122,12 +126,6 @@ export function SlotsPage() {
     if (window.confirm("¿Estás seguro de que deseas eliminar este slot?")) {
       deleteSlot.mutate(slotId);
     }
-  };
-
-  const weekEnd = addDays(currentWeekStart, 6);
-  const formatDateRange = () => {
-    const options = { day: "numeric", month: "short" } as const;
-    return `${currentWeekStart.toLocaleDateString("es-ES", options)} - ${weekEnd.toLocaleDateString("es-ES", options)}`;
   };
 
   if (isLoadingProfile || isLoadingServices || isLoadingSlots) {
@@ -161,7 +159,9 @@ export function SlotsPage() {
             Administra tus horarios disponibles
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Service Selector */}
           <Select
             value={selectedServiceId}
             onValueChange={setSelectedServiceId}
@@ -185,6 +185,8 @@ export function SlotsPage() {
               ))}
             </SelectContent>
           </Select>
+
+          {/* Generate Buttons */}
           <Button
             onClick={handleGenerateNextWeek}
             disabled={!selectedServiceId || generateSlots.isPending}
@@ -192,99 +194,134 @@ export function SlotsPage() {
             <Plus className="mr-2 h-4 w-4" />
             {generateSlots.isPending ? "Generando..." : "Generar Slots"}
           </Button>
-          <Dialog
-            open={isGenerateModalOpen}
-            onOpenChange={setIsGenerateModalOpen}
+
+          {/* Custom Range Dialog */}
+          <Button
+            variant="outline"
+            onClick={() => setIsGenerateModalOpen(true)}
+            disabled={!selectedServiceId}
           >
-            <DialogTrigger asChild>
-              <Button variant="outline" disabled={!selectedServiceId}>
-                <Calendar className="mr-2 h-4 w-4" />
-                Rango Personalizado
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>Generar Slots en Rango Personalizado</DialogTitle>
-                <DialogDescription>
-                  Selecciona el rango de fechas para generar slots basados en
-                  tus reglas de disponibilidad.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="py-4">
-                <div className="grid-content-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="start-date">Desde</Label>
-                    <input
-                      id="start-date"
-                      type="date"
-                      value={customStartDate.toISOString().split("T")[0]}
-                      onChange={(e) =>
-                        setCustomStartDate(new Date(e.target.value))
-                      }
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="end-date">Hasta</Label>
-                    <input
-                      id="end-date"
-                      type="date"
-                      value={customEndDate.toISOString().split("T")[0]}
-                      onChange={(e) =>
-                        setCustomEndDate(new Date(e.target.value))
-                      }
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    />
-                  </div>
+            <Calendar className="mr-2 h-4 w-4" />
+            Rango Personalizado
+          </Button>
+        </div>
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Generator Panel - Sidebar */}
+        <div className="lg:col-span-1">
+          <SlotGeneratorPanel
+            services={services || []}
+            selectedServiceId={selectedServiceId}
+            onServiceChange={setSelectedServiceId}
+            onGenerate={(config) => {
+              generateSlots.mutate({
+                profileId: profile?.id || "",
+                serviceId: config.serviceId,
+                mode: "nextWeek",
+              });
+            }}
+            onGenerateRange={(config, start, end) => {
+              generateSlots.mutate(
+                {
+                  profileId: profile?.id || "",
+                  serviceId: config.serviceId,
+                  mode: "range",
+                  startDate: start,
+                  endDate: end,
+                },
+                {
+                  onSuccess: () => {
+                    toast.success("Slots generados exitosamente");
+                  },
+                },
+              );
+            }}
+            isGenerating={generateSlots.isPending}
+          />
+        </div>
+
+        {/* Slots List - Main Area */}
+        <div className="lg:col-span-2">
+          <Card>
+            <CardHeader className="px-6">
+              <WeekNavigator
+                currentWeekStart={currentWeekStart}
+                onWeekChange={setCurrentWeekStart}
+              />
+            </CardHeader>
+            <CardContent className="px-6">
+              {!slots || slots.length === 0 ? (
+                <EmptySlotsState
+                  onGenerate={handleGenerateNextWeek}
+                  isGenerating={generateSlots.isPending}
+                />
+              ) : (
+                <SlotsList
+                  slots={slots || []}
+                  onBlock={handleBlock}
+                  onUnblock={handleUnblock}
+                  onDelete={handleDelete}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Custom Range Dialog */}
+      {isGenerateModalOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <Card className="w-full max-w-md mx-4">
+            <CardHeader>
+              <CardTitle>Generar Slots en Rango Personalizado</CardTitle>
+              <CardDescription>
+                Selecciona el rango de fechas para generar slots basados en tus
+                reglas de disponibilidad.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Desde</label>
+                  <input
+                    type="date"
+                    value={customStartDate.toISOString().split("T")[0]}
+                    onChange={(e) =>
+                      setCustomStartDate(new Date(e.target.value))
+                    }
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Hasta</label>
+                  <input
+                    type="date"
+                    value={customEndDate.toISOString().split("T")[0]}
+                    onChange={(e) => setCustomEndDate(new Date(e.target.value))}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  />
                 </div>
               </div>
-              <DialogFooter>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsGenerateModalOpen(false)}
+                >
+                  Cancelar
+                </Button>
                 <Button
                   onClick={handleGenerateCustomRange}
                   disabled={generateSlots.isPending}
                 >
                   {generateSlots.isPending ? "Generando..." : "Generar Slots"}
                 </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </div>
-
-      {/* Week Navigation */}
-      <Card>
-        <CardHeader className="px-6">
-          <div className="flex items-center justify-between gap-4">
-            <div className="space-y-1">
-              <CardTitle>Slots de la Semana</CardTitle>
-              <CardDescription>{formatDateRange()}</CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handlePreviousWeek}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" onClick={handleToday}>
-                Hoy
-              </Button>
-              <Button variant="outline" size="icon" onClick={handleNextWeek}>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="px-6">
-          <SlotsList
-            slots={slots || []}
-            onBlock={handleBlock}
-            onUnblock={handleUnblock}
-            onDelete={handleDelete}
-          />
-        </CardContent>
-      </Card>
+      )}
     </div>
   );
 }

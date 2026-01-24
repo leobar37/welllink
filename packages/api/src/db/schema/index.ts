@@ -36,3 +36,6 @@ export * from "./relations";
 
 // Payment Methods
 export * from "./payment-method";
+
+// Agent Configuration
+export * from "./agent-config";

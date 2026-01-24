@@ -96,24 +96,12 @@ export class AvailabilityService {
       }
     }
 
-    // Convert time strings to timestamps for today
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const startTimeTimestamp = new Date(today);
-    const [startHour, startMinute] = data.startTime.split(":").map(Number);
-    startTimeTimestamp.setHours(startHour, startMinute, 0, 0);
-
-    const endTimeTimestamp = new Date(today);
-    const [endHour, endMinute] = data.endTime.split(":").map(Number);
-    endTimeTimestamp.setHours(endHour, endMinute, 0, 0);
-
     // Create the rule
     const ruleData: NewAvailabilityRule = {
       profileId: data.profileId,
       dayOfWeek: data.dayOfWeek,
-      startTime: startTimeTimestamp,
-      endTime: endTimeTimestamp,
+      startTime: `${data.startTime}:00`,
+      endTime: `${data.endTime}:00`,
       slotDuration: data.slotDuration,
       bufferTime: data.bufferTime || 0,
       maxAppointmentsPerSlot: data.maxAppointmentsPerSlot || 1,
@@ -299,14 +287,8 @@ export class AvailabilityService {
         generatedSlots.push({
           date: new Date(currentDate),
           dayOfWeek,
-          startTime: new Date(rule.startTime).toLocaleTimeString("es-ES", {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          endTime: new Date(rule.endTime).toLocaleTimeString("es-ES", {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
+          startTime: rule.startTime.substring(0, 5),
+          endTime: rule.endTime.substring(0, 5),
           count: slotCount,
         });
       }
@@ -362,7 +344,12 @@ export class AvailabilityService {
       while (currentMinutes + slotDuration <= endMinutes) {
         const slotStart = new Date(targetDate);
         const [startHour, startMinute] = this.minutesToTime(currentMinutes);
-        slotStart.setHours(startHour, startMinute, 0, 0);
+
+        // Fix for Timezone (UTC-5 Lima)
+        // We want the slot to be at the correct local time (e.g. 09:00 Lima)
+        // Since we store as UTC, 09:00 Lima = 14:00 UTC (09 + 5)
+        const LIMA_OFFSET_HOURS = 5;
+        slotStart.setUTCHours(startHour + LIMA_OFFSET_HOURS, startMinute, 0, 0);
 
         const slotEnd = new Date(slotStart);
         slotEnd.setMinutes(slotEnd.getMinutes() + slotDuration);

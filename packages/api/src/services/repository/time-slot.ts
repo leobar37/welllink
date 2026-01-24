@@ -137,4 +137,8 @@ export class TimeSlotRepository {
 
     return createdSlots;
   }
+
+  async delete(id: string): Promise<void> {
+    await db.delete(timeSlot).where(eq(timeSlot.id, id));
+  }
 }

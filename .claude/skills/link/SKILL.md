@@ -24,6 +24,14 @@ Expert for the mediapp monorepo. Combines frontend (React 19 + Tailwind v4 + sha
 - **[Web Agent](reference/web-agent.md)** - Quick reference to `.claude/agent/web.md`
 - **[API Agent](reference/api-agent.md)** - Quick reference to `.claude/agent/api.md`
 
+### AI Agent References
+
+- **[VoltAgent Guide](../../docs/ai-voltagent-guide.md)** - Complete VoltAgent framework guide (agents, tools, memory, workflows, RAG, guardrails, observability)
+- **[AI Tools Reference](../../docs/ai-tools-reference.md)** - Catalog of 10+ implemented tools with creation patterns
+- **[AI Agent Reference](../../docs/ai-agent-reference.md)** - Architecture of the medical AI agent (config, memory, context, structured responses)
+- **[AI UI Reference](../../docs/ai-ui-reference.md)** - Part-based UI system (types, factory pattern, handlers, components)
+- **[AI Patterns Guide](../../docs/ai-patterns.md)** - Step-by-step guide for extending the AI system
+
 ## Monorepo Structure
 
 ```

@@ -155,7 +155,7 @@ export function usePreviewSlots() {
       const { data, error } = await api.api.availability.preview[
         "profile-id"
       ].get({
-        query: {
+        $query: {
           startDate: new Date().toISOString(),
           endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         },
@@ -177,7 +177,7 @@ export function usePreviewSlotsMutation() {
     }: PreviewSlotsData & { profileId: string }) => {
       const { data, error } = await api.api.availability.preview[profileId].get(
         {
-          query: {
+          $query: {
             startDate: startDate.toISOString(),
             endDate: endDate.toISOString(),
           },

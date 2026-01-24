@@ -44,7 +44,9 @@ import { medicalServiceRoutes } from "./api/routes/medical-services";
 import { availabilityRoutes } from "./api/routes/availability";
 import { slotsRoutes } from "./api/routes/slots";
 import { agentRoutes } from "./api/routes/agent";
+import { agentConfigRoutes } from "./api/routes/agent-config";
 import { paymentMethodRoutes } from "./api/routes/payment-methods";
+import { whatsappAgentWebhook } from "./services/ai/whatsapp-agent/webhooks";
 import { createStorageStrategy } from "./services/storage";
 
 // Test routes - ONLY enabled via ENABLE_TEST_ROUTES=true (SECURITY: never in production)
@@ -159,6 +161,8 @@ const app = new Elysia()
       .use(availabilityRoutes)
       .use(slotsRoutes)
       .use(agentRoutes)
+      .use(agentConfigRoutes)
+      .use(whatsappAgentWebhook)
       .use(paymentMethodRoutes)
       // Test routes - ONLY enabled via ENABLE_TEST_ROUTES=true (SECURITY: never in production)
       .use(

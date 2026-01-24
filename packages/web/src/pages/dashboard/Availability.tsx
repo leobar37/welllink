@@ -16,19 +16,38 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { AvailabilityRuleForm, AvailabilityRulesList, AvailabilityPreview } from "@/components/availability";
-import { useAvailabilityRules, useCreateAvailabilityRule, useUpdateAvailabilityRule, useDeleteAvailabilityRule, usePreviewSlotsMutation } from "@/hooks/use-availability-rules";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
+import {
+  AvailabilityRuleForm,
+  AvailabilityRulesList,
+  AvailabilityPreview,
+} from "@/components/availability";
+import {
+  useAvailabilityRules,
+  useCreateAvailabilityRule,
+  useUpdateAvailabilityRule,
+  useDeleteAvailabilityRule,
+  usePreviewSlotsMutation,
+} from "@/hooks/use-availability-rules";
 import type { AvailabilityRule } from "@/hooks/use-availability-rules";
 
 export function AvailabilityPage() {
   const { profile, isLoading: isLoadingProfile } = useProfile();
-  const { data: rules, isLoading: isLoadingRules } = useAvailabilityRules(profile?.id || "");
+  const { data: rules, isLoading: isLoadingRules } = useAvailabilityRules(
+    profile?.id || "",
+  );
   const createRule = useCreateAvailabilityRule();
   const updateRule = useUpdateAvailabilityRule();
   const deleteRule = useDeleteAvailabilityRule();
   const previewMutation = usePreviewSlotsMutation();
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<AvailabilityRule | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [previewData, setPreviewData] = useState<any>(null);
@@ -36,7 +55,7 @@ export function AvailabilityPage() {
   const handleCreate = (data: any) => {
     createRule.mutate(data, {
       onSuccess: () => {
-        setIsDialogOpen(false);
+        setIsSheetOpen(false);
       },
     });
   };
@@ -48,7 +67,7 @@ export function AvailabilityPage() {
       {
         onSuccess: () => {
           setEditingRule(null);
-          setIsDialogOpen(false);
+          setIsSheetOpen(false);
         },
       },
     );
@@ -62,7 +81,7 @@ export function AvailabilityPage() {
 
   const handleEdit = (rule: AvailabilityRule) => {
     setEditingRule(rule);
-    setIsDialogOpen(true);
+    setIsSheetOpen(true);
   };
 
   const handlePreview = () => {
@@ -105,7 +124,7 @@ export function AvailabilityPage() {
           <Button variant="outline" onClick={handlePreview}>
             Previsualizar Slots
           </Button>
-          <Button onClick={() => setIsDialogOpen(true)}>
+          <Button onClick={() => setIsSheetOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Nueva Regla
           </Button>
@@ -145,25 +164,33 @@ export function AvailabilityPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Create/Edit Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {editingRule ? "Editar Regla" : "Nueva Regla de Disponibilidad"}
-            </DialogTitle>
-            <DialogDescription>
-              Configura un día y horario de atención
-            </DialogDescription>
-          </DialogHeader>
-          <AvailabilityRuleForm
-            profileId={profile?.id || ""}
-            rule={editingRule || undefined}
-            onSubmit={editingRule ? handleUpdate : handleCreate}
-            isLoading={createRule.isPending || updateRule.isPending}
-          />
-        </DialogContent>
-      </Dialog>
+      {/* Create/Edit Sheet */}
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+        <SheetContent
+          side="right"
+          className="w-[500px] sm:max-w-[540px] p-0 flex flex-col h-full"
+        >
+          <div className="p-6 pb-2">
+            <SheetHeader>
+              <SheetTitle>
+                {editingRule ? "Editar Regla" : "Nueva Regla de Disponibilidad"}
+              </SheetTitle>
+              <SheetDescription>
+                Configura un día y horario de atención
+              </SheetDescription>
+            </SheetHeader>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-6 pt-0">
+            <AvailabilityRuleForm
+              profileId={profile?.id || ""}
+              rule={editingRule || undefined}
+              onSubmit={editingRule ? handleUpdate : handleCreate}
+              isLoading={createRule.isPending || updateRule.isPending}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

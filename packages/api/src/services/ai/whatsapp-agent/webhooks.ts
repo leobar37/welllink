@@ -1,10 +1,14 @@
 import { Elysia, t } from "elysia";
 import { env } from "../../../config/env";
-import { EvolutionService } from "../../../services/business/evolution-api";
+import { EvolutionService } from "../../business/evolution-api";
+import { getMedicalChatAgent } from "../chat/agent";
+import { AgentConfigService } from "../business/agent-config";
+import { AgentConfigRepository } from "../repository/agent-config";
 import { db } from "../../../db";
 import { profile, whatsappConfig } from "../../../db/schema";
 import { eq } from "drizzle-orm";
-import { WhatsAppContextRepository } from "../../../services/repository/whatsapp-context";
+import { WhatsAppContextRepository } from "../repository/whatsapp-context";
+import { convertToWhatsAppResponse } from "./response-adapter";
 
 interface EvolutionWebhookPayload {
   event: string;
@@ -26,23 +30,7 @@ interface EvolutionWebhookPayload {
   };
 }
 
-const quickFAQResponses: Record<string, string> = {
-  horarios:
-    "Nuestros horarios son Lunes a Viernes 9:00-18:00 y Sábados 9:00-13:00. ¿Te gustaría agendar una cita?",
-  precios:
-    "Los precios varían según el servicio. Puedo mostrarte nuestra lista de servicios con precios. ¿Te gustaría verla?",
-  ubicacion:
-    "Nuestra dirección y enlace a Google Maps están en nuestro perfil público. ¿Te los envío?",
-  servicios:
-    "Ofrecemos consultas generales, especialidades y más. ¿Te gustaría ver nuestra lista completa de servicios?",
-  contacto:
-    "Puedes contactarnos aquí mismo por WhatsApp. ¿En qué puedo ayudarte hoy?",
-  general:
-    "¡Hola! Bienvenido. ¿En qué puedo ayudarte hoy? Puedo responder preguntas sobre horarios, precios, ubicación o agendar una cita.",
-};
-
 async function getProfileByInstanceName(instanceName: string) {
-  // Find profile by looking up the WhatsApp config with this instance
   const config = await db.query.whatsappConfig.findFirst({
     where: eq(whatsappConfig.instanceName, instanceName),
   });
@@ -54,6 +42,16 @@ async function getProfileByInstanceName(instanceName: string) {
   });
 
   return profileData;
+}
+
+async function getAgentConfig(profileId: string) {
+  const agentConfigRepository = new AgentConfigRepository();
+  return agentConfigRepository.findByProfile({ userId: "" } as any, profileId);
+}
+
+function generateTransferUrl(profileUsername: string, phone: string) {
+  const webUrl = env.WEB_URL || "https://wellness-link.com";
+  return `${webUrl}/${profileUsername}/chat?from=whatsapp&phone=${encodeURIComponent(phone)}`;
 }
 
 export const whatsappAgentWebhook = new Elysia({
@@ -113,6 +111,14 @@ export const whatsappAgentWebhook = new Elysia({
         return { success: true, skipped: "no-profile" };
       }
 
+      // Get agent config
+      const config = await getAgentConfig(profileData.id);
+
+      // Check if WhatsApp agent is enabled
+      if (config && !config.whatsappEnabled) {
+        return { success: true, skipped: "whatsapp-disabled" };
+      }
+
       // Check if context exists and its status
       const context = await contextRepository.findByPhone(phone);
 
@@ -127,6 +133,8 @@ export const whatsappAgentWebhook = new Elysia({
 
         // Check if already transferred to widget
         if (context.status === "TRANSFERRED_TO_WIDGET") {
+          // Optionally send a reminder message
+          const transferUrl = generateTransferUrl(profileData.username, phone);
           return {
             success: true,
             skipped: "already-transferred",
@@ -146,118 +154,111 @@ export const whatsappAgentWebhook = new Elysia({
         });
       }
 
-      // Analyze message and determine response
-      const lowerText = text.toLowerCase();
+      // Build message for the agent
+      const conversationId = `whatsapp-${phone}-${Date.now()}`;
 
-      // Keywords that indicate need for transfer
-      const transferKeywords = [
-        "cita",
-        "agendar",
-        "reservar",
-        "horario",
-        "disponible",
-        "precio",
-        "consulta",
-        "atención",
-      ];
-      const shouldTransfer = transferKeywords.some((kw) =>
-        lowerText.includes(kw),
+      // Get agent instructions with custom tone
+      const agentConfigService = new AgentConfigService(
+        new AgentConfigRepository(),
+      );
+      const instructions = await agentConfigService.getEffectiveInstructions(
+        { userId: "" } as any,
+        profileData.id,
+        profileData.displayName || "el profesional",
       );
 
-      if (shouldTransfer) {
-        // Save assistant message suggesting transfer
-        const transferMessage =
-          "Para esto es mejor que conversemos directamente. Te paso a nuestro chat donde podrás agendar tu cita con calma.";
-        await contextRepository.addMessage(phone, "assistant", transferMessage);
+      // Build context for the agent
+      const agentContext = new Map([
+        ["userPhone", phone],
+        ["channel", "whatsapp"],
+        ["profileDisplayName", profileData.displayName || "el profesional"],
+        ["profileTitle", profileData.title || ""],
+        ["profileBio", profileData.bio || ""],
+        ["profileId", profileData.id],
+        ["conversationId", conversationId],
+      ]);
 
-        // Mark as transferred
-        await contextRepository.markTransferredToWidget(phone);
+      // Build full message with profile context
+      const profileContext = `Información del profesional que atienden:
+- Nombre: ${profileData.displayName || "el profesional"}
+- ID del Perfil: ${profileData.id}
+${profileData.title ? `- Título: ${profileData.title}` : ""}
+${profileData.bio ? `- Bio: ${profileData.bio}` : ""}
 
-        // Generate transfer URL
-        const webUrl = env.WEB_URL;
-        const transferUrl = `${webUrl}/${profileData.username}/chat?from=whatsapp&phone=${encodeURIComponent(phone)}`;
+Este usuario te contacta por WhatsApp.
 
-        // Send transfer message with link
-        await evolutionService.sendText(instance, {
-          number: phone,
-          text: `${transferMessage}\n\n${transferUrl}`,
+`;
+
+      const fullMessage = `${profileContext}${text}`;
+
+      try {
+        // Get the medical chat agent
+        const agent = getMedicalChatAgent();
+
+        // Generate response using the agent
+        const result = await agent.generateText(fullMessage, {
+          conversationId,
+          context: agentContext,
         });
 
-        return {
-          success: true,
-          transferred: true,
-          messageId: data.key.id,
-        };
-      }
+        // Convert structured response to WhatsApp format
+        const whatsappResponse = convertToWhatsAppResponse(result.text);
 
-      // Try quick FAQ matching
-      let faqAnswer: string | null = null;
+        // Save assistant message to context
+        await contextRepository.addMessage(
+          phone,
+          "assistant",
+          whatsappResponse.text,
+        );
 
-      if (
-        lowerText.includes("horario") ||
-        lowerText.includes("horarios") ||
-        lowerText.includes("disponible")
-      ) {
-        faqAnswer = quickFAQResponses.horarios;
-      } else if (
-        lowerText.includes("precio") ||
-        lowerText.includes("costo") ||
-        lowerText.includes("cuánto")
-      ) {
-        faqAnswer = quickFAQResponses.precios;
-      } else if (
-        lowerText.includes("ubicación") ||
-        lowerText.includes("dirección") ||
-        lowerText.includes("donde")
-      ) {
-        faqAnswer = quickFAQResponses.ubicacion;
-      } else if (
-        lowerText.includes("servicio") ||
-        lowerText.includes("ofrecen")
-      ) {
-        faqAnswer = quickFAQResponses.servicios;
-      } else if (
-        lowerText.includes("hola") ||
-        lowerText.includes("buenos") ||
-        lowerText.includes("saludos")
-      ) {
-        faqAnswer = quickFAQResponses.general;
-      }
-
-      if (faqAnswer) {
-        await contextRepository.addMessage(phone, "assistant", faqAnswer);
-
+        // Send response via Evolution API
         await evolutionService.sendText(instance, {
           number: phone,
-          text: faqAnswer,
+          text: whatsappResponse.text,
         });
+
+        // If should transfer to web, send the link
+        if (whatsappResponse.shouldTransferToWeb) {
+          const transferUrl = generateTransferUrl(profileData.username, phone);
+          await contextRepository.markTransferredToWidget(phone);
+
+          // Send transfer message with a small delay
+          setTimeout(async () => {
+            await evolutionService.sendText(instance, {
+              number: phone,
+              text: `\n\nPara continuar con más opciones y agendar tu cita, visita nuestro chat interactivo:\n${transferUrl}`,
+            });
+          }, 2000);
+        }
 
         return {
           success: true,
           answered: true,
           messageId: data.key.id,
         };
+      } catch (agentError) {
+        console.error("Agent error:", agentError);
+
+        // Fallback to simple response if agent fails
+        const fallbackMessage =
+          "Gracias por tu mensaje. Estoy procesando tu solicitud. Para una mejor atención, te recomiendo continuar en nuestro chat web donde podrás agendar tu cita con calma.";
+
+        const transferUrl = generateTransferUrl(profileData.username, phone);
+
+        await contextRepository.addMessage(phone, "assistant", fallbackMessage);
+        await contextRepository.markTransferredToWidget(phone);
+
+        await evolutionService.sendText(instance, {
+          number: phone,
+          text: `${fallbackMessage}\n\n${transferUrl}`,
+        });
+
+        return {
+          success: true,
+          fallback: true,
+          messageId: data.key.id,
+        };
       }
-
-      // Default response - suggest transfer for complex queries
-      const defaultMessage =
-        "Para atenderte mejor, te recomiendo continuar en nuestro chat interactivo donde podrás agendar tu cita. ¿Te paso el enlace?";
-      await contextRepository.addMessage(phone, "assistant", defaultMessage);
-      await contextRepository.markTransferredToWidget(phone);
-
-      const webUrl = env.WEB_URL;
-      const transferUrl = `${webUrl}/${profileData.username}/chat?from=whatsapp&phone=${encodeURIComponent(phone)}`;
-
-      await evolutionService.sendText(instance, {
-        number: phone,
-        text: `${defaultMessage}\n\n${transferUrl}`,
-      });
-
-      return {
-        success: true,
-        transferred: true,
-        messageId: data.key.id,
-      };
     } catch (err) {
       console.error("WhatsApp agent webhook error:", err);
       // Always return 200 to prevent webhook retries

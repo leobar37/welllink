@@ -1,12 +1,6 @@
 import { Loader2, Trash2, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { AvailabilityRule } from "@/hooks/use-availability-rules";
 import { getDayName } from "@/hooks/use-availability-rules";
@@ -24,6 +18,21 @@ export function AvailabilityRulesList({
   onEdit,
   onDelete,
 }: AvailabilityRulesListProps) {
+  const formatTime = (timeStr: string) => {
+    try {
+      if (!timeStr) return "";
+      const [hours, minutes] = timeStr.split(":");
+      const date = new Date();
+      date.setHours(parseInt(hours), parseInt(minutes));
+      return date.toLocaleTimeString("es-ES", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch (e) {
+      return timeStr;
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -43,14 +52,17 @@ export function AvailabilityRulesList({
   }
 
   // Group rules by day
-  const groupedRules = rules.reduce((acc, rule) => {
-    const dayName = getDayName(rule.dayOfWeek);
-    if (!acc[dayName]) {
-      acc[dayName] = [];
-    }
-    acc[dayName].push(rule);
-    return acc;
-  }, {} as Record<string, AvailabilityRule[]>);
+  const groupedRules = rules.reduce(
+    (acc, rule) => {
+      const dayName = getDayName(rule.dayOfWeek);
+      if (!acc[dayName]) {
+        acc[dayName] = [];
+      }
+      acc[dayName].push(rule);
+      return acc;
+    },
+    {} as Record<string, AvailabilityRule[]>,
+  );
 
   // Sort days in order
   const dayOrder = [
@@ -80,19 +92,10 @@ export function AvailabilityRulesList({
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-1">
                       <span className="font-medium">
-                        {new Date(rule.startTime).toLocaleTimeString("es-ES", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}{" "}
-                        -{" "}
-                        {new Date(rule.endTime).toLocaleTimeString("es-ES", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {formatTime(rule.startTime)} -{" "}
+                        {formatTime(rule.endTime)}
                       </span>
-                      <Badge variant="secondary">
-                        {rule.slotDuration}min
-                      </Badge>
+                      <Badge variant="secondary">{rule.slotDuration}min</Badge>
                       {rule.bufferTime && rule.bufferTime > 0 && (
                         <Badge variant="outline">
                           +{rule.bufferTime}min espera
@@ -103,7 +106,8 @@ export function AvailabilityRulesList({
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Máximo {rule.maxAppointmentsPerSlot} cita{rule.maxAppointmentsPerSlot > 1 ? "s" : ""} por horario
+                      Máximo {rule.maxAppointmentsPerSlot} cita
+                      {rule.maxAppointmentsPerSlot > 1 ? "s" : ""} por horario
                     </p>
                   </div>
                   <div className="flex items-center gap-2">

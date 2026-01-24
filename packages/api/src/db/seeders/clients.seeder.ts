@@ -10,6 +10,7 @@ import { db } from "../index";
 export const createdClientIds: Record<string, string> = {};
 
 const CLIENT_DATA = [
+  // María García - Perfil Individual
   {
     key: "client_laura",
     profileKey: "maria",
@@ -62,6 +63,58 @@ const CLIENT_DATA = [
     notes:
       "Cliente desde 2 meses. En programa de bienestar integral. Excelentes resultados.",
     lastContactAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
+  },
+  // Clínica Bienestar - Perfil Organizacional
+  {
+    key: "clinic_client_1",
+    profileKey: "clinic",
+    name: "Carlos Mendoza",
+    phone: "+51911112222",
+    email: "carlos.m@email.com",
+    label: ClientLabel.AFILIADO,
+    notes: "Paciente crónico. Control mensual de diabetes.",
+    lastContactAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+  },
+  {
+    key: "clinic_client_2",
+    profileKey: "clinic",
+    name: "Ana Lucía Torres",
+    phone: "+51922223333",
+    email: "ana.torres@email.com",
+    label: ClientLabel.PROSPECTO,
+    notes:
+      "Interesada en programa de pérdida de peso. Primera consulta programada.",
+    lastContactAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+  },
+  {
+    key: "clinic_client_3",
+    profileKey: "clinic",
+    name: "Miguel Rodríguez",
+    phone: "+51933334444",
+    email: null,
+    label: ClientLabel.CONSUMIDOR,
+    notes: "Llegó por referencia de Facebook. Solo quiere consulta inicial.",
+    lastContactAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+  },
+  {
+    key: "clinic_client_4",
+    profileKey: "clinic",
+    name: "Fernanda López",
+    phone: "+51944445555",
+    email: "fernanda.l@email.com",
+    label: ClientLabel.AFILIADO,
+    notes: "Paciente pediatrico. Trae a su hijo cada 3 meses.",
+    lastContactAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+  },
+  {
+    key: "clinic_client_5",
+    profileKey: "clinic",
+    name: "Pedro Salinas",
+    phone: "+51955556666",
+    email: "pedro.s@email.com",
+    label: ClientLabel.PROSPECTO,
+    notes: "Empresa aliado. Quiere paquetes para sus empleados.",
+    lastContactAt: new Date(Date.now() - 1 * 60 * 60 * 1000),
   },
 ];
 

@@ -1,7 +1,7 @@
 import { createSeederContext } from "./helpers";
 import { SocialLinkRepository } from "../../services/repository/social-link";
 import { createdProfileIds } from "./profiles.seeder";
-import { getTestUserId } from "./users.seeder";
+import { getTestUserId, getClinicUserId } from "./users.seeder";
 import { eq, and } from "drizzle-orm";
 import { socialLink } from "../schema/social-link";
 import { db } from "../index";
@@ -9,6 +9,7 @@ import { db } from "../index";
 export const createdSocialLinkIds: Record<string, string> = {};
 
 const SOCIAL_LINK_DATA = [
+  // María García - Perfil Individual
   {
     key: "mariaInstagram",
     profileKey: "maria",
@@ -37,17 +38,51 @@ const SOCIAL_LINK_DATA = [
     username: "mariawellness",
     displayOrder: 4,
   },
+  // Clínica Bienestar - Perfil Organizacional
+  {
+    key: "clinicInstagram",
+    profileKey: "clinic",
+    platform: "instagram" as const,
+    username: "clinicabienestar",
+    displayOrder: 1,
+  },
+  {
+    key: "clinicWhatsapp",
+    profileKey: "clinic",
+    platform: "whatsapp" as const,
+    username: "51999888777",
+    displayOrder: 2,
+  },
+  {
+    key: "clinicFacebook",
+    profileKey: "clinic",
+    platform: "facebook" as const,
+    username: "clinicabienestar",
+    displayOrder: 3,
+  },
+  {
+    key: "clinicYoutube",
+    profileKey: "clinic",
+    platform: "youtube" as const,
+    username: "@clinicabienestar",
+    displayOrder: 4,
+  },
 ];
 
 export async function seedSocialLinks() {
   console.log("🔗 Seeding social links...");
 
   const socialLinkRepository = new SocialLinkRepository();
-  const userId = await getTestUserId();
+  const testUserId = await getTestUserId();
+  const clinicUserId = await getClinicUserId();
 
   for (const linkData of SOCIAL_LINK_DATA) {
     const { key, profileKey, ...data } = linkData;
     const profileId = createdProfileIds[profileKey];
+
+    // Use the correct user ID based on the profile
+    // maria profile belongs to testUserId, clinic profile belongs to clinicUserId
+    const userId = profileKey === "clinic" ? clinicUserId : testUserId;
     const ctx = createSeederContext(userId);
 
     if (!profileId) {
@@ -66,7 +101,7 @@ export async function seedSocialLinks() {
 
     if (existingLink) {
       console.log(
-        `  ✓ Social link ${data.platform} already exists for profile, skipping`,
+        `  ✓ Social link ${data.platform} already exists for profile ${profileKey}, skipping`,
       );
       createdSocialLinkIds[key] = existingLink.id;
       continue;
@@ -79,7 +114,7 @@ export async function seedSocialLinks() {
 
     createdSocialLinkIds[key] = created.id;
     console.log(
-      `  ✓ Created social link: ${data.platform} (order: ${data.displayOrder}) - ID: ${created.id}`,
+      `  ✓ Created social link: ${profileKey}/${data.platform} (order: ${data.displayOrder}) - ID: ${created.id}`,
     );
   }
 

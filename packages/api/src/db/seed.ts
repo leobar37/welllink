@@ -135,18 +135,24 @@ async function cleanupSeedData() {
         CREATE TABLE availability_rule (
           id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
           profile_id uuid NOT NULL REFERENCES profile(id) ON DELETE CASCADE,
-          day_of_week integer NOT NULL CHECK (day_of_week >= 1 AND day_of_week <= 7),
+          day_of_week integer NOT NULL CHECK (day_of_week >= 0 AND day_of_week <= 6),
           start_time time NOT NULL,
           end_time time NOT NULL,
-          is_available boolean NOT NULL DEFAULT true,
+          slot_duration integer NOT NULL DEFAULT 30,
+          buffer_time integer NOT NULL DEFAULT 0,
+          max_appointments_per_slot integer NOT NULL DEFAULT 1,
+          effective_from timestamp NOT NULL DEFAULT NOW(),
+          effective_to timestamp,
+          is_active boolean NOT NULL DEFAULT true,
           metadata jsonb DEFAULT '{}',
-          created_at timestamp NOT NULL DEFAULT now()
+          created_at timestamp NOT NULL DEFAULT NOW(),
+          updated_at timestamp NOT NULL DEFAULT NOW()
         );
       `);
       await db.execute(
         sql`CREATE INDEX IF NOT EXISTS availability_rule_profile_id_idx ON availability_rule(profile_id)`,
       );
-      console.log("  ✓ Recreated availability_rule table with metadata column");
+      console.log("  ✓ Recreated availability_rule table with all columns");
     } catch (error: any) {
       console.log(
         `  ℹ️  Availability rule table cleanup: ${error.message || "skipped"}`,
@@ -341,6 +347,7 @@ async function runMigrations() {
     "0006_rename_social_link_url_to_username.sql",
     "0007_add_clinic_fields_to_profile.sql",
     "0008_payment_methods.sql", // Nueva migración para payment_method
+    "0009_whatsapp_context.sql", // Nueva migración para whatsapp_context
   ];
 
   for (const file of migrationFiles) {
