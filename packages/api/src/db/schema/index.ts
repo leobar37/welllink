@@ -15,6 +15,7 @@ export * from "./ai-recommendation";
 export * from "./whatsapp-config";
 export * from "./whatsapp-message";
 export * from "./whatsapp-template";
+export * from "./whatsapp-context";
 
 // MEDICAL RESERVATION TABLES
 export * from "./medical-service";
@@ -32,3 +33,6 @@ export * from "./campaign-audience";
 
 // Relations
 export * from "./relations";
+
+// Payment Methods
+export * from "./payment-method";

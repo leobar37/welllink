@@ -8,6 +8,7 @@ import {
   boolean,
   timestamp,
   index,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
 import { asset } from "./asset";
@@ -27,6 +28,7 @@ export const medicalService = pgTable(
     category: varchar("category", { length: 100 }),
     requirements: text("requirements"),
     isActive: boolean("is_active").notNull().default(true),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at")
       .notNull()

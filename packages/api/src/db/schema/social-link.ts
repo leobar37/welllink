@@ -6,6 +6,7 @@ import {
   timestamp,
   index,
   unique,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
 import { socialPlatformEnum } from "./enums";
@@ -20,6 +21,7 @@ export const socialLink = pgTable(
     platform: socialPlatformEnum("platform").notNull(),
     username: varchar("username", { length: 100 }).notNull(),
     displayOrder: integer("display_order").notNull().default(0),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (table) => [

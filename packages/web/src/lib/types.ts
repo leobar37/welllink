@@ -4,19 +4,8 @@ import type {
   MedicalService as DbMedicalService,
 } from "../../../api/src/db/schema";
 
-// Extend the DB profile with properties returned by the API (e.g. computed avatarUrl)
-export type Profile = DbProfile & {
-  avatarUrl?: string | null;
-};
-
-// Extend the DB social link with URL computed by backend
-export type SocialLink = DbSocialLink & {
-  url: string;
-};
-
-export type MedicalService = DbMedicalService & {
-  imageAssetId?: string | null;
-};
+// Re-export PaymentMethodType from schema for convenience
+export type { PaymentMethodType } from "../../../api/src/db/schema";
 
 interface BaseFeature<Config = Record<string, unknown>> {
   id: string;
@@ -40,9 +29,9 @@ export interface AppointmentsFeature extends BaseFeature<
 export type Feature = WhatsAppCtaFeature | AppointmentsFeature | BaseFeature;
 
 export interface PublicProfileData {
-  profile: Profile;
-  socialLinks: SocialLink[];
+  profile: DbProfile;
+  socialLinks: DbSocialLink[];
   features: Feature[];
   themeId?: string;
-  medicalServices?: MedicalService[];
+  medicalServices?: DbMedicalService[];
 }

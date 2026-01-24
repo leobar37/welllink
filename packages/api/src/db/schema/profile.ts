@@ -57,10 +57,20 @@ export const profile = pgTable(
       .notNull()
       .defaultNow()
       .$onUpdate(() => new Date()),
+    // Clinic/Organization fields
+    isOrganization: boolean("is_organization").notNull().default(false),
+    clinicName: varchar("clinic_name", { length: 100 }),
+    clinicAddress: text("clinic_address"),
+    clinicPhone: varchar("clinic_phone", { length: 20 }),
+    clinicEmail: varchar("clinic_email", { length: 255 }),
+    clinicWebsite: varchar("clinic_website", { length: 255 }),
+    clinicRuc: varchar("clinic_ruc", { length: 20 }),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>(),
   },
   (table) => [
     index("profile_user_id_idx").on(table.userId),
     index("profile_username_idx").on(table.username),
+    index("profile_is_organization_idx").on(table.isOrganization),
   ],
 );
 

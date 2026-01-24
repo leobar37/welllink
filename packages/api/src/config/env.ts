@@ -43,6 +43,9 @@ interface EnvConfig {
   UPSTASH_REDIS_REST_URL: string;
   UPSTASH_REDIS_REST_TOKEN: string;
 
+  // Web URL (for generating transfer links)
+  WEB_URL: string;
+
   // Test routes (only for local development)
   ENABLE_TEST_ROUTES: string;
 }
@@ -79,6 +82,9 @@ const env: EnvConfig = {
 
   UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL || "",
   UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN || "",
+
+  WEB_URL:
+    process.env.WEB_URL || process.env.PUBLIC_URL || "http://localhost:5176",
 
   // Test routes (only for local development)
   ENABLE_TEST_ROUTES: process.env.ENABLE_TEST_ROUTES || "false",

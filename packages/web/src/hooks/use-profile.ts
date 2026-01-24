@@ -14,6 +14,14 @@ interface Profile {
   whatsappNumber?: string;
   avatarId?: string;
   coverImageId?: string;
+  // Clinic/Organization fields
+  isOrganization?: boolean;
+  clinicName?: string;
+  clinicAddress?: string;
+  clinicPhone?: string;
+  clinicEmail?: string;
+  clinicWebsite?: string;
+  clinicRuc?: string;
 }
 
 export function useProfile() {

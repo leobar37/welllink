@@ -21,10 +21,15 @@ packages/web/tests/
     │   ├── settings.spec.ts            # Settings tests (13 tests)
     │   └── profile-seed.spec.ts        # Seed verification tests (5 tests)
     ├── fixtures/
-    │   └── test-data.ts                # Test constants & URLs
-    └── utils/
-        ├── auth.helper.ts              # Authentication helper
-        └── db.helper.ts                # Database helper
+    │   ├── test-data.ts                # Test constants & URLs
+    │   └── reservation-data.ts         # Reservation test data
+    ├── utils/
+    │   ├── auth.helper.ts              # Authentication helper
+    │   └── db.helper.ts                # Database helper
+    └── reservations/
+        ├── reservation-request.spec.ts # API request tests (12 tests)
+        ├── reservation-approval.spec.ts# API approval tests (6 tests)
+        └── main-flow.spec.ts           # 🆕 Main E2E flow tests (8 tests)
 ```
 
 ---
@@ -36,7 +41,46 @@ packages/web/tests/
 | Profile Settings       | 15     | ✅ Passing          |
 | Settings               | 13     | ✅ Passing          |
 | Profile with Seed Data | 5      | ✅ Passing          |
-| **Total**              | **34** | **✅ 100% Passing** |
+| Reservation Request API| 12     | 🔄 In Progress      |
+| Reservation Approval   | 6      | 🔄 In Progress      |
+| **Main Flow (NEW)**    | 8      | 🆕 Added            |
+| **Total**              | **59** | **In Development**  |
+
+---
+
+## 🆕 Main Flow Tests (NEW)
+
+### `reservations/main-flow.spec.ts`
+
+**8 tests covering the PRIMARY patient-to-doctor reservation flow:**
+
+| Test | Description |
+|------|-------------|
+| Complete Reservation Flow | Full E2E: request → approval → confirmation |
+| View Available Slots | Patient can see time slots |
+| Access Booking Form | Patient can start booking process |
+| View Pending Requests | Doctor sees pending reservations |
+| Access Reservations Management | Doctor navigates to manage reservations |
+| Public Profile Load | Patient views doctor profile |
+| Profile Information Display | Profile shows doctor info |
+| Appointment Booking Option | Page has booking CTA |
+| Dashboard Load | Doctor dashboard loads |
+| Dashboard Navigation | Menu/navigation is present |
+
+### Flow Coverage
+
+```
+PACIENTE                          MÉDICO
+   │                                 │
+   ├─→ Visitar página pública        │
+   ├─→ Seleccionar servicio          │
+   ├─→ Elegir horario disponible     │
+   ├─→ Llenar formulario contacto    │
+   ├─→ Enviar solicitud ─────────────→├─→ Ver solicitudes pendientes
+   │                                  ├─→ Aprobar solicitud
+   │                                  └─→ Confirmación automática
+   └─→ Recibe confirmación           │
+```
 
 ---
 
@@ -461,9 +505,10 @@ test.describe("Feature Name", () => {
 
 ## 🔗 Quick Reference
 
-| Command                                            | Description                   |
-| -------------------------------------------------- | ----------------------------- |
-| `bun run test`                                     | Run all E2E tests             |
-| `bun run test:ui`                                  | Run tests with visual UI      |
-| `ENABLE_TEST_ROUTES=true bun run dev`              | Start API with test endpoints |
-| `curl -X POST http://localhost:5300/api/test/seed` | Seed database                 |
+| Command | Description |
+|---------|-------------|
+| `bun run test` | Run all E2E tests |
+| `bun run test:ui` | Run tests with visual UI |
+| `ENABLE_TEST_ROUTES=true bun run dev` | Start API with test endpoints |
+| `curl -X POST http://localhost:5300/api/test/seed` | Seed database |
+| `bun run test reservations/main-flow.spec.ts` | **Run main flow tests** |

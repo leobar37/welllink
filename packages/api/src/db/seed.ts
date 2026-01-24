@@ -16,6 +16,7 @@ import { seedCampaigns } from "./seeders/campaigns.seeder";
 import { seedReservationRequests } from "./seeders/reservation-requests.seeder";
 import { seedAIRecommendations } from "./seeders/ai-recommendations.seeder";
 import { seedClientNotes } from "./seeders/client-notes.seeder";
+import { seedPaymentMethods } from "./seeders/payment-methods.seeder";
 import { db } from "./index";
 import { user, profile, account, session, asset } from "./schema";
 import { eq, sql } from "drizzle-orm";
@@ -75,7 +76,15 @@ async function cleanupSeedData() {
         onboarding_step integer NOT NULL DEFAULT 0,
         onboarding_completed_at timestamp,
         created_at timestamp NOT NULL DEFAULT now(),
-        updated_at timestamp NOT NULL DEFAULT now()
+        updated_at timestamp NOT NULL DEFAULT now(),
+        is_organization boolean NOT NULL DEFAULT false,
+        clinic_name varchar(100),
+        clinic_address text,
+        clinic_phone varchar(20),
+        clinic_email varchar(255),
+        clinic_website varchar(255),
+        clinic_ruc varchar(20),
+        metadata jsonb DEFAULT '{}'
       );
     `);
 
@@ -86,8 +95,204 @@ async function cleanupSeedData() {
     await db.execute(
       sql`CREATE INDEX IF NOT EXISTS profile_username_idx ON profile(username)`,
     );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS profile_is_organization_idx ON profile(is_organization)`,
+    );
 
     console.log("  ✓ Recreated profile table with all columns");
+
+    // Drop and recreate social_link table (was dropped by CASCADE)
+    try {
+      await db.execute(sql`DROP TABLE IF EXISTS social_link CASCADE`);
+      await db.execute(sql`
+        CREATE TABLE social_link (
+          id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+          profile_id uuid NOT NULL REFERENCES profile(id) ON DELETE CASCADE,
+          platform text NOT NULL,
+          username varchar(100) NOT NULL,
+          display_order integer NOT NULL DEFAULT 0,
+          metadata jsonb DEFAULT '{}',
+          created_at timestamp NOT NULL DEFAULT now()
+        );
+      `);
+      await db.execute(
+        sql`CREATE UNIQUE INDEX IF NOT EXISTS social_link_profile_platform_unique ON social_link(profile_id, platform)`,
+      );
+      await db.execute(
+        sql`CREATE INDEX IF NOT EXISTS social_link_profile_id_idx ON social_link(profile_id)`,
+      );
+      console.log("  ✓ Recreated social_link table with metadata column");
+    } catch (error: any) {
+      console.log(
+        `  ℹ️  Social link table cleanup: ${error.message || "skipped"}`,
+      );
+    }
+
+    // Drop and recreate availability_rule table (was dropped by CASCADE)
+    try {
+      await db.execute(sql`DROP TABLE IF EXISTS availability_rule CASCADE`);
+      await db.execute(sql`
+        CREATE TABLE availability_rule (
+          id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+          profile_id uuid NOT NULL REFERENCES profile(id) ON DELETE CASCADE,
+          day_of_week integer NOT NULL CHECK (day_of_week >= 1 AND day_of_week <= 7),
+          start_time time NOT NULL,
+          end_time time NOT NULL,
+          is_available boolean NOT NULL DEFAULT true,
+          metadata jsonb DEFAULT '{}',
+          created_at timestamp NOT NULL DEFAULT now()
+        );
+      `);
+      await db.execute(
+        sql`CREATE INDEX IF NOT EXISTS availability_rule_profile_id_idx ON availability_rule(profile_id)`,
+      );
+      console.log("  ✓ Recreated availability_rule table with metadata column");
+    } catch (error: any) {
+      console.log(
+        `  ℹ️  Availability rule table cleanup: ${error.message || "skipped"}`,
+      );
+    }
+
+    // Drop and recreate medical_service table (was dropped by CASCADE)
+    try {
+      await db.execute(sql`DROP TABLE IF EXISTS medical_service CASCADE`);
+      await db.execute(sql`
+        CREATE TABLE medical_service (
+          id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+          profile_id uuid NOT NULL REFERENCES profile(id) ON DELETE CASCADE,
+          name varchar(100) NOT NULL,
+          description text,
+          duration integer NOT NULL DEFAULT 30,
+          price numeric(10, 2) NOT NULL DEFAULT 0,
+          currency varchar(3) NOT NULL DEFAULT 'PEN',
+          category varchar(50),
+          requirements text,
+          is_active boolean NOT NULL DEFAULT true,
+          display_order integer NOT NULL DEFAULT 0,
+          metadata jsonb DEFAULT '{}',
+          created_at timestamp NOT NULL DEFAULT now(),
+          updated_at timestamp NOT NULL DEFAULT now()
+        );
+      `);
+      await db.execute(
+        sql`CREATE INDEX IF NOT EXISTS medical_service_profile_id_idx ON medical_service(profile_id)`,
+      );
+      console.log("  ✓ Recreated medical_service table with metadata column");
+    } catch (error: any) {
+      console.log(
+        `  ℹ️  Medical service table cleanup: ${error.message || "skipped"}`,
+      );
+    }
+
+    // Drop and recreate time_slot table (was dropped by CASCADE)
+    try {
+      await db.execute(sql`DROP TABLE IF EXISTS time_slot CASCADE`);
+      await db.execute(sql`
+        CREATE TABLE time_slot (
+          id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+          profile_id uuid NOT NULL REFERENCES profile(id) ON DELETE CASCADE,
+          service_id uuid NOT NULL REFERENCES medical_service(id) ON DELETE CASCADE,
+          start_time timestamp NOT NULL,
+          end_time timestamp NOT NULL,
+          max_reservations integer NOT NULL DEFAULT 1,
+          current_reservations integer NOT NULL DEFAULT 0,
+          status varchar(50) DEFAULT 'available',
+          metadata jsonb DEFAULT '{}',
+          created_at timestamp NOT NULL DEFAULT now(),
+          expires_at timestamp
+        );
+      `);
+      await db.execute(
+        sql`CREATE INDEX IF NOT EXISTS time_slot_profile_id_idx ON time_slot(profile_id)`,
+      );
+      await db.execute(
+        sql`CREATE INDEX IF NOT EXISTS time_slot_service_id_idx ON time_slot(service_id)`,
+      );
+      console.log("  ✓ Recreated time_slot table with metadata column");
+    } catch (error: any) {
+      console.log(
+        `  ℹ️  Time slot table cleanup: ${error.message || "skipped"}`,
+      );
+    }
+
+    // Drop and recreate client table (was dropped by CASCADE)
+    try {
+      await db.execute(sql`DROP TABLE IF EXISTS client CASCADE`);
+      await db.execute(sql`
+        CREATE TABLE client (
+          id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+          profile_id uuid NOT NULL REFERENCES profile(id) ON DELETE CASCADE,
+          health_survey_id uuid REFERENCES health_survey_response(id) ON DELETE SET NULL,
+          name varchar(255) NOT NULL,
+          phone varchar(20) NOT NULL,
+          email varchar(255),
+          label text NOT NULL DEFAULT 'consumidor',
+          notes text,
+          last_contact_at timestamp,
+          metadata jsonb DEFAULT '{}',
+          created_at timestamp NOT NULL DEFAULT now(),
+          updated_at timestamp NOT NULL DEFAULT now()
+        );
+      `);
+      await db.execute(
+        sql`CREATE INDEX IF NOT EXISTS client_profile_id_idx ON client(profile_id)`,
+      );
+      await db.execute(
+        sql`CREATE INDEX IF NOT EXISTS client_phone_idx ON client(phone)`,
+      );
+      await db.execute(
+        sql`CREATE INDEX IF NOT EXISTS client_label_idx ON client(label)`,
+      );
+      console.log("  ✓ Recreated client table with metadata column");
+    } catch (error: any) {
+      console.log(`  ℹ️  Client table cleanup: ${error.message || "skipped"}`);
+    }
+
+    // Drop and recreate reservation table (was dropped by CASCADE)
+    try {
+      await db.execute(sql`DROP TABLE IF EXISTS reservation CASCADE`);
+      await db.execute(sql`
+        CREATE TABLE reservation (
+          id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+          profile_id uuid NOT NULL REFERENCES profile(id) ON DELETE CASCADE,
+          slot_id uuid NOT NULL REFERENCES time_slot(id) ON DELETE CASCADE,
+          service_id uuid NOT NULL REFERENCES medical_service(id) ON DELETE CASCADE,
+          request_id uuid REFERENCES reservation_request(id) ON DELETE SET NULL,
+          patient_name varchar(255) NOT NULL,
+          patient_phone varchar(50) NOT NULL,
+          patient_email varchar(255),
+          status varchar(50) DEFAULT 'confirmed',
+          source varchar(50) DEFAULT 'whatsapp',
+          notes text,
+          reminder_24h_sent boolean DEFAULT false,
+          reminder_2h_sent boolean DEFAULT false,
+          reminder_24h_scheduled boolean DEFAULT false,
+          reminder_2h_scheduled boolean DEFAULT false,
+          completed_at timestamp,
+          no_show boolean DEFAULT false,
+          price_at_booking decimal(10, 2),
+          payment_status varchar(50) DEFAULT 'pending',
+          created_at timestamp NOT NULL DEFAULT now(),
+          updated_at timestamp NOT NULL DEFAULT now(),
+          cancelled_at timestamp,
+          metadata jsonb DEFAULT '{}'
+        );
+      `);
+      await db.execute(
+        sql`CREATE INDEX IF NOT EXISTS reservation_profile_id_idx ON reservation(profile_id)`,
+      );
+      await db.execute(
+        sql`CREATE INDEX IF NOT EXISTS reservation_slot_id_idx ON reservation(slot_id)`,
+      );
+      await db.execute(
+        sql`CREATE INDEX IF NOT EXISTS reservation_status_idx ON reservation(status)`,
+      );
+      console.log("  ✓ Recreated reservation table with metadata column");
+    } catch (error: any) {
+      console.log(
+        `  ℹ️  Reservation table cleanup: ${error.message || "skipped"}`,
+      );
+    }
   } catch (error: any) {
     console.log(`  ℹ️  Profile table cleanup: ${error.message || "skipped"}`);
   }
@@ -134,6 +339,8 @@ async function runMigrations() {
     "0004_conscious_giant_man.sql", // Agrega servicios médicos
     "0005_exotic_sentinels.sql", // Agrega time slots y reservations
     "0006_rename_social_link_url_to_username.sql",
+    "0007_add_clinic_fields_to_profile.sql",
+    "0008_payment_methods.sql", // Nueva migración para payment_method
   ];
 
   for (const file of migrationFiles) {
@@ -181,7 +388,10 @@ async function seed() {
     // 3. Profiles (depends on users and assets)
     await seedProfiles();
 
-    // 4. Social Links (depends on profiles)
+    // 4. Payment Methods (depends on profiles)
+    await seedPaymentMethods();
+
+    // 5. Social Links (depends on profiles)
     await seedSocialLinks();
 
     // 5. Profile Customizations (depends on profiles)
@@ -199,36 +409,38 @@ async function seed() {
     // 9. Time Slots (depends on profiles & medical services)
     await seedTimeSlots();
 
-    // 9. Clients (depends on profiles)
+    // 10. Clients (depends on profiles)
     await seedClients();
 
-    // 10. Reservations (depends on profiles, services, time slots, clients)
+    // 11. Reservations (depends on profiles, services, time slots, clients)
     await seedReservations();
 
-    // 11. AI Recommendations (depends on profiles and health surveys)
+    // 12. AI Recommendations (depends on profiles and health surveys)
     await seedAIRecommendations();
 
-    // 12. Client Notes (depends on profiles and clients)
+    // 13. Client Notes (depends on profiles and clients)
     await seedClientNotes();
 
-    // 13. Campaigns (depends on profiles)
+    // 14. Campaigns (depends on profiles)
     await seedCampaigns();
 
-    // 12. Analytics (depends on profiles and social links)
+    // 15. Analytics (depends on profiles and social links)
     await seedAnalytics();
 
-    console.log("\n" + "=".repeat(50));
     console.log("\n🎉 Database seeding completed successfully!\n");
     console.log("📊 Summary:");
-    console.log("  - 1 user created");
+    console.log("  - 2 users created (individual + clinic)");
     console.log(
-      "  - 6 assets created (avatars, covers y slider antes/después)",
+      "  - 8 assets created (avatars, covers, stories, and clinic assets)",
     );
-    console.log("  - 1 profile created");
+    console.log("  - 2 profiles created (individual professional + clinic)");
+    console.log("  - 10 payment methods created (2 profiles × 5 methods)");
     console.log("  - 4 social links created");
-    console.log("  - 1 profile customization created");
+    console.log("  - 2 profile customizations created");
     console.log("  - 2 health survey responses created");
-    console.log("  - 10 availability rules created (Mon-Fri, morning & afternoon)");
+    console.log(
+      "  - 10 availability rules created (Mon-Fri, morning & afternoon)",
+    );
     console.log("  - 4 medical services created");
     console.log("  - 30+ time slots for the next 7 days");
     console.log("  - 5 clients created");
@@ -244,8 +456,8 @@ async function seed() {
     console.log("  - 40+ social clicks created");
     console.log("  - 5 QR downloads created\n");
     console.log("🔐 Login credentials:");
-    console.log("  Email: test@wellness.com");
-    console.log("  Password: test123456\n");
+    console.log("  📱 Individual: test@wellness.com / test123456");
+    console.log("  🏥 Clinic: clinic@wellness.com / test123456\n");
 
     process.exit(0);
   } catch (error) {

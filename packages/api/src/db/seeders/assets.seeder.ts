@@ -1,6 +1,6 @@
 import { createSeederContext } from "./helpers";
 import { AssetRepository } from "../../services/repository/asset";
-import { getTestUserId } from "./users.seeder";
+import { getTestUserId, getClinicUserId } from "./users.seeder";
 import { eq } from "drizzle-orm";
 import { asset } from "../schema/asset";
 import { db } from "../index";
@@ -56,6 +56,23 @@ const ASSET_DATA = [
     size: 318000,
     metadata: { width: 1080, height: 1350, subject: "client" },
   },
+  // Clinic assets
+  {
+    key: "clinicLogo",
+    path: "https://ui-avatars.com/api/?name=CB&size=300&background=10B981&color=fff&bold=true",
+    filename: "clinic-logo.jpg",
+    mimeType: "image/jpeg",
+    size: 45000,
+    metadata: { width: 300, height: 300, generator: "ui-avatars" },
+  },
+  {
+    key: "clinicCover",
+    path: "https://placehold.co/1200x400/10B981/white?text=Clinica+Bienestar",
+    filename: "clinic-cover.jpg",
+    mimeType: "image/jpeg",
+    size: 120000,
+    metadata: { width: 1200, height: 400, generator: "placehold.co" },
+  },
 ];
 
 export async function seedAssets() {
@@ -78,7 +95,7 @@ export async function seedAssets() {
       continue;
     }
 
-    const created = await assetRepository.create(ctx, { ...data, userId });
+    const created = await assetRepository.create(ctx, { ...data });
     createdAssetIds[key] = created.id;
     console.log(`  ✓ Created asset: ${data.filename} - ID: ${created.id}`);
   }

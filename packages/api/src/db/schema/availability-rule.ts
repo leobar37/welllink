@@ -6,6 +6,7 @@ import {
   boolean,
   timestamp,
   index,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
 
@@ -20,6 +21,7 @@ export const availabilityRule = pgTable(
     startTime: time("start_time").notNull(),
     endTime: time("end_time").notNull(),
     isActive: boolean("is_available").notNull().default(true),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (table) => ({

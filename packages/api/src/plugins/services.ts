@@ -37,6 +37,7 @@ import { TimeSlotRepository } from "../services/repository/time-slot";
 import { ReservationRequestRepository } from "../services/repository/reservation-request";
 import { ReservationRepository } from "../services/repository/reservation";
 import { AvailabilityRuleRepository } from "../services/repository/availability-rule";
+import { PaymentMethodRepository } from "../services/repository/payment-method";
 
 import { ClientService } from "../services/business/client";
 import { CampaignTemplateService } from "../services/business/campaign-template";
@@ -48,6 +49,7 @@ import { getCampaignQueue } from "../services/queue/campaign-queue";
 // NEW RESERVATION SERVICES IMPORTS
 import { ApprovalService } from "../services/business/approval";
 import { NotificationService } from "../services/business/notification";
+import { PaymentMethodService } from "../services/business/payment-method";
 
 let storageInstance: StorageStrategy | null = null;
 let initialized = false;
@@ -127,6 +129,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     const reservationRequestRepository = new ReservationRequestRepository();
     const reservationRepository = new ReservationRepository();
     const availabilityRuleRepository = new AvailabilityRuleRepository();
+    const paymentMethodRepository = new PaymentMethodRepository();
 
     // Evolution API service
     const evolutionService = new EvolutionService({
@@ -152,6 +155,10 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
       profileRepository,
       medicalServiceRepository,
       evolutionService,
+    );
+
+    const paymentMethodService = new PaymentMethodService(
+      paymentMethodRepository,
     );
 
     // Services
@@ -228,6 +235,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         reservationRequestRepository,
         reservationRepository,
         availabilityRuleRepository,
+        paymentMethodRepository,
         // Services
         assetService,
         cdnService,
@@ -248,6 +256,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         // NEW RESERVATION SERVICES
         approvalService,
         notificationService,
+        paymentMethodService,
       },
     };
   },

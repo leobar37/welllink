@@ -43,6 +43,8 @@ import { clientRoutes } from "./api/routes/client";
 import { medicalServiceRoutes } from "./api/routes/medical-services";
 import { availabilityRoutes } from "./api/routes/availability";
 import { slotsRoutes } from "./api/routes/slots";
+import { agentRoutes } from "./api/routes/agent";
+import { paymentMethodRoutes } from "./api/routes/payment-methods";
 import { createStorageStrategy } from "./services/storage";
 
 // Test routes - ONLY enabled via ENABLE_TEST_ROUTES=true (SECURITY: never in production)
@@ -156,6 +158,8 @@ const app = new Elysia()
       .use(medicalServiceRoutes)
       .use(availabilityRoutes)
       .use(slotsRoutes)
+      .use(agentRoutes)
+      .use(paymentMethodRoutes)
       // Test routes - ONLY enabled via ENABLE_TEST_ROUTES=true (SECURITY: never in production)
       .use(
         enableTestRoutes

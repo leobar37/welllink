@@ -5,6 +5,7 @@ import {
   varchar,
   timestamp,
   index,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
 import { healthSurveyResponse } from "./health-survey";
@@ -36,6 +37,7 @@ export const client = pgTable(
       .default(ClientLabel.CONSUMIDOR),
     notes: text("notes"),
     lastContactAt: timestamp("last_contact_at"),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at")
       .notNull()

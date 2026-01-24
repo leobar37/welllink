@@ -1,12 +1,13 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, Save, Upload } from "lucide-react";
+import { Loader2, Save, Upload, Building2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Form,
   FormControl,
@@ -41,6 +42,13 @@ const profileFormSchema = z.object({
   title: z.string().max(100).optional(),
   bio: z.string().max(160).optional(),
   whatsappNumber: z.string().optional(),
+  isOrganization: z.boolean().default(false),
+  clinicName: z.string().max(100).optional(),
+  clinicAddress: z.string().optional(),
+  clinicPhone: z.string().max(20).optional(),
+  clinicEmail: z.string().email().optional().or(z.literal("")),
+  clinicWebsite: z.string().url().optional().or(z.literal("")),
+  clinicRuc: z.string().max(20).optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -48,6 +56,7 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 export function EditProfile() {
   const { profile, isLoading, updateProfile, uploadAvatar } = useProfile();
   const { data: avatarUrl } = useAssetUrl(profile?.avatarId);
+  const [showClinicFields, setShowClinicFields] = useState(false);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -58,12 +67,21 @@ export function EditProfile() {
 
   useEffect(() => {
     if (profile) {
+      const isOrg = profile.isOrganization ?? false;
+      setShowClinicFields(isOrg);
       form.reset({
         displayName: profile.displayName,
         username: profile.username,
         title: profile.title || "",
         bio: profile.bio || "",
         whatsappNumber: profile.whatsappNumber || "",
+        isOrganization: isOrg,
+        clinicName: profile.clinicName || "",
+        clinicAddress: profile.clinicAddress || "",
+        clinicPhone: profile.clinicPhone || "",
+        clinicEmail: profile.clinicEmail || "",
+        clinicWebsite: profile.clinicWebsite || "",
+        clinicRuc: profile.clinicRuc || "",
       });
     }
   }, [profile, form]);
@@ -159,8 +177,11 @@ export function EditProfile() {
                         <Input placeholder="juana-perez" {...field} />
                       </FormControl>
                       <FormDescription>
-                        Esta es tu URL única: {window.location.origin}/
-                        {field.value}
+                        Esta es tu URL única:{" "}
+                        {typeof window !== "undefined"
+                          ? window.location.origin
+                          : ""}
+                        /{field.value}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -212,6 +233,171 @@ export function EditProfile() {
                     </FormItem>
                   )}
                 />
+                <div className="flex justify-end">
+                  <Button
+                    type="submit"
+                    disabled={!isDirty || !isValid || updateProfile.isPending}
+                  >
+                    {updateProfile.isPending && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    <Save className="mr-2 h-4 w-4" />
+                    Guardar Cambios
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Clinic/Organization Section */}
+      <div className="grid gap-6 md:grid-cols-[250px_1fr]">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              Clínica
+            </CardTitle>
+            <CardDescription>
+              Información de tu consultorio o clínica
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Información de la Clínica</CardTitle>
+            <CardDescription>
+              Completa esta sección si eres una clínica u organización.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
+                <FormField
+                  control={form.control}
+                  name="isOrganization"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">
+                          ¿Eres una clínica u organización?
+                        </FormLabel>
+                        <FormDescription>
+                          Activa esta opción si deseas mostrar información de tu
+                          consultorio
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={(checked) => {
+                            field.onChange(checked);
+                            setShowClinicFields(checked);
+                          }}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                {showClinicFields && (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="clinicName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nombre de la Clínica</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Clínica Bienestar" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="clinicAddress"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Dirección</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Calle principal #123, Ciudad"
+                              className="resize-none"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="clinicPhone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Teléfono Fijo</FormLabel>
+                          <FormControl>
+                            <Input placeholder="+51 1 2345678" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="clinicEmail"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email de Contacto</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="contacto@clinica.com"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="clinicWebsite"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Website</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="https://www.clinica.com"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="clinicRuc"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>RUC</FormLabel>
+                          <FormControl>
+                            <Input placeholder="12345678901" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
+
                 <div className="flex justify-end">
                   <Button
                     type="submit"

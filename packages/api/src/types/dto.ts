@@ -17,6 +17,14 @@ export interface CreateProfileData {
   whatsappNumber?: string;
   isDefault?: boolean;
   isPublished?: boolean;
+  // Clinic/Organization fields
+  isOrganization?: boolean;
+  clinicName?: string;
+  clinicAddress?: string;
+  clinicPhone?: string;
+  clinicEmail?: string;
+  clinicWebsite?: string;
+  clinicRuc?: string;
 }
 
 export interface UpdateProfileData {
@@ -29,6 +37,14 @@ export interface UpdateProfileData {
   whatsappNumber?: string;
   isDefault?: boolean;
   isPublished?: boolean;
+  // Clinic/Organization fields
+  isOrganization?: boolean;
+  clinicName?: string;
+  clinicAddress?: string;
+  clinicPhone?: string;
+  clinicEmail?: string;
+  clinicWebsite?: string;
+  clinicRuc?: string;
 }
 
 // =============================================================================
@@ -294,4 +310,38 @@ export interface UpdateTemplateData {
   language?: string;
   components?: TemplateComponent[];
   variables?: TemplateVariable[];
+}
+
+// =============================================================================
+// Payment Method DTOs
+// =============================================================================
+
+export type PaymentMethodType =
+  | "cash"
+  | "credit_card"
+  | "debit_card"
+  | "bank_transfer"
+  | "digital_wallet"
+  | "insurance"
+  | "payment_plan";
+
+export interface CreatePaymentMethodData {
+  profileId: string;
+  name: string;
+  type: string; // Simplified to string for API flexibility
+  instructions?: string;
+  details?: Record<string, unknown>;
+  isActive?: boolean;
+  displayOrder?: number;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdatePaymentMethodData {
+  name?: string;
+  type?: string; // Simplified to string for API flexibility
+  instructions?: string;
+  details?: Record<string, unknown>;
+  isActive?: boolean;
+  displayOrder?: number;
+  metadata?: Record<string, unknown>;
 }

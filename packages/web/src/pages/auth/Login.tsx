@@ -42,7 +42,7 @@ export function Login() {
   // Dev-only: Auto-fill with seed credentials
   const isDev = import.meta.env.DEV;
   const DEV_CREDENTIALS = {
-    email: "test@wellness.com",
+    email: "clinic@wellness.com",
     password: "test123456",
   };
 
@@ -93,8 +93,7 @@ export function Login() {
         {isDev && (
           <Alert className="mb-4">
             <AlertDescription>
-              <strong>Modo Dev:</strong> Credenciales de prueba precargadas
-              (seed)
+              <strong>Modo Dev:</strong> Credenciales de clínica precargadas
             </AlertDescription>
           </Alert>
         )}

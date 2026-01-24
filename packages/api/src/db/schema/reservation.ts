@@ -7,6 +7,7 @@ import {
   boolean,
   decimal,
   index,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
 import { timeSlot } from "./time-slot";
@@ -71,6 +72,7 @@ export const reservation = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date()),
     cancelledAt: timestamp("cancelled_at"),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>(),
   },
   (table) => ({
     profileIdIdx: index("idx_reservation_profile_id").on(table.profileId),

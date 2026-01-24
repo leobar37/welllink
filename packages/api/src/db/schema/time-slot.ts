@@ -5,6 +5,7 @@ import {
   integer,
   varchar,
   index,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
 import { medicalService } from "./medical-service";
@@ -37,6 +38,7 @@ export const timeSlot = pgTable(
       .$type<SlotStatus>()
       .notNull()
       .default("available"),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     expiresAt: timestamp("expires_at"),
   },

@@ -8,6 +8,7 @@ import { ActionButtons } from "@/components/public-profile/action-buttons";
 import { FloatingActions } from "@/components/public-profile/floating-actions";
 import { MedicalServices } from "@/components/public-profile/medical-services";
 import { ProfileThemeProvider } from "@/components/public-profile/theme-provider";
+import { ChatWidget } from "@/components/chat";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
 
@@ -104,6 +105,11 @@ export function PublicProfilePage() {
         <FloatingActions
           username={data.profile.username}
           displayName={data.profile.displayName}
+        />
+
+        <ChatWidget
+          profileId={data.profile.id}
+          doctorName={data.profile.displayName}
         />
       </div>
     </ProfileThemeProvider>

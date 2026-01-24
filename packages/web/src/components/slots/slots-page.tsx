@@ -29,7 +29,12 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { SlotsList } from "@/components/slots";
-import { useSlots, useBlockSlot, useUnblockSlot, useDeleteSlot } from "@/hooks/use-slots";
+import {
+  useSlots,
+  useBlockSlot,
+  useUnblockSlot,
+  useDeleteSlot,
+} from "@/hooks/use-slots";
 import { addDays, startOfWeek } from "date-fns";
 
 export function SlotsPage() {
@@ -40,9 +45,11 @@ export function SlotsPage() {
   const [selectedServiceId, setSelectedServiceId] = useState<string>("");
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
   const [customStartDate, setCustomStartDate] = useState<Date>(new Date());
-  const [customEndDate, setCustomEndDate] = useState<Date>(addDays(new Date(), 6));
+  const [customEndDate, setCustomEndDate] = useState<Date>(
+    addDays(new Date(), 6),
+  );
 
-  const { data: services, isLoading: isLoadingServices } = useMedicalServices(
+  const { services, isLoading: isLoadingServices } = useMedicalServices(
     profile?.id || "",
   );
 
@@ -134,17 +141,22 @@ export function SlotsPage() {
   if (!profile?.id) {
     return (
       <div className="flex items-center justify-center p-12">
-        <p className="text-muted">No hay un perfil seleccionado. Por favor selecciona un perfil para continuar.</p>
+        <p className="text-muted">
+          No hay un perfil seleccionado. Por favor selecciona un perfil para
+          continuar.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="space-section">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
         <div className="space-y-1">
-          <h1 className="text-page-title">Gestión de Slots</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Gestión de Slots
+          </h1>
           <p className="text-sm text-stone-500 dark:text-stone-400">
             Administra tus horarios disponibles
           </p>
@@ -155,13 +167,15 @@ export function SlotsPage() {
             onValueChange={setSelectedServiceId}
           >
             <SelectTrigger className="w-[250px]">
-              <SelectValue placeholder={
-                isLoadingServices 
-                  ? "Cargando..." 
-                  : services && services.length === 0 
-                    ? "No hay servicios" 
-                    : "Seleccionar servicio"
-              } />
+              <SelectValue
+                placeholder={
+                  isLoadingServices
+                    ? "Cargando..."
+                    : services && services.length === 0
+                      ? "No hay servicios"
+                      : "Seleccionar servicio"
+                }
+              />
             </SelectTrigger>
             <SelectContent>
               {services?.map((service) => (
@@ -171,11 +185,17 @@ export function SlotsPage() {
               ))}
             </SelectContent>
           </Select>
-          <Button onClick={handleGenerateNextWeek} disabled={!selectedServiceId || generateSlots.isPending}>
+          <Button
+            onClick={handleGenerateNextWeek}
+            disabled={!selectedServiceId || generateSlots.isPending}
+          >
             <Plus className="mr-2 h-4 w-4" />
             {generateSlots.isPending ? "Generando..." : "Generar Slots"}
           </Button>
-          <Dialog open={isGenerateModalOpen} onOpenChange={setIsGenerateModalOpen}>
+          <Dialog
+            open={isGenerateModalOpen}
+            onOpenChange={setIsGenerateModalOpen}
+          >
             <DialogTrigger asChild>
               <Button variant="outline" disabled={!selectedServiceId}>
                 <Calendar className="mr-2 h-4 w-4" />
@@ -186,32 +206,33 @@ export function SlotsPage() {
               <DialogHeader>
                 <DialogTitle>Generar Slots en Rango Personalizado</DialogTitle>
                 <DialogDescription>
-                  Selecciona el rango de fechas para generar slots basados en tus reglas de disponibilidad.
+                  Selecciona el rango de fechas para generar slots basados en
+                  tus reglas de disponibilidad.
                 </DialogDescription>
               </DialogHeader>
               <div className="py-4">
                 <div className="grid-content-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="start-date">
-                      Desde
-                    </Label>
+                    <Label htmlFor="start-date">Desde</Label>
                     <input
                       id="start-date"
                       type="date"
-                      value={customStartDate.toISOString().split('T')[0]}
-                      onChange={(e) => setCustomStartDate(new Date(e.target.value))}
+                      value={customStartDate.toISOString().split("T")[0]}
+                      onChange={(e) =>
+                        setCustomStartDate(new Date(e.target.value))
+                      }
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="end-date">
-                      Hasta
-                    </Label>
+                    <Label htmlFor="end-date">Hasta</Label>
                     <input
                       id="end-date"
                       type="date"
-                      value={customEndDate.toISOString().split('T')[0]}
-                      onChange={(e) => setCustomEndDate(new Date(e.target.value))}
+                      value={customEndDate.toISOString().split("T")[0]}
+                      onChange={(e) =>
+                        setCustomEndDate(new Date(e.target.value))
+                      }
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     />
                   </div>
@@ -239,7 +260,11 @@ export function SlotsPage() {
               <CardDescription>{formatDateRange()}</CardDescription>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" onClick={handlePreviousWeek}>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handlePreviousWeek}
+              >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <Button variant="outline" onClick={handleToday}>

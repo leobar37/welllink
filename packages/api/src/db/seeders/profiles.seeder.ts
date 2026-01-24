@@ -1,6 +1,6 @@
 import { createSeederContext } from "./helpers";
 import { ProfileRepository } from "../../services/repository/profile";
-import { getTestUserId } from "./users.seeder";
+import { getTestUserId, getClinicUserId } from "./users.seeder";
 import { createdAssetIds } from "./assets.seeder";
 import { eq } from "drizzle-orm";
 import { profile } from "../schema/profile";
@@ -33,23 +33,56 @@ const PROFILE_DATA = [
       },
     },
   },
+  {
+    key: "clinic",
+    username: "clinic_bienestar",
+    displayName: "Clínica Bienestar",
+    title: "Centro de Salud Integral",
+    bio: "Brindamos atención médica integral para toda la familia. Contamos con especialistas en medicina general, nutrición y bienestar.",
+    avatarKey: "clinicLogo",
+    coverKey: "clinicCover",
+    whatsappNumber: "+51999888777",
+    isDefault: true,
+    isPublished: true,
+    onboardingStep: 5,
+    onboardingCompletedAt: new Date("2024-11-15T10:30:00Z"),
+    isOrganization: true,
+    clinicName: "Clínica Bienestar S.A.",
+    clinicAddress: "Av. Principal 1234, Lima, Perú",
+    clinicPhone: "+51 1 2345678",
+    clinicEmail: "contacto@clinicabienestar.com",
+    clinicWebsite: "https://www.clinicabienestar.com",
+    clinicRuc: "20123456789",
+    featuresConfig: {
+      healthSurvey: {
+        enabled: true,
+        buttonText: "Agenda tu evaluación",
+      },
+      appointments: {
+        enabled: true,
+      },
+    },
+  },
 ];
 
 export async function seedProfiles() {
   console.log("👤 Seeding profiles...");
 
   const profileRepository = new ProfileRepository();
-  const userId = await getTestUserId();
+  const testUserId = await getTestUserId();
+  const clinicUserId = await getClinicUserId();
 
-  // CLEANUP: Remove existing profiles for this user to avoid duplicates
-  console.log(`  🧹 Cleaning up existing profiles for user...`);
-  await db
-    .delete(profile)
-    .where(eq(profile.userId, userId));
-  console.log(`  ✓ Removed old profiles for user`);
+  // Cleanup existing profiles for both users
+  console.log(`  🧹 Cleaning up existing profiles...`);
+  await db.delete(profile).where(eq(profile.userId, testUserId));
+  await db.delete(profile).where(eq(profile.userId, clinicUserId));
+  console.log(`  ✓ Removed old profiles`);
 
   for (const profileData of PROFILE_DATA) {
     const { key, avatarKey, coverKey, ...data } = profileData;
+
+    // Determine which user this profile belongs to
+    const userId = key === "clinic" ? clinicUserId : testUserId;
     const ctx = createSeederContext(userId);
 
     const avatarId = createdAssetIds[avatarKey];

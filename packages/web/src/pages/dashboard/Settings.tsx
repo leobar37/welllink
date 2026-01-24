@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
-import { LogOut, Smartphone, QrCode } from "lucide-react"
+import { LogOut, Smartphone, QrCode, CreditCard } from "lucide-react"
 import { WhatsAppConfigModal } from "@/components/dashboard/WhatsAppConfigModal"
 
 export function Settings() {
@@ -110,6 +110,36 @@ export function Settings() {
                         variant="outline"
                     >
                         <QrCode className="mr-2 h-4 w-4" />
+                        Configurar
+                    </Button>
+                </div>
+            </CardContent>
+        </Card>
+
+        {/* Payment Methods Section */}
+        <Card>
+            <CardHeader>
+                <CardTitle>Métodos de Pago</CardTitle>
+                <CardDescription>
+                    Configura los métodos de pago que aceptas en tu clínica
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                        <CreditCard className="h-5 w-5 text-gray-400" />
+                        <div>
+                            <p className="font-medium text-gray-900">Gestionar Métodos de Pago</p>
+                            <p className="text-sm text-gray-600">
+                                Configura efectivo, tarjetas, transferencias y más
+                            </p>
+                        </div>
+                    </div>
+                    <Button
+                        onClick={() => navigate("/dashboard/payment-methods")}
+                        variant="outline"
+                    >
+                        <CreditCard className="mr-2 h-4 w-4" />
                         Configurar
                     </Button>
                 </div>

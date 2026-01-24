@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { MapPin, Phone, Mail, Globe, Building2 } from "lucide-react";
 import type { Profile } from "@/lib/types";
 
 interface ProfileHeaderProps {
@@ -9,6 +10,8 @@ interface ProfileHeaderProps {
 
 export function ProfileHeader({ profile }: ProfileHeaderProps) {
   const [isImageOpen, setIsImageOpen] = useState(false);
+
+  const isOrganization = profile.isOrganization ?? false;
 
   const initials = profile.displayName
     .split(" ")
@@ -22,6 +25,11 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
   const avatarUrl = profile.avatarUrl
     ? `${API_URL}${profile.avatarUrl}`
     : undefined;
+
+  // Mostrar title o clinicName según el tipo
+  const displayTitle = isOrganization
+    ? profile.clinicName || profile.title
+    : profile.title;
 
   return (
     <>
@@ -38,14 +46,54 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
           <h1 className="text-2xl font-bold tracking-tight">
             {profile.displayName}
           </h1>
-          {profile.title && (
-            <p className="text-muted-foreground font-medium">{profile.title}</p>
+          {displayTitle && (
+            <p className="text-muted-foreground font-medium">{displayTitle}</p>
           )}
           {profile.bio && (
             <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
               {profile.bio}
             </p>
           )}
+
+          {/* Clinic/Organization Info */}
+          {isOrganization &&
+            (profile.clinicAddress ||
+              profile.clinicPhone ||
+              profile.clinicEmail ||
+              profile.clinicWebsite) && (
+              <div className="flex flex-col items-center gap-2 mt-4 pt-4 border-t border-border/50">
+                {profile.clinicAddress && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <MapPin className="h-4 w-4" />
+                    <span>{profile.clinicAddress}</span>
+                  </div>
+                )}
+                {profile.clinicPhone && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Phone className="h-4 w-4" />
+                    <span>{profile.clinicPhone}</span>
+                  </div>
+                )}
+                {profile.clinicEmail && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Mail className="h-4 w-4" />
+                    <span>{profile.clinicEmail}</span>
+                  </div>
+                )}
+                {profile.clinicWebsite && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Globe className="h-4 w-4" />
+                    <span>{profile.clinicWebsite}</span>
+                  </div>
+                )}
+                {isOrganization && (
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground/70 mt-1">
+                    <Building2 className="h-3 w-3" />
+                    <span>Clínica verificada</span>
+                  </div>
+                )}
+              </div>
+            )}
         </div>
       </div>
 
