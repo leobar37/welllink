@@ -1,14 +1,14 @@
 import { Elysia, t } from "elysia";
 import { env } from "../../../config/env";
 import { EvolutionService } from "../../business/evolution-api";
-import { getMedicalChatAgent } from "../chat/agent";
-import { AgentConfigService } from "../business/agent-config";
-import { AgentConfigRepository } from "../repository/agent-config";
+import { AgentConfigService } from "../../business/agent-config";
+import { AgentConfigRepository } from "../../repository/agent-config";
 import { db } from "../../../db";
 import { profile, whatsappConfig } from "../../../db/schema";
 import { eq } from "drizzle-orm";
-import { WhatsAppContextRepository } from "../repository/whatsapp-context";
+import { WhatsAppContextRepository } from "../../repository/whatsapp-context";
 import { convertToWhatsAppResponse } from "./response-adapter";
+import { getMedicalChatAgent } from "../chat";
 
 interface EvolutionWebhookPayload {
   event: string;

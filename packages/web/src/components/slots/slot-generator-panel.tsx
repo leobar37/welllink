@@ -159,8 +159,8 @@ export function SlotGeneratorPanel({
             <SelectContent>
               {services.map((service) => (
                 <SelectItem key={service.id} value={service.id}>
-                  <div className="flex items-center justify-between gap-4">
-                    <span>
+                  <div className="flex items-center justify-between gap-4 w-full overflow-hidden">
+                    <span className="truncate block max-w-[180px]">
                       {service.name}
                       {service.price && (
                         <span className="text-muted-foreground ml-2">
@@ -168,7 +168,7 @@ export function SlotGeneratorPanel({
                         </span>
                       )}
                     </span>
-                    <span className="text-muted-foreground text-xs">
+                    <span className="text-muted-foreground text-xs shrink-0">
                       {service.duration}min
                     </span>
                   </div>
@@ -227,7 +227,10 @@ export function SlotGeneratorPanel({
 
         {/* Preview */}
         <div className="space-y-2">
-          <Label>Vista previa</Label>
+          <Label>Vista previa de generación</Label>
+          <p className="text-xs text-muted-foreground">
+            Estos son los slots que se crearán para cada día seleccionado.
+          </p>
           <SlotPreviewTimeline
             startTime={startTime}
             endTime={endTime}

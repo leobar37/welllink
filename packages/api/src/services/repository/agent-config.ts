@@ -1,7 +1,7 @@
 import { eq, and } from "drizzle-orm";
 import { db } from "../../db";
 import { agentConfig, profile } from "../../db/schema";
-import type { RequestContext } from "../../types/context";
+import type { RequestContext } from "../../types";
 import type { NewAgentConfig } from "../../db/schema/agent-config";
 
 export class AgentConfigRepository {

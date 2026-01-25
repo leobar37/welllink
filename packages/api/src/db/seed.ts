@@ -4,7 +4,7 @@ import { seedUsers } from "./seeders/users.seeder";
 import { seedAssets } from "./seeders/assets.seeder";
 import { seedProfiles } from "./seeders/profiles.seeder";
 import { seedSocialLinks } from "./seeders/social-links.seeder";
-import { seedHealthSurveys } from "./seeders/health-surveys.seeder";
+// health-survey seeder: REMOVED - legacy wellness feature
 import { seedAnalytics } from "./seeders/analytics.seeder";
 import { seedProfileCustomizations } from "./seeders/profile-customization.seeder";
 import { seedMedicalServices } from "./seeders/medical-services.seeder";
@@ -404,8 +404,7 @@ async function seed() {
     // 5. Profile Customizations (depends on profiles)
     await seedProfileCustomizations();
 
-    // 6. Health Survey Responses (depends on profiles)
-    await seedHealthSurveys();
+    // 6. Health Survey Responses: REMOVED - legacy wellness feature
 
     // 7. Availability Rules (depends on profiles)
     await seedAvailabilityRules();
@@ -422,7 +421,7 @@ async function seed() {
     // 11. Reservations (depends on profiles, services, time slots, clients)
     await seedReservations();
 
-    // 12. AI Recommendations (depends on profiles and health surveys)
+    // 12. AI Recommendations (depends on profiles)
     await seedAIRecommendations();
 
     // 13. Client Notes (depends on profiles and clients)
@@ -444,7 +443,7 @@ async function seed() {
     console.log("  - 10 payment methods created (2 profiles × 5 methods)");
     console.log("  - 4 social links created");
     console.log("  - 2 profile customizations created");
-    console.log("  - 2 health survey responses created");
+    // health survey responses: REMOVED
     console.log(
       "  - 10 availability rules created (Mon-Fri, morning & afternoon)",
     );

@@ -9,7 +9,7 @@ export * from "./asset";
 export * from "./profile";
 export * from "./profile-customization";
 export * from "./social-link";
-export * from "./health-survey";
+// health-survey: REMOVED - legacy wellness feature
 export * from "./analytics";
 export * from "./ai-recommendation";
 export * from "./whatsapp-config";

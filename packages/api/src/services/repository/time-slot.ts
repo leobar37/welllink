@@ -48,6 +48,23 @@ export class TimeSlotRepository {
       .orderBy(timeSlot.startTime);
   }
 
+  async findByDateRange(
+    profileId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<TimeSlot[]> {
+    return await db
+      .select()
+      .from(timeSlot)
+      .where(
+        and(
+          eq(timeSlot.profileId, profileId),
+          between(timeSlot.startTime, startDate, endDate),
+        ),
+      )
+      .orderBy(timeSlot.startTime);
+  }
+
   async findAvailableSlots(
     profileId: string,
     serviceId: string,

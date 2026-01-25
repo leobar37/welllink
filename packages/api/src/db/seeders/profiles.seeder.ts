@@ -23,10 +23,7 @@ const PROFILE_DATA = [
     onboardingStep: 5,
     onboardingCompletedAt: new Date("2024-11-15T10:30:00Z"),
     featuresConfig: {
-      healthSurvey: {
-        enabled: true,
-        buttonText: "Evalúate gratis",
-      },
+      // healthSurvey: REMOVED - legacy wellness feature
       tuHistoria: {
         enabled: true,
         buttonText: "Mi historia",
@@ -54,10 +51,7 @@ const PROFILE_DATA = [
     clinicWebsite: "https://www.clinicabienestar.com",
     clinicRuc: "20123456789",
     featuresConfig: {
-      healthSurvey: {
-        enabled: true,
-        buttonText: "Agenda tu evaluación",
-      },
+      // healthSurvey: REMOVED - legacy wellness feature
       appointments: {
         enabled: true,
       },

@@ -15,7 +15,6 @@ export class AIRecommendationRepository {
   }
 
   async findByProfile(profileId: string) {
-    // Use select instead of query builder to avoid relation issues
     return db
       .select()
       .from(aiRecommendation)
@@ -48,15 +47,7 @@ export class AIRecommendationRepository {
     return result;
   }
 
-  async findBySurveyResponse(surveyResponseId: string) {
-    const [result] = await db
-      .select()
-      .from(aiRecommendation)
-      .where(eq(aiRecommendation.surveyResponseId, surveyResponseId))
-      .limit(1);
-
-    return result;
-  }
+  // findBySurveyResponse: REMOVED - surveyResponseId column deleted
 
   async findLatestByProfile(profileId: string) {
     const [result] = await db

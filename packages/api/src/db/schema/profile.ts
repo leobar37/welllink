@@ -11,11 +11,8 @@ import {
 } from "drizzle-orm/pg-core";
 
 // Features configuration type
+// health-survey: REMOVED - legacy wellness feature
 export interface FeaturesConfig {
-  healthSurvey?: {
-    enabled: boolean;
-    buttonText: string;
-  };
   whatsappCta?: {
     enabled: boolean;
     buttonText: string;

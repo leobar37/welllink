@@ -8,7 +8,9 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
-import { healthSurveyResponse } from "./health-survey";
+
+// ai-recommendation: REMOVED - legacy wellness feature
+// Previously had surveyResponseId FK to health_survey_response table
 
 export const aiRecommendation = pgTable(
   "ai_recommendation",
@@ -17,9 +19,7 @@ export const aiRecommendation = pgTable(
     profileId: uuid("profile_id")
       .notNull()
       .references(() => profile.id, { onDelete: "cascade" }),
-    surveyResponseId: uuid("survey_response_id")
-      .notNull()
-      .references(() => healthSurveyResponse.id, { onDelete: "cascade" }),
+    // surveyResponseId: REMOVED - was referencing health_survey_response
     recommendations: jsonb("recommendations").notNull(),
     advisorNotes: jsonb("advisor_notes").notNull(),
     aiModel: varchar("ai_model", { length: 50 }).notNull(),
@@ -30,12 +30,12 @@ export const aiRecommendation = pgTable(
   },
   (table) => [
     index("ai_recommendation_profile_id_idx").on(table.profileId),
-    index("ai_recommendation_survey_id_idx").on(table.surveyResponseId),
+    // index("ai_recommendation_survey_id_idx"): REMOVED
     index("ai_recommendation_created_at_idx").on(
       table.profileId,
-      table.createdAt
+      table.createdAt,
     ),
-  ]
+  ],
 );
 
 export type AIRecommendation = typeof aiRecommendation.$inferSelect;

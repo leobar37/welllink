@@ -236,28 +236,19 @@ export class SlotService {
 
     // If filtering by date range
     if (startDate && endDate) {
-      const slots = [];
+      // Use optimized range query instead of day-by-day loop
+      const rangeSlots = await this.timeSlotRepository.findByDateRange(
+        profileId,
+        startDate,
+        endDate,
+      );
 
-      // Get slots for each day in range
-      const currentDate = new Date(startDate);
-      while (currentDate <= endDate) {
-        const daySlots = await this.timeSlotRepository.findByProfileIdAndDate(
-          profileId,
-          new Date(currentDate),
-        );
-
-        // Apply filters
-        const filtered = daySlots.filter((slot) => {
-          if (serviceId && slot.serviceId !== serviceId) return false;
-          if (status && slot.status !== status) return false;
-          return true;
-        });
-
-        slots.push(...filtered);
-        currentDate.setDate(currentDate.getDate() + 1);
-      }
-
-      return slots;
+      // Apply remaining filters in memory
+      return rangeSlots.filter((slot) => {
+        if (serviceId && slot.serviceId !== serviceId) return false;
+        if (status && slot.status !== status) return false;
+        return true;
+      });
     }
 
     // If filtering by service only

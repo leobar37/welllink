@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { SlotStatusDot } from "./slot-status-badge";
 import { Clock, ArrowRight } from "lucide-react";
+import { SlotStatusDot } from "./slot-status-badge";
 
 interface SlotPreviewTimelineProps {
   startTime: string; // "09:00"
@@ -58,96 +58,56 @@ export function SlotPreviewTimeline({
     return result;
   }, [startTime, endTime, interval, serviceDuration, existingSlots]);
 
-  const availableCount = slots.filter((s) => !s.isExisting).length;
-  const occupiedCount = slots.filter(
-    (s) =>
-      s.isExisting &&
-      (s.existingStatus === "reserved" ||
-        s.existingStatus === "pending_approval"),
-  ).length;
+  // Group by hour
+  const groupedSlots = useMemo(() => {
+    const grouped: Record<number, typeof slots> = {};
+    slots.forEach(slot => {
+      const hour = parseInt(slot.time.split(':')[0]);
+      if (!grouped[hour]) grouped[hour] = [];
+      grouped[hour].push(slot);
+    });
+    return grouped;
+  }, [slots]);
+
+  const availableCount = slots.length;
 
   return (
     <div className={cn("space-y-3", className)}>
       {/* Header with stats */}
-      <div className="flex items-center justify-between text-sm">
-        <div className="flex items-center gap-4">
-          <span className="text-muted-foreground">
-            <Clock className="inline size-3.5 mr-1" />
-            Vista previa
+      <div className="flex items-center justify-between text-xs text-muted-foreground border-b pb-2">
+        <div className="flex items-center gap-2">
+          <Clock className="size-3.5" />
+          <span>
+            {availableCount} slots por día
           </span>
-          <div className="flex items-center gap-2">
-            <span className="text-emerald-600 font-medium">
-              {availableCount} disponibles
-            </span>
-            {occupiedCount > 0 && (
-              <span className="text-amber-600 font-medium">
-                {occupiedCount} ocupados
-              </span>
-            )}
-          </div>
         </div>
-        <span className="text-muted-foreground">
-          {slots.length} slots × {serviceDuration}min
+        <span>
+          {serviceDuration} min / slot
         </span>
       </div>
 
-      {/* Timeline */}
-      <div className="flex flex-wrap gap-1.5">
-        {slots.map((slot) => {
-          const isAvailable = !slot.isExisting;
-          const isReserved =
-            slot.isExisting &&
-            (slot.existingStatus === "reserved" ||
-              slot.existingStatus === "pending_approval");
-          const isBlocked =
-            slot.isExisting && slot.existingStatus === "blocked";
-
-          return (
-            <div
-              key={slot.time}
-              className={cn(
-                "inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium transition-all duration-200",
-                isAvailable &&
-                  "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800",
-                isReserved &&
-                  "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800",
-                isBlocked &&
-                  "bg-red-50 text-red-700 border border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800",
-              )}
-            >
-              <SlotStatusDot
-                variant={
-                  isAvailable
-                    ? "available"
-                    : isReserved
-                      ? "reserved"
-                      : isBlocked
-                        ? "blocked"
-                        : "cancelled"
-                }
-              />
-              <span>
-                {slot.time} - {slot.endTime}
-              </span>
+      {/* Grouped Timeline */}
+      <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+        {Object.entries(groupedSlots).map(([hour, hourSlots]) => (
+          <div key={hour} className="flex gap-2 text-sm">
+            <div className="w-10 text-xs font-medium text-muted-foreground pt-1.5 shrink-0 text-right">
+              {hour}:00
             </div>
-          );
-        })}
-      </div>
-
-      {/* Legend */}
-      <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2 border-t">
-        <div className="flex items-center gap-1.5">
-          <SlotStatusDot variant="available" />
-          <span>Disponible</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <SlotStatusDot variant="reserved" />
-          <span>Reservado</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <SlotStatusDot variant="blocked" />
-          <span>Bloqueado</span>
-        </div>
+            <div className="flex flex-wrap gap-2 flex-1">
+              {hourSlots.map((slot) => (
+                <div
+                  key={slot.time}
+                  className={cn(
+                    "px-2 py-1 rounded bg-secondary/50 text-secondary-foreground text-xs border border-transparent hover:border-primary/20 transition-colors cursor-default",
+                  )}
+                  title={`${slot.time} - ${slot.endTime}`}
+                >
+                  {slot.time}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

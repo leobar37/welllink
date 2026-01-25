@@ -1,18 +1,17 @@
-import {
-  NotFoundException,
-  BadRequestException,
-} from "../../utils/http-exceptions";
+import { NotFoundException } from "../../utils/http-exceptions";
 import { AIRecommendationRepository } from "../repository/ai-recommendation";
-import { HealthSurveyRepository } from "../repository/health-survey";
 import type {
   AIRecommendation,
   ClientRecommendations,
   AdvisorNotes,
 } from "../../db/schema/ai-recommendation";
 
+// health-survey: REMOVED - legacy wellness feature
+// AIRecommendationService no longer depends on healthSurveyRepository
+
 interface CreateRecommendationData {
   profileId: string;
-  surveyResponseId: string;
+  // surveyResponseId: REMOVED - no longer needed
   recommendations: ClientRecommendations;
   advisorNotes: AdvisorNotes;
   aiModel: string;
@@ -23,7 +22,7 @@ interface CreateRecommendationData {
 export class AIRecommendationService {
   constructor(
     private aiRecommendationRepository: AIRecommendationRepository,
-    private healthSurveyRepository: HealthSurveyRepository,
+    // healthSurveyRepository: REMOVED
   ) {}
 
   async getRecommendations(profileId: string): Promise<AIRecommendation[]> {
@@ -50,15 +49,7 @@ export class AIRecommendationService {
     return recommendation;
   }
 
-  async getRecommendationBySurvey(
-    surveyResponseId: string,
-  ): Promise<AIRecommendation | null> {
-    const result =
-      await this.aiRecommendationRepository.findBySurveyResponse(
-        surveyResponseId,
-      );
-    return result ?? null;
-  }
+  // getRecommendationBySurvey: REMOVED - was tied to health_survey_response
 
   async getLatestRecommendation(profileId: string): Promise<AIRecommendation> {
     const recommendation =
@@ -70,46 +61,11 @@ export class AIRecommendationService {
   }
 
   async createRecommendation(data: CreateRecommendationData) {
-    if (!data.profileId) {
-      throw new BadRequestException("Profile ID is required");
-    }
-
-    if (!data.surveyResponseId) {
-      throw new BadRequestException("Survey response ID is required");
-    }
-
-    // Verify survey response exists and belongs to profile
-    const surveyResponse = await this.healthSurveyRepository.findOneByProfile(
-      data.surveyResponseId,
-      data.profileId,
-    );
-    if (!surveyResponse) {
-      throw new NotFoundException("Survey response not found");
-    }
-
-    // Check if recommendation already exists for this survey
-    const existingRecommendation =
-      await this.aiRecommendationRepository.findBySurveyResponse(
-        data.surveyResponseId,
-      );
-    if (existingRecommendation) {
-      // Update existing recommendation
-      return this.aiRecommendationRepository.update(
-        existingRecommendation.id,
-        data.profileId,
-        {
-          recommendations: data.recommendations,
-          advisorNotes: data.advisorNotes,
-          aiModel: data.aiModel,
-          aiVersion: data.aiVersion,
-          processingTimeMs: data.processingTimeMs,
-        },
-      );
-    }
+    // surveyResponseId validation: REMOVED
 
     return this.aiRecommendationRepository.create({
       profileId: data.profileId,
-      surveyResponseId: data.surveyResponseId,
+      // surveyResponseId: REMOVED - column removed from schema
       recommendations: data.recommendations,
       advisorNotes: data.advisorNotes,
       aiModel: data.aiModel,

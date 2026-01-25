@@ -8,7 +8,8 @@ import {
   jsonb,
 } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
-import { healthSurveyResponse } from "./health-survey";
+
+// healthSurveyId FK removed - health_survey_response table deleted
 
 export enum ClientLabel {
   CONSUMIDOR = "consumidor",
@@ -23,15 +24,17 @@ export const client = pgTable(
     profileId: uuid("profile_id")
       .notNull()
       .references(() => profile.id, { onDelete: "cascade" }),
-    healthSurveyId: uuid("health_survey_id").references(
-      () => healthSurveyResponse.id,
-      { onDelete: "set null" },
-    ),
+    // healthSurveyId: REMOVED FK constraint - kept column nullable for migration
+    healthSurveyId: uuid("health_survey_id"), // Deprecated: no longer populated
     name: varchar("name", { length: 255 }).notNull(),
     phone: varchar("phone", { length: 20 }).notNull(),
     email: varchar("email", { length: 255 }),
     label: text("label", {
-      enum: [ClientLabel.CONSUMIDOR, ClientLabel.PROSPECTO, ClientLabel.AFILIADO],
+      enum: [
+        ClientLabel.CONSUMIDOR,
+        ClientLabel.PROSPECTO,
+        ClientLabel.AFILIADO,
+      ],
     })
       .notNull()
       .default(ClientLabel.CONSUMIDOR),
@@ -48,7 +51,7 @@ export const client = pgTable(
     index("client_profile_id_idx").on(table.profileId),
     index("client_phone_idx").on(table.phone),
     index("client_label_idx").on(table.label),
-    index("client_health_survey_id_idx").on(table.healthSurveyId),
+    // index("client_health_survey_id_idx"): REMOVED
     index("client_last_contact_at_idx").on(table.lastContactAt),
   ],
 );

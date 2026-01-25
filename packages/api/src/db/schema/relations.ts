@@ -4,7 +4,7 @@ import { asset } from "./asset";
 import { profile } from "./profile";
 import { profileCustomization } from "./profile-customization";
 import { socialLink } from "./social-link";
-import { healthSurveyResponse } from "./health-survey";
+// health-survey: REMOVED - legacy wellness feature
 import { profileView, socialClick, qrDownload } from "./analytics";
 import { aiRecommendation } from "./ai-recommendation";
 import { medicalService } from "./medical-service";
@@ -59,7 +59,7 @@ export const profileRelations = relations(profile, ({ one, many }) => ({
   }),
   customization: one(profileCustomization),
   socialLinks: many(socialLink),
-  healthSurveyResponses: many(healthSurveyResponse),
+  // healthSurveyResponses: REMOVED - health_survey_response table deleted
   aiRecommendations: many(aiRecommendation),
   views: many(profileView),
   qrDownloads: many(qrDownload),
@@ -86,17 +86,7 @@ export const socialLinkRelations = relations(socialLink, ({ one, many }) => ({
   clicks: many(socialClick),
 }));
 
-// Health Survey Response relations
-export const healthSurveyResponseRelations = relations(
-  healthSurveyResponse,
-  ({ one, many }) => ({
-    profile: one(profile, {
-      fields: [healthSurveyResponse.profileId],
-      references: [profile.id],
-    }),
-    aiRecommendations: many(aiRecommendation),
-  }),
-);
+// health-survey relations: REMOVED - table deleted
 
 // AI Recommendation relations
 export const aiRecommendationRelations = relations(
@@ -106,12 +96,7 @@ export const aiRecommendationRelations = relations(
       fields: [aiRecommendation.profileId],
       references: [profile.id],
     }),
-    // COMMENTED OUT: This relation causes SQL errors with Drizzle query builder
-    // Use manual joins if you need surveyResponse data
-    // surveyResponse: one(healthSurveyResponse, {
-    //   fields: [aiRecommendation.surveyResponseId],
-    //   references: [healthSurveyResponse.id],
-    // }),
+    // surveyResponse relation REMOVED - was FK to health_survey_response
   }),
 );
 

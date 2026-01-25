@@ -26,7 +26,7 @@ import { errorMiddleware } from "./middleware/error";
 // Routes
 import { authRoutes } from "./api/routes/auth";
 import { profileRoutes } from "./api/routes/profiles";
-import { healthSurveyRoutes } from "./api/routes/health-survey";
+// health-survey routes: REMOVED - legacy wellness feature
 import { assetRoutes } from "./api/routes/assets";
 import { analyticsRoutes } from "./api/routes/analytics";
 
@@ -144,7 +144,7 @@ const app = new Elysia()
       .get("/modules", () => modules)
       .use(authRoutes)
       .use(profileRoutes)
-      .use(healthSurveyRoutes)
+      // healthSurveyRoutes: REMOVED
       .use(assetRoutes)
       .use(analyticsRoutes)
       .use(uploadRoutes)
