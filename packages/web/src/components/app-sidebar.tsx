@@ -1,5 +1,21 @@
-import { User, Settings, QrCode, Sparkles, LayoutDashboard, Link as LinkIcon, Palette, Users, Stethoscope, Folder, Calendar, Clock, CalendarDays } from "lucide-react"
-import { Logo } from "@/components/ui/logo"
+import {
+  User,
+  Settings,
+  QrCode,
+  Sparkles,
+  LayoutDashboard,
+  Link as LinkIcon,
+  Palette,
+  Users,
+  Stethoscope,
+  Folder,
+  Calendar,
+  Clock,
+  CalendarDays,
+  Bot,
+  MessageCircle,
+} from "lucide-react";
+import { Logo } from "@/components/ui/logo";
 import {
   Sidebar,
   SidebarContent,
@@ -11,8 +27,8 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   SidebarRail,
-} from "@/components/ui/sidebar"
-import { Link, useLocation } from "react-router"
+} from "@/components/ui/sidebar";
+import { Link, useLocation } from "react-router";
 
 // Menu items.
 const items = [
@@ -52,6 +68,16 @@ const items = [
     icon: Users,
   },
   {
+    title: "Agente IA",
+    url: "/dashboard/agent-config",
+    icon: Bot,
+  },
+  {
+    title: "Conversaciones",
+    url: "/dashboard/conversations",
+    icon: MessageCircle,
+  },
+  {
     title: "Servicios Médicos",
     url: "/dashboard/services",
     icon: Stethoscope,
@@ -81,10 +107,10 @@ const items = [
     url: "/dashboard/files",
     icon: Folder,
   },
-]
+];
 
 export function AppSidebar() {
-  const location = useLocation()
+  const location = useLocation();
 
   return (
     <Sidebar>
@@ -100,7 +126,10 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={location.pathname === item.url}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={location.pathname === item.url}
+                  >
                     <Link to={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
@@ -114,5 +143,5 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

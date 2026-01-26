@@ -1,4 +1,4 @@
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, asc } from "drizzle-orm";
 import { db } from "../../db";
 import {
   whatsappContext,
@@ -64,6 +64,38 @@ export class WhatsAppContextRepository {
       .limit(1);
 
     return context;
+  }
+
+  async findByProfileAndStatus(
+    profileId: string,
+    status: WhatsAppContextStatus,
+  ): Promise<WhatsAppContext[]> {
+    const contexts = await db
+      .select()
+      .from(whatsappContext)
+      .where(
+        and(
+          eq(whatsappContext.profileId, profileId),
+          eq(whatsappContext.status, status),
+        ),
+      )
+      .orderBy(asc(whatsappContext.lastInteractionAt));
+
+    return contexts;
+  }
+
+  async findByProfile(
+    profileId: string,
+    limit: number = 50,
+  ): Promise<WhatsAppContext[]> {
+    const contexts = await db
+      .select()
+      .from(whatsappContext)
+      .where(eq(whatsappContext.profileId, profileId))
+      .orderBy(desc(whatsappContext.lastInteractionAt))
+      .limit(limit);
+
+    return contexts;
   }
 
   async addMessage(

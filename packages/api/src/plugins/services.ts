@@ -43,8 +43,6 @@ import { CampaignTemplateService } from "../services/business/campaign-template"
 import { CampaignService } from "../services/business/campaign";
 import { TemplateVariablesService } from "../services/business/template-variables";
 
-import { getCampaignQueue } from "../services/queue/campaign-queue";
-
 // NEW RESERVATION SERVICES IMPORTS
 import { ApprovalService } from "../services/business/approval";
 import { NotificationService } from "../services/business/notification";
