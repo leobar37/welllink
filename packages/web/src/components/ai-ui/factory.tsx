@@ -8,6 +8,8 @@ import { FAQPart } from "./faq-part";
 import { CalendarPart } from "./calendar-part";
 import { PatientFormPart } from "./patient-form-part";
 import { ConfirmationPart } from "./confirmation-part";
+import { ToolCallPart } from "./tool-call-part";
+import { ToolResultPart } from "./tool-result-part";
 
 interface PartRendererProps {
   part: AIMessagePart;
@@ -32,6 +34,10 @@ const PartRenderer = memo(({ part, handlers }: PartRendererProps) => {
       return <PatientFormPart part={part} handlers={handlers} />;
     case "confirmation":
       return <ConfirmationPart part={part} handlers={handlers} />;
+    case "tool-call":
+      return <ToolCallPart part={part} />;
+    case "tool-result":
+      return <ToolResultPart part={part} />;
     default:
       return null;
   }

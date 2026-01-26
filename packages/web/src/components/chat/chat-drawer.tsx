@@ -107,6 +107,8 @@ function ChatContent({
                     // Only include parts that match our supported types
                     const validTypes = [
                       "text",
+                      "tool-call",
+                      "tool-result",
                       "services-list",
                       "availability",
                       "reservation",

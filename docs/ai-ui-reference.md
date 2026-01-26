@@ -238,11 +238,91 @@ export interface ConfirmationAIPart extends BaseAIPart {
 
 **Uso**: Solicitar confirmación del usuario para una acción.
 
+#### 9. ToolCallAIPart
+
+Llamada de herramienta - la IA está invocando una herramienta antes de su ejecución.
+
+```typescript
+export interface ToolCallAIPart extends BaseAIPart {
+  readonly type: "tool-call";
+  /** ID que vincula con el resultado de la herramienta */
+  toolCallId: string;
+  /** Nombre de la herramienta que se está chiamando */
+  toolName: string;
+  /** Parámetros de entrada para la herramienta */
+  input: unknown;
+}
+```
+
+**Ejemplo de payload**:
+```json
+{
+  "type": "tool-call",
+  "toolCallId": "call_123",
+  "toolName": "search_products",
+  "input": {
+    "query": "vitaminas",
+    "limit": 5
+  }
+}
+```
+
+**Uso**: Mostrar que la IA está ejecutando una herramienta (buscar productos, obtener categorías, etc.). Se rendered antes de recibir el resultado.
+
+#### 10. ToolResultAIPart
+
+Resultado de herramienta - resultado de la ejecución de una herramienta.
+
+```typescript
+export interface ToolResultAIPart extends BaseAIPart {
+  readonly type: "tool-result";
+  /** ID que vincula con la llamada original */
+  toolCallId: string;
+  /** Nombre de la herramienta que fue chamada */
+  toolName: string;
+  /** Resultado de la ejecución de la herramienta */
+  output: unknown;
+  /** Error si la herramienta falló */
+  errorText?: string;
+}
+```
+
+**Ejemplo de payload (éxito)**:
+```json
+{
+  "type": "tool-result",
+  "toolCallId": "call_123",
+  "toolName": "search_products",
+  "output": {
+    "products": [
+      { "id": "1", "name": "Vitamina C", "price": "$25" },
+      { "id": "2", "name": "Vitamina D3", "price": "$30" }
+    ],
+    "count": 2
+  }
+}
+```
+
+**Ejemplo de payload (error)**:
+```json
+{
+  "type": "tool-result",
+  "toolCallId": "call_456",
+  "toolName": "get_appointment",
+  "output": null,
+  "errorText": "No se encontró disponibilidad para esa fecha"
+}
+```
+
+**Uso**: Mostrar el resultado de una herramienta después de su ejecución. Puede ser el resultado exitoso o un mensaje de error.
+
 ### Union Type
 
 ```typescript
 export type AIMessagePart =
   | TextAIPart
+  | ToolCallAIPart
+  | ToolResultAIPart
   | ServicesAIPart
   | AvailabilityAIPart
   | ReservationAIPart
