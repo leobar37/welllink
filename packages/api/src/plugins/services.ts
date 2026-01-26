@@ -8,7 +8,7 @@ import { AssetRepository } from "../services/repository/asset";
 import { ProfileRepository } from "../services/repository/profile";
 import { SocialLinkRepository } from "../services/repository/social-link";
 // health-survey: REMOVED - legacy wellness feature
-import { AIRecommendationRepository } from "../services/repository/ai-recommendation";
+// ai-recommendation: REMOVED - legacy wellness feature
 import { AnalyticsRepository } from "../services/repository/analytics";
 import { WhatsAppConfigRepository } from "../services/repository/whatsapp-config";
 import { WhatsAppMessageRepository } from "../services/repository/whatsapp-message";
@@ -18,7 +18,6 @@ import { CDNService } from "../services/business/cdn";
 import { ProfileService } from "../services/business/profile";
 import { SocialLinkService } from "../services/business/social-link";
 // health-survey: REMOVED
-import { AIRecommendationService } from "../services/business/ai-recommendation";
 import { AnalyticsService } from "../services/business/analytics";
 import { EvolutionService } from "../services/business/evolution-api";
 import { WhatsAppConfigService } from "../services/business/whatsapp-config";
@@ -111,7 +110,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     const profileRepository = new ProfileRepository();
     const socialLinkRepository = new SocialLinkRepository();
     // healthSurveyRepository: REMOVED
-    const aiRecommendationRepository = new AIRecommendationRepository();
+    // aiRecommendationRepository: REMOVED
     const analyticsRepository = new AnalyticsRepository();
     const whatsappConfigRepository = new WhatsAppConfigRepository();
     const whatsappMessageRepository = new WhatsAppMessageRepository();
@@ -174,10 +173,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
       analyticsRepository,
     );
     // healthSurveyService: REMOVED
-    const aiRecommendationService = new AIRecommendationService(
-      aiRecommendationRepository,
-      // healthSurveyRepository: REMOVED - was second param
-    );
+    // aiRecommendationService: REMOVED
     const analyticsService = new AnalyticsService(analyticsRepository);
     const whatsappConfigService = new WhatsAppConfigService(
       whatsappConfigRepository,
@@ -219,7 +215,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         profileRepository,
         socialLinkRepository,
         // healthSurveyRepository: REMOVED
-        aiRecommendationRepository,
+        // aiRecommendationRepository: REMOVED
         analyticsRepository,
         whatsappConfigRepository,
         whatsappMessageRepository,
@@ -242,7 +238,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         profileService,
         socialLinkService,
         // healthSurveyService: REMOVED
-        aiRecommendationService,
+        // aiRecommendationService: REMOVED
         analyticsService,
         whatsappConfigService,
         whatsappService,

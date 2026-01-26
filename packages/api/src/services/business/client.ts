@@ -6,7 +6,8 @@ import { ClientRepository } from "../repository/client";
 import { ClientNoteRepository } from "../repository/client-note";
 import type { Client, NewClient } from "../../db/schema/client";
 import { ClientLabel } from "../../db/schema/client";
-import type { HealthSurveyResponse } from "../../db/schema/health-survey";
+// health-survey: REMOVED - legacy wellness feature
+// import type { HealthSurveyResponse } from "../../db/schema/health-survey";
 import type { RequestContext } from "../../types/context";
 
 export class ClientService {
@@ -27,10 +28,7 @@ export class ClientService {
     return client;
   }
 
-  async createClient(
-    ctx: RequestContext,
-    data: NewClient,
-  ): Promise<Client> {
+  async createClient(ctx: RequestContext, data: NewClient): Promise<Client> {
     if (!data.name) {
       throw new BadRequestException("Client name is required");
     }
@@ -122,33 +120,5 @@ export class ClientService {
     await this.clientNoteRepository.delete(ctx, noteId);
   }
 
-  async createClientFromSurvey(
-    ctx: RequestContext,
-    survey: HealthSurveyResponse,
-    profileId: string,
-  ): Promise<Client> {
-    // Use visitorPhone for both phone and WhatsApp (single field approach)
-    if (!survey.visitorPhone) {
-      throw new BadRequestException(
-        "Survey must have phone/WhatsApp number",
-      );
-    }
-
-    const phone = survey.visitorPhone;
-
-    // Check if client already exists
-    const existing = await this.clientRepository.findByPhone(ctx, phone);
-    if (existing) {
-      throw new BadRequestException("Client already exists from this survey");
-    }
-
-    return this.clientRepository.create({
-      profileId,
-      healthSurveyId: survey.id,
-      name: survey.visitorName,
-      phone: phone, // Used for both phone and WhatsApp
-      email: survey.visitorEmail,
-      label: ClientLabel.PROSPECTO, // Default for survey leads
-    });
-  }
+  // createClientFromSurvey: REMOVED - was tied to health_survey_response table
 }

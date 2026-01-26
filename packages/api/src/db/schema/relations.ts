@@ -6,7 +6,7 @@ import { profileCustomization } from "./profile-customization";
 import { socialLink } from "./social-link";
 // health-survey: REMOVED - legacy wellness feature
 import { profileView, socialClick, qrDownload } from "./analytics";
-import { aiRecommendation } from "./ai-recommendation";
+// ai-recommendation: REMOVED - legacy wellness feature
 import { medicalService } from "./medical-service";
 
 // User relations
@@ -60,7 +60,7 @@ export const profileRelations = relations(profile, ({ one, many }) => ({
   customization: one(profileCustomization),
   socialLinks: many(socialLink),
   // healthSurveyResponses: REMOVED - health_survey_response table deleted
-  aiRecommendations: many(aiRecommendation),
+  // aiRecommendations: REMOVED
   views: many(profileView),
   qrDownloads: many(qrDownload),
   medicalServices: many(medicalService),
@@ -87,18 +87,7 @@ export const socialLinkRelations = relations(socialLink, ({ one, many }) => ({
 }));
 
 // health-survey relations: REMOVED - table deleted
-
-// AI Recommendation relations
-export const aiRecommendationRelations = relations(
-  aiRecommendation,
-  ({ one }) => ({
-    profile: one(profile, {
-      fields: [aiRecommendation.profileId],
-      references: [profile.id],
-    }),
-    // surveyResponse relation REMOVED - was FK to health_survey_response
-  }),
-);
+// ai-recommendation relations: REMOVED
 
 // Profile View relations
 export const profileViewRelations = relations(profileView, ({ one }) => ({

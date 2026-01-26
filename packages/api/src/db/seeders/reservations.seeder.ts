@@ -11,9 +11,14 @@ import { db } from "../index";
 
 export const createdReservationIds: Record<string, string> = {};
 
-function getSlotKey(day: number, hour: number): string {
-  const period = hour < 12 ? "morning" : "afternoon";
-  return `slot_${period}_${day}_${hour}`;
+// Helper to generate the same slot key format as time-slots.seeder.ts
+function getSlotKey(
+  profileKey: string,
+  serviceKey: string,
+  dayOffset: number,
+  slotIndex: number,
+): string {
+  return `slot_${profileKey}_${serviceKey}_day${dayOffset}_${slotIndex}`;
 }
 
 const RESERVATION_DATA = [
@@ -21,7 +26,7 @@ const RESERVATION_DATA = [
     key: "reservation_confirmed",
     profileKey: "maria",
     serviceKey: "consultation",
-    slotKey: getSlotKey(0, 10),
+    slotKey: getSlotKey("maria", "consultation", 1, 0), // First slot on day 1, 9:00 UTC (14:00 Lima)
     patientName: "Laura Gómez",
     patientPhone: "+51912345678",
     patientEmail: "laura.gomez@example.com",
@@ -35,7 +40,7 @@ const RESERVATION_DATA = [
     key: "reservation_completed",
     profileKey: "maria",
     serviceKey: "followUp",
-    slotKey: getSlotKey(1, 9),
+    slotKey: getSlotKey("maria", "followUp", 2, 0), // First followUp slot on day 2
     patientName: "Roberto Pérez",
     patientPhone: "+51923456789",
     patientEmail: "roberto.p@example.com",
@@ -50,7 +55,7 @@ const RESERVATION_DATA = [
     key: "reservation_cancelled",
     profileKey: "maria",
     serviceKey: "consultation",
-    slotKey: getSlotKey(1, 16),
+    slotKey: getSlotKey("maria", "consultation", 2, 6), // 7th consultation slot on day 2
     patientName: "Sofía Ramírez",
     patientPhone: "+51934567890",
     patientEmail: null,
@@ -65,7 +70,7 @@ const RESERVATION_DATA = [
     key: "reservation_no_show",
     profileKey: "maria",
     serviceKey: "consultation",
-    slotKey: getSlotKey(2, 11),
+    slotKey: getSlotKey("maria", "consultation", 3, 2), // 3rd consultation slot on day 3
     patientName: "Diego Torres",
     patientPhone: "+51945678901",
     patientEmail: "diego.t@example.com",

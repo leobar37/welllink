@@ -14,7 +14,7 @@ import { seedClients } from "./seeders/clients.seeder";
 import { seedReservations } from "./seeders/reservations.seeder";
 import { seedCampaigns } from "./seeders/campaigns.seeder";
 import { seedReservationRequests } from "./seeders/reservation-requests.seeder";
-import { seedAIRecommendations } from "./seeders/ai-recommendations.seeder";
+// ai-recommendations seeder: REMOVED - legacy wellness feature
 import { seedClientNotes } from "./seeders/client-notes.seeder";
 import { seedPaymentMethods } from "./seeders/payment-methods.seeder";
 import { db } from "./index";
@@ -228,7 +228,6 @@ async function cleanupSeedData() {
         CREATE TABLE client (
           id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
           profile_id uuid NOT NULL REFERENCES profile(id) ON DELETE CASCADE,
-          health_survey_id uuid REFERENCES health_survey_response(id) ON DELETE SET NULL,
           name varchar(255) NOT NULL,
           phone varchar(20) NOT NULL,
           email varchar(255),
@@ -348,6 +347,9 @@ async function runMigrations() {
     "0007_add_clinic_fields_to_profile.sql",
     "0008_payment_methods.sql", // Nueva migración para payment_method
     "0009_whatsapp_context.sql", // Nueva migración para whatsapp_context
+    "0010_remove_health_survey.sql", // Elimina health_survey y columnas relacionadas
+    "0010_agent_config.sql", // Configuración del agente AI
+    "0010_add_availability_rule_fields.sql", // Campos adicionales para availability_rule
   ];
 
   for (const file of migrationFiles) {
@@ -421,8 +423,7 @@ async function seed() {
     // 11. Reservations (depends on profiles, services, time slots, clients)
     await seedReservations();
 
-    // 12. AI Recommendations (depends on profiles)
-    await seedAIRecommendations();
+    // 12. AI Recommendations: REMOVED - legacy wellness feature
 
     // 13. Client Notes (depends on profiles and clients)
     await seedClientNotes();
@@ -454,7 +455,7 @@ async function seed() {
       "  - 4 reservations (confirmed, completed, cancelled, no_show)",
     );
     console.log("  - 5 reservation requests (pending, approved, rejected)");
-    console.log("  - 2 AI recommendations generated");
+    // AI recommendations: REMOVED
     console.log("  - 11 client notes (consulta, seguimiento, recordatorio)");
     console.log("  - 3 campaign templates created");
     console.log("  - 3 campaigns created");

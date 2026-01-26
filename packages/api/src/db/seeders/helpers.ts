@@ -2,12 +2,10 @@ import { createStorageStrategy } from "../../services/storage";
 import { AssetRepository } from "../../services/repository/asset";
 import { ProfileRepository } from "../../services/repository/profile";
 import { SocialLinkRepository } from "../../services/repository/social-link";
-import { HealthSurveyRepository } from "../../services/repository/health-survey";
 import { AnalyticsRepository } from "../../services/repository/analytics";
 import { AssetService } from "../../services/business/asset";
 import { ProfileService } from "../../services/business/profile";
 import { SocialLinkService } from "../../services/business/social-link";
-import { HealthSurveyService } from "../../services/business/health-survey";
 import { AnalyticsService } from "../../services/business/analytics";
 import type { RequestContext } from "../../types/context";
 
@@ -24,7 +22,6 @@ export async function initializeServices() {
   const assetRepository = new AssetRepository();
   const profileRepository = new ProfileRepository();
   const socialLinkRepository = new SocialLinkRepository();
-  const healthSurveyRepository = new HealthSurveyRepository();
   const analyticsRepository = new AnalyticsRepository();
 
   // Services
@@ -38,7 +35,6 @@ export async function initializeServices() {
     socialLinkRepository,
     analyticsRepository,
   );
-  const healthSurveyService = new HealthSurveyService(healthSurveyRepository);
   const analyticsService = new AnalyticsService(analyticsRepository);
 
   return {
@@ -47,14 +43,12 @@ export async function initializeServices() {
       assetRepository,
       profileRepository,
       socialLinkRepository,
-      healthSurveyRepository,
       analyticsRepository,
     },
     services: {
       assetService,
       profileService,
       socialLinkService,
-      healthSurveyService,
       analyticsService,
     },
   };

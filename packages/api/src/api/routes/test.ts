@@ -3,7 +3,6 @@ import { seedUsers } from "../../db/seeders/users.seeder";
 import { seedAssets } from "../../db/seeders/assets.seeder";
 import { seedProfiles } from "../../db/seeders/profiles.seeder";
 import { seedSocialLinks } from "../../db/seeders/social-links.seeder";
-import { seedHealthSurveys } from "../../db/seeders/health-surveys.seeder";
 import { seedAnalytics } from "../../db/seeders/analytics.seeder";
 
 export const testRoutes = new Elysia({ prefix: "test" })
@@ -22,7 +21,6 @@ export const testRoutes = new Elysia({ prefix: "test" })
       await seedAssets();
       await seedProfiles();
       await seedSocialLinks();
-      await seedHealthSurveys();
       await seedAnalytics();
 
       console.log("✅ All seed data inserted successfully");

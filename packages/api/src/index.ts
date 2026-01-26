@@ -37,16 +37,16 @@ import { qrRoutes } from "./api/routes/qr";
 import { socialLinkRoutes } from "./api/routes/social-links";
 import { themeRoutes } from "./api/routes/themes";
 import { reservationRoutes } from "./api/routes/reservations";
-import { aiRecommendationRoutes } from "./api/routes/ai-recommendation";
+// ai-recommendation routes: REMOVED - legacy wellness feature
 import { whatsappRoutes } from "./api/routes/whatsapp";
 import { clientRoutes } from "./api/routes/client";
 import { medicalServiceRoutes } from "./api/routes/medical-services";
 import { availabilityRoutes } from "./api/routes/availability";
 import { slotsRoutes } from "./api/routes/slots";
-import { agentRoutes } from "./api/routes/agent";
+// agent routes: REMOVED - was part of AI services
 import { agentConfigRoutes } from "./api/routes/agent-config";
 import { paymentMethodRoutes } from "./api/routes/payment-methods";
-import { whatsappAgentWebhook } from "./services/ai/whatsapp-agent/webhooks";
+// whatsappAgentWebhook: REMOVED - was part of AI services
 import { createStorageStrategy } from "./services/storage";
 
 // Test routes - ONLY enabled via ENABLE_TEST_ROUTES=true (SECURITY: never in production)
@@ -154,15 +154,15 @@ const app = new Elysia()
       .use(socialLinkRoutes)
       .use(themeRoutes)
       .use(reservationRoutes)
-      .use(aiRecommendationRoutes)
+      // aiRecommendationRoutes: REMOVED
       .use(whatsappRoutes)
       .use(clientRoutes)
       .use(medicalServiceRoutes)
       .use(availabilityRoutes)
       .use(slotsRoutes)
-      .use(agentRoutes)
+      // agentRoutes: REMOVED
       .use(agentConfigRoutes)
-      .use(whatsappAgentWebhook)
+      // whatsappAgentWebhook: REMOVED
       .use(paymentMethodRoutes)
       // Test routes - ONLY enabled via ENABLE_TEST_ROUTES=true (SECURITY: never in production)
       .use(

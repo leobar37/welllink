@@ -155,27 +155,8 @@ export interface OnboardingExample {
 }
 
 // =============================================================================
-// Health Survey DTOs
+// Health Survey DTOs: REMOVED - legacy wellness feature
 // =============================================================================
-
-export interface CreateHealthSurveyData {
-  profileId: string;
-  visitorName: string;
-  visitorPhone?: string;
-  visitorEmail?: string;
-  visitorWhatsapp?: string;
-  referredBy?: string;
-  responses: Record<string, unknown>;
-}
-
-export interface UpdateHealthSurveyData {
-  visitorName?: string;
-  visitorPhone?: string;
-  visitorEmail?: string;
-  visitorWhatsapp?: string;
-  referredBy?: string;
-  responses?: Record<string, unknown>;
-}
 
 // =============================================================================
 // Tu Historia DTOs

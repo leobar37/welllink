@@ -24,8 +24,6 @@ export const client = pgTable(
     profileId: uuid("profile_id")
       .notNull()
       .references(() => profile.id, { onDelete: "cascade" }),
-    // healthSurveyId: REMOVED FK constraint - kept column nullable for migration
-    healthSurveyId: uuid("health_survey_id"), // Deprecated: no longer populated
     name: varchar("name", { length: 255 }).notNull(),
     phone: varchar("phone", { length: 20 }).notNull(),
     email: varchar("email", { length: 255 }),
@@ -51,7 +49,6 @@ export const client = pgTable(
     index("client_profile_id_idx").on(table.profileId),
     index("client_phone_idx").on(table.phone),
     index("client_label_idx").on(table.label),
-    // index("client_health_survey_id_idx"): REMOVED
     index("client_last_contact_at_idx").on(table.lastContactAt),
   ],
 );

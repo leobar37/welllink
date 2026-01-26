@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Calendar } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { useProfile } from "@/hooks/use-profile";
 import { useMedicalServices } from "@/hooks/use-medical-services";
 import { useGenerateSlots } from "@/hooks/use-availability-rules";
@@ -11,13 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { SlotsList, EmptySlotsState } from "@/components/slots";
 import {
   useSlots,
@@ -161,40 +154,6 @@ export function SlotsPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          {/* Service Selector */}
-          <Select
-            value={selectedServiceId}
-            onValueChange={setSelectedServiceId}
-          >
-            <SelectTrigger className="w-[250px]">
-              <SelectValue
-                placeholder={
-                  isLoadingServices
-                    ? "Cargando..."
-                    : services && services.length === 0
-                      ? "No hay servicios"
-                      : "Seleccionar servicio"
-                }
-              />
-            </SelectTrigger>
-            <SelectContent>
-              {services?.map((service) => (
-                <SelectItem key={service.id} value={service.id}>
-                  {service.name} ({service.duration} min)
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Generate Buttons */}
-          <Button
-            onClick={handleGenerateNextWeek}
-            disabled={!selectedServiceId || generateSlots.isPending}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            {generateSlots.isPending ? "Generando..." : "Generar Slots"}
-          </Button>
-
           {/* Custom Range Dialog */}
           <Button
             variant="outline"

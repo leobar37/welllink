@@ -11,7 +11,7 @@ export * from "./profile-customization";
 export * from "./social-link";
 // health-survey: REMOVED - legacy wellness feature
 export * from "./analytics";
-export * from "./ai-recommendation";
+// ai-recommendation: REMOVED - legacy wellness feature
 export * from "./whatsapp-config";
 export * from "./whatsapp-message";
 export * from "./whatsapp-template";
