@@ -121,4 +121,60 @@ export class ClientService {
   }
 
   // createClientFromSurvey: REMOVED - was tied to health_survey_response table
+
+  // Methods for AI tools - accept profileId directly without RequestContext
+  async findByPhoneAndProfile(
+    phone: string,
+    profileId: string,
+  ): Promise<Client | null | undefined> {
+    return this.clientRepository.findByPhoneAndProfile(phone, profileId);
+  }
+
+  async createForProfile(
+    data: NewClient & { profileId: string },
+  ): Promise<Client> {
+    if (!data.name) {
+      throw new BadRequestException("Client name is required");
+    }
+
+    if (!data.phone) {
+      throw new BadRequestException("Phone/WhatsApp number is required");
+    }
+
+    const existing = await this.clientRepository.findByPhoneAndProfile(
+      data.phone,
+      data.profileId,
+    );
+    if (existing) {
+      throw new BadRequestException(
+        "Client with this phone/WhatsApp already exists",
+      );
+    }
+
+    return this.clientRepository.create(data);
+  }
+
+  async updateForProfile(
+    id: string,
+    profileId: string,
+    data: Partial<NewClient>,
+  ): Promise<Client> {
+    const existingClient = await this.clientRepository.findByIdAndProfile(
+      id,
+      profileId,
+    );
+    if (!existingClient) {
+      throw new NotFoundException("Client not found");
+    }
+
+    const result = await this.clientRepository.updateByProfile(
+      id,
+      profileId,
+      data,
+    );
+    if (!result) {
+      throw new NotFoundException("Client not found");
+    }
+    return result;
+  }
 }

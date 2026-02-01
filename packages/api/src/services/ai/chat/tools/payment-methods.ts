@@ -1,13 +1,11 @@
 import { createTool } from "@voltagent/core";
 import { z } from "zod";
-import { db } from "../../../../db";
-import { paymentMethod } from "../../../../db/schema/payment-method";
-import { profile } from "../../../../db/schema/profile";
-import { eq, and, asc } from "drizzle-orm";
+import { PaymentMethodRepository } from "../../../../services/repository/payment-method";
+import { ProfileRepository } from "../../../../services/repository/profile";
 
-/**
- * Input schema for listing payment methods
- */
+const paymentMethodRepository = new PaymentMethodRepository();
+const profileRepository = new ProfileRepository();
+
 const ListPaymentMethodsInput = z.object({
   profileId: z.string().describe("The profile ID to get payment methods for"),
   includeInactive: z
@@ -16,16 +14,10 @@ const ListPaymentMethodsInput = z.object({
     .describe("Include inactive payment methods (default: false)"),
 });
 
-/**
- * Input schema for getting payment method details
- */
 const GetPaymentMethodDetailsInput = z.object({
   methodId: z.string().describe("The payment method ID to look up"),
 });
 
-/**
- * Helper function to format payment type for display
- */
 function formatPaymentType(type: string): string {
   const types: Record<string, string> = {
     cash: "Efectivo",
@@ -39,9 +31,6 @@ function formatPaymentType(type: string): string {
   return types[type] || type;
 }
 
-/**
- * Helper function to get icon for payment type
- */
 function getPaymentIcon(type: string): string {
   const icons: Record<string, string> = {
     cash: "💵",
@@ -55,9 +44,6 @@ function getPaymentIcon(type: string): string {
   return icons[type] || "💰";
 }
 
-/**
- * Helper function to format payment list for response
- */
 function formatPaymentListForResponse(
   methods: Array<{ name: string; type: string; instructions: string | null }>,
 ): string {
@@ -76,9 +62,6 @@ function formatPaymentListForResponse(
   return `Métodos de pago disponibles:\n${list.join("\n")}`;
 }
 
-/**
- * Tool to list available payment methods for the clinic
- */
 export const listPaymentMethodsTool = createTool({
   name: "list_payment_methods",
   description:
@@ -86,12 +69,7 @@ export const listPaymentMethodsTool = createTool({
   parameters: ListPaymentMethodsInput,
   execute: async ({ profileId, includeInactive }) => {
     try {
-      // Verify profile exists and get user context
-      const [profileData] = await db
-        .select({ id: profile.id })
-        .from(profile)
-        .where(eq(profile.id, profileId))
-        .limit(1);
+      const profileData = await profileRepository.findById(profileId);
 
       if (!profileData) {
         return {
@@ -101,28 +79,10 @@ export const listPaymentMethodsTool = createTool({
         };
       }
 
-      // Get payment methods - only active by default
-      const conditions = includeInactive
-        ? eq(paymentMethod.profileId, profileId)
-        : and(
-            eq(paymentMethod.profileId, profileId),
-            eq(paymentMethod.isActive, true),
-          );
+      const methods = includeInactive
+        ? await paymentMethodRepository.findByProfileId(profileId)
+        : await paymentMethodRepository.findActiveByProfileId(profileId);
 
-      const methods = await db
-        .select({
-          id: paymentMethod.id,
-          name: paymentMethod.name,
-          type: paymentMethod.type,
-          instructions: paymentMethod.instructions,
-          details: paymentMethod.details,
-          displayOrder: paymentMethod.displayOrder,
-        })
-        .from(paymentMethod)
-        .where(conditions)
-        .orderBy(asc(paymentMethod.displayOrder));
-
-      // If no active methods found
       if (methods.length === 0 && !includeInactive) {
         return {
           success: true,
@@ -133,7 +93,6 @@ export const listPaymentMethodsTool = createTool({
         };
       }
 
-      // Format for patient-friendly response
       const formattedMethods = methods.map((m) => ({
         id: m.id,
         name: m.name,
@@ -160,9 +119,6 @@ export const listPaymentMethodsTool = createTool({
   },
 });
 
-/**
- * Tool to get detailed information about a specific payment method
- */
 export const getPaymentMethodDetailsTool = createTool({
   name: "get_payment_method_details",
   description:
@@ -170,17 +126,7 @@ export const getPaymentMethodDetailsTool = createTool({
   parameters: GetPaymentMethodDetailsInput,
   execute: async ({ methodId }) => {
     try {
-      const [method] = await db
-        .select({
-          id: paymentMethod.id,
-          name: paymentMethod.name,
-          type: paymentMethod.type,
-          instructions: paymentMethod.instructions,
-          details: paymentMethod.details,
-        })
-        .from(paymentMethod)
-        .where(eq(paymentMethod.id, methodId))
-        .limit(1);
+      const method = await paymentMethodRepository.findById(methodId);
 
       if (!method) {
         return {
@@ -190,7 +136,6 @@ export const getPaymentMethodDetailsTool = createTool({
         };
       }
 
-      // Format details based on type
       let formattedDetails = "";
       if (method.details) {
         const details = method.details as Record<string, unknown>;

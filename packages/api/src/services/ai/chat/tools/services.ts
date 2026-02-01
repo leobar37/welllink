@@ -1,28 +1,19 @@
 import { createTool } from "@voltagent/core";
 import { z } from "zod";
-import { db } from "../../../../db";
-import { medicalService } from "../../../../db/schema/medical-service";
-import { eq, and, desc } from "drizzle-orm";
+import { MedicalServiceRepository } from "../../../../services/repository/medical-service";
 
-/**
- * Input schema for listing services
- */
+const medicalServiceRepository = new MedicalServiceRepository();
+
 const ListServicesInput = z.object({
   profileId: z.string().describe("The profile ID to list services for"),
   category: z.string().optional().describe("Filter services by category"),
 });
 
-/**
- * Input schema for getting service details
- */
 const GetServiceDetailsInput = z.object({
   profileId: z.string().describe("The profile ID the service belongs to"),
   serviceId: z.string().describe("The service ID to look up"),
 });
 
-/**
- * Tool to list available medical services
- */
 export const listServicesTool = createTool({
   name: "list_services",
   description:
@@ -30,34 +21,14 @@ export const listServicesTool = createTool({
   parameters: ListServicesInput,
   execute: async ({ profileId, category }) => {
     try {
-      let query = db
-        .select({
-          id: medicalService.id,
-          name: medicalService.name,
-          description: medicalService.description,
-          price: medicalService.price,
-          duration: medicalService.duration,
-          category: medicalService.category,
-        })
-        .from(medicalService)
-        .where(
-          and(
-            eq(medicalService.profileId, profileId),
-            eq(medicalService.isActive, true)
-          )
-        );
-
+      let services;
       if (category) {
-        query = query.where(
-          and(
-            eq(medicalService.profileId, profileId),
-            eq(medicalService.isActive, true),
-            eq(medicalService.category, category)
-          )
-        ) as typeof query;
+        services = await medicalServiceRepository.findByCategory(category);
+        services = services.filter((s) => s.profileId === profileId);
+      } else {
+        services =
+          await medicalServiceRepository.findActiveByProfileId(profileId);
       }
-
-      const services = await query.orderBy(desc(medicalService.createdAt));
 
       return {
         success: true,
@@ -79,9 +50,6 @@ export const listServicesTool = createTool({
   },
 });
 
-/**
- * Tool to get detailed information about a specific service
- */
 export const getServiceDetailsTool = createTool({
   name: "get_service_details",
   description:
@@ -89,26 +57,9 @@ export const getServiceDetailsTool = createTool({
   parameters: GetServiceDetailsInput,
   execute: async ({ profileId, serviceId }) => {
     try {
-      const [service] = await db
-        .select({
-          id: medicalService.id,
-          name: medicalService.name,
-          description: medicalService.description,
-          price: medicalService.price,
-          duration: medicalService.duration,
-          category: medicalService.category,
-          requirements: medicalService.requirements,
-        })
-        .from(medicalService)
-        .where(
-          and(
-            eq(medicalService.id, serviceId),
-            eq(medicalService.profileId, profileId)
-          )
-        )
-        .limit(1);
+      const service = await medicalServiceRepository.findById(serviceId);
 
-      if (!service) {
+      if (!service || service.profileId !== profileId) {
         return {
           error: true,
           message: `Service with ID ${serviceId} not found`,

@@ -21,6 +21,15 @@ export interface FeaturesConfig {
     enabled: boolean;
   };
 }
+
+// FAQ configuration type
+export interface FAQConfig {
+  faqs: Array<{
+    keywords: string[];
+    question: string;
+    answer: string;
+  }>;
+}
 import { user } from "./auth";
 import { asset } from "./asset";
 
@@ -63,6 +72,7 @@ export const profile = pgTable(
     clinicWebsite: varchar("clinic_website", { length: 255 }),
     clinicRuc: varchar("clinic_ruc", { length: 20 }),
     metadata: jsonb("metadata").$type<Record<string, unknown>>(),
+    faqConfig: jsonb("faq_config").$type<FAQConfig>().default({ faqs: [] }),
   },
   (table) => [
     index("profile_user_id_idx").on(table.userId),

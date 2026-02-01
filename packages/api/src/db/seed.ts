@@ -84,7 +84,8 @@ async function cleanupSeedData() {
         clinic_email varchar(255),
         clinic_website varchar(255),
         clinic_ruc varchar(20),
-        metadata jsonb DEFAULT '{}'
+        metadata jsonb DEFAULT '{}',
+        faq_config jsonb DEFAULT '{"faqs":[]}'
       );
     `);
 
@@ -337,19 +338,7 @@ async function runMigrations() {
   const migrationsDir = join(__dirname, "migrations");
 
   const migrationFiles = [
-    "0000_foamy_felicia_hardy.sql", // Crea tablas base
-    "0002_eminent_big_bertha.sql", // Crea profile (antes de modificarlo)
-    "0001_warm_bloodstorm.sql", // Modifica profile
-    "0003_legal_jean_grey.sql", // Agrega whatsapp y clientes
-    "0004_conscious_giant_man.sql", // Agrega servicios médicos
-    "0005_exotic_sentinels.sql", // Agrega time slots y reservations
-    "0006_rename_social_link_url_to_username.sql",
-    "0007_add_clinic_fields_to_profile.sql",
-    "0008_payment_methods.sql", // Nueva migración para payment_method
-    "0009_whatsapp_context.sql", // Nueva migración para whatsapp_context
-    "0010_remove_health_survey.sql", // Elimina health_survey y columnas relacionadas
-    "0010_agent_config.sql", // Configuración del agente AI
-    "0010_add_availability_rule_fields.sql", // Campos adicionales para availability_rule
+    "0000_regular_nico_minoru.sql", // Migración inicial fresca - todas las tablas
   ];
 
   for (const file of migrationFiles) {

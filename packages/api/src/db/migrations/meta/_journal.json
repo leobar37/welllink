@@ -5,50 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1764526309801,
-      "tag": "0000_foamy_felicia_hardy",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1764561419732,
-      "tag": "0001_warm_bloodstorm",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1764682687603,
-      "tag": "0002_eminent_big_bertha",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1765778819117,
-      "tag": "0003_legal_jean_grey",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1768009610999,
-      "tag": "0004_conscious_giant_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1768250386456,
-      "tag": "0005_exotic_sentinels",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1768250386500,
-      "tag": "0006_rename_social_link_url_to_username",
+      "when": 1769807160738,
+      "tag": "0000_regular_nico_minoru",
       "breakpoints": true
     }
   ]

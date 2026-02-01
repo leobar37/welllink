@@ -1,4 +1,14 @@
-import { eq, and, like, desc, gte, lte, inArray, or, isNull } from "drizzle-orm";
+import {
+  eq,
+  and,
+  like,
+  desc,
+  gte,
+  lte,
+  inArray,
+  or,
+  isNull,
+} from "drizzle-orm";
 import { db } from "../../db";
 import { client, type Client, type NewClient } from "../../db/schema/client";
 import { profile } from "../../db/schema/profile";
@@ -118,7 +128,10 @@ export class ClientRepository {
     const profileIds = profiles.map((p) => p.id);
 
     return db.query.client.findMany({
-      where: and(eq(client.label, label), inArray(client.profileId, profileIds)),
+      where: and(
+        eq(client.label, label),
+        inArray(client.profileId, profileIds),
+      ),
       orderBy: desc(client.createdAt),
     });
   }
@@ -145,5 +158,31 @@ export class ClientRepository {
       ),
       orderBy: desc(client.createdAt),
     });
+  }
+
+  // Methods for AI tools - accept profileId directly without RequestContext
+  async findByPhoneAndProfile(phone: string, profileId: string) {
+    return db.query.client.findFirst({
+      where: and(eq(client.phone, phone), eq(client.profileId, profileId)),
+    });
+  }
+
+  async findByIdAndProfile(id: string, profileId: string) {
+    return db.query.client.findFirst({
+      where: and(eq(client.id, id), eq(client.profileId, profileId)),
+    });
+  }
+
+  async updateByProfile(
+    id: string,
+    profileId: string,
+    data: Partial<NewClient>,
+  ) {
+    const [result] = await db
+      .update(client)
+      .set(data)
+      .where(and(eq(client.id, id), eq(client.profileId, profileId)))
+      .returning();
+    return result;
   }
 }

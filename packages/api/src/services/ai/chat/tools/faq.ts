@@ -1,18 +1,11 @@
 import { createTool } from "@voltagent/core";
 import { z } from "zod";
+import { ProfileRepository } from "../../../../services/repository/profile";
+import type { FAQConfig } from "../../../../db/schema/profile";
 
-/**
- * Input schema for FAQ search
- */
-const SearchFAQInput = z.object({
-  query: z.string().describe("The question or topic to search for in the FAQ"),
-});
+const profileRepository = new ProfileRepository();
 
-/**
- * Common FAQ responses for medical practice
- * These are general templates that can be customized per profile
- */
-const commonFAQ = [
+const defaultFAQs = [
   {
     keywords: ["horario", "horarios", "atienden", "abren", "cerrado"],
     question: "¿Cuáles son los horarios de atención?",
@@ -63,35 +56,55 @@ const commonFAQ = [
   },
 ];
 
-/**
- * Tool to search and answer frequently asked questions
- */
+const SearchFAQInput = z.object({
+  profileId: z.string().describe("The profile ID to get FAQs for"),
+  query: z.string().describe("The question or topic to search for in the FAQ"),
+});
+
+async function getFAQsForProfile(profileId: string) {
+  const profile = await profileRepository.findById(profileId);
+  if (
+    profile?.faqConfig &&
+    profile.faqConfig.faqs &&
+    profile.faqConfig.faqs.length > 0
+  ) {
+    return profile.faqConfig.faqs;
+  }
+  return defaultFAQs;
+}
+
 export const searchFAQTool = createTool({
   name: "search_faq",
   description:
     "Answer frequently asked questions about the medical practice. Use this for general questions about services, prices, location, hours, and policies. For medical questions, always recommend visiting for a consultation.",
   parameters: SearchFAQInput,
-  execute: async ({ query }) => {
-    const lowerQuery = query.toLowerCase();
+  execute: async ({ profileId, query }) => {
+    try {
+      const lowerQuery = query.toLowerCase();
+      const faqs = await getFAQsForProfile(profileId);
 
-    // Find matching FAQ based on keywords
-    const match = commonFAQ.find((faq) =>
-      faq.keywords.some((keyword) => lowerQuery.includes(keyword)),
-    );
+      const match = faqs.find((faq) =>
+        faq.keywords.some((keyword) => lowerQuery.includes(keyword)),
+      );
 
-    if (match) {
+      if (match) {
+        return {
+          success: true,
+          question: match.question,
+          answer: match.answer,
+        };
+      }
+
       return {
-        success: true,
-        question: match.question,
-        answer: match.answer,
+        success: false,
+        message:
+          "No tengo una respuesta específica para esa pregunta. Te recomiendo agendar una consulta para que podamos atenderte mejor. ¿Te gustaría ver nuestros horarios disponibles?",
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Error searching FAQ: ${error instanceof Error ? error.message : "Unknown error"}`,
       };
     }
-
-    // Default response for unmatched queries
-    return {
-      success: false,
-      message:
-        "No tengo una respuesta específica para esa pregunta. Te recomiendo agendar una consulta para que podamos atenderte mejor. ¿Te gustaría ver nuestros horarios disponibles?",
-    };
   },
 });

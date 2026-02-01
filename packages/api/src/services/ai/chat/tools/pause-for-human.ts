@@ -1,5 +1,10 @@
 import { createTool } from "@voltagent/core";
 import { z } from "zod";
+import { WhatsAppContextRepository } from "../../../../services/repository/whatsapp-context";
+import { ProfileRepository } from "../../../../services/repository/profile";
+
+const contextRepository = new WhatsAppContextRepository();
+const profileRepository = new ProfileRepository();
 
 const PauseForHumanInput = z.object({
   phone: z.string().describe("Número de teléfono del usuario"),
@@ -28,18 +33,8 @@ NO uses esto para:
 - Seguimientos simples`,
   parameters: PauseForHumanInput,
   execute: async ({ phone, reason }) => {
-    const { WhatsAppContextRepository } =
-      await import("../../../../services/repository/whatsapp-context");
-    const { db } = await import("../../../../db");
-    const { profile } = await import("../../../../db/schema");
-    const { eq } = await import("drizzle-orm");
-
-    const contextRepository = new WhatsAppContextRepository();
-
-    // 1. Pause context of WhatsApp
     await contextRepository.markPausedForHuman(phone);
 
-    // 2. Get profile to generate doctor WhatsApp link
     const context = await contextRepository.findByPhone(phone);
 
     if (!context || !context.profileId) {
@@ -53,9 +48,7 @@ NO uses esto para:
       };
     }
 
-    const profileData = await db.query.profile.findFirst({
-      where: eq(profile.id, context.profileId),
-    });
+    const profileData = await profileRepository.findById(context.profileId);
 
     if (!profileData || !profileData.whatsappNumber) {
       return {
@@ -68,7 +61,6 @@ NO uses esto para:
       };
     }
 
-    // 3. Generate direct WhatsApp link to doctor
     const message = encodeURIComponent(
       `🆘 Atención Humana Requerida
       

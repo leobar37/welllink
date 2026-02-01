@@ -112,48 +112,46 @@ export function EditProfile() {
         <h1 className="text-3xl font-bold tracking-tight">Editar Perfil</h1>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-[250px_1fr]">
-        <Card>
-          <CardHeader>
-            <CardTitle>Avatar</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center gap-4">
-            <Avatar className="h-32 w-32">
-              <AvatarImage src={avatarUrl || ""} />
-              <AvatarFallback>?</AvatarFallback>
-            </Avatar>
-            <div className="w-full">
-              <label htmlFor="avatar-upload" className="cursor-pointer w-full">
-                <div className="flex items-center justify-center w-full py-2 px-4 border rounded-md hover:bg-muted transition-colors text-sm font-medium">
-                  <Upload className="w-4 h-4 mr-2" />
-                  {uploadAvatar.isPending ? "Subiendo..." : "Cambiar Foto"}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {/* Profile Info Section */}
+          <div className="grid gap-6 md:grid-cols-[250px_1fr]">
+            <Card>
+              <CardHeader>
+                <CardTitle>Avatar</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center gap-4">
+                <Avatar className="h-32 w-32">
+                  <AvatarImage src={avatarUrl || ""} />
+                  <AvatarFallback>?</AvatarFallback>
+                </Avatar>
+                <div className="w-full">
+                  <label htmlFor="avatar-upload" className="cursor-pointer w-full">
+                    <div className="flex items-center justify-center w-full py-2 px-4 border rounded-md hover:bg-muted transition-colors text-sm font-medium">
+                      <Upload className="w-4 h-4 mr-2" />
+                      {uploadAvatar.isPending ? "Subiendo..." : "Cambiar Foto"}
+                    </div>
+                    <input
+                      id="avatar-upload"
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                      disabled={uploadAvatar.isPending}
+                    />
+                  </label>
                 </div>
-                <input
-                  id="avatar-upload"
-                  type="file"
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleAvatarUpload}
-                  disabled={uploadAvatar.isPending}
-                />
-              </label>
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Información del Perfil</CardTitle>
-            <CardDescription>
-              Actualiza la información de tu perfil visible para los visitantes.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
-              >
+            <Card>
+              <CardHeader>
+                <CardTitle>Información del Perfil</CardTitle>
+                <CardDescription>
+                  Actualiza la información de tu perfil visible para los visitantes.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <FormField
                   control={form.control}
                   name="displayName"
@@ -233,51 +231,32 @@ export function EditProfile() {
                     </FormItem>
                   )}
                 />
-                <div className="flex justify-end">
-                  <Button
-                    type="submit"
-                    disabled={!isDirty || !isValid || updateProfile.isPending}
-                  >
-                    {updateProfile.isPending && (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
-                    <Save className="mr-2 h-4 w-4" />
-                    Guardar Cambios
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-      </div>
+              </CardContent>
+            </Card>
+          </div>
 
-      {/* Clinic/Organization Section */}
-      <div className="grid gap-6 md:grid-cols-[250px_1fr]">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5" />
-              Clínica
-            </CardTitle>
-            <CardDescription>
-              Información de tu consultorio o clínica
-            </CardDescription>
-          </CardHeader>
-        </Card>
+          {/* Clinic/Organization Section */}
+          <div className="grid gap-6 md:grid-cols-[250px_1fr]">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5" />
+                  Clínica
+                </CardTitle>
+                <CardDescription>
+                  Información de tu consultorio o clínica
+                </CardDescription>
+              </CardHeader>
+            </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Información de la Clínica</CardTitle>
-            <CardDescription>
-              Completa esta sección si eres una clínica u organización.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
-              >
+            <Card>
+              <CardHeader>
+                <CardTitle>Información de la Clínica</CardTitle>
+                <CardDescription>
+                  Completa esta sección si eres una clínica u organización.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <FormField
                   control={form.control}
                   name="isOrganization"
@@ -294,7 +273,7 @@ export function EditProfile() {
                       </div>
                       <FormControl>
                         <Switch
-                          checked={field.value}
+                          checked={!!field.value}
                           onCheckedChange={(checked) => {
                             field.onChange(checked);
                             setShowClinicFields(checked);
@@ -397,24 +376,25 @@ export function EditProfile() {
                     />
                   </>
                 )}
+              </CardContent>
+            </Card>
+          </div>
 
-                <div className="flex justify-end">
-                  <Button
-                    type="submit"
-                    disabled={!isDirty || !isValid || updateProfile.isPending}
-                  >
-                    {updateProfile.isPending && (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
-                    <Save className="mr-2 h-4 w-4" />
-                    Guardar Cambios
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-      </div>
+          {/* Single Save Button */}
+          <div className="flex justify-end">
+            <Button
+              type="submit"
+              disabled={!isDirty || !isValid || updateProfile.isPending}
+            >
+              {updateProfile.isPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              <Save className="mr-2 h-4 w-4" />
+              Guardar Cambios
+            </Button>
+          </div>
+        </form>
+      </Form>
     </div>
   );
 }

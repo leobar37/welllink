@@ -1,5 +1,5 @@
 import { Agent } from "@voltagent/core";
-import { fireworks } from "@ai-sdk/fireworks";
+
 import { chatAgentConfig } from "./config";
 import { createChatMemory } from "./memory/config";
 import {

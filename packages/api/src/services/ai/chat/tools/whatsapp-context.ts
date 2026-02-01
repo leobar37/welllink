@@ -1,5 +1,8 @@
 import { createTool } from "@voltagent/core";
 import { z } from "zod";
+import { WhatsAppContextRepository } from "../../../../services/repository/whatsapp-context";
+
+const repository = new WhatsAppContextRepository();
 
 const LoadWhatsAppContextInput = z.object({
   phone: z.string().describe("Número de teléfono del usuario"),
@@ -16,10 +19,6 @@ Esta tool NO identifica al usuario - solo carga el contexto histórico.
 Para identificación usa las tools de paciente.`,
   parameters: LoadWhatsAppContextInput,
   execute: async ({ phone }) => {
-    const { WhatsAppContextRepository } =
-      await import("../../../../services/repository/whatsapp-context");
-    const repository = new WhatsAppContextRepository();
-
     const context = await repository.findByPhone(phone);
 
     if (!context) {

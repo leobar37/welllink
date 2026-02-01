@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 
-export type TonePreset = "formal" | "professional" | "friendly";
+export const TonePresetValues = ["formal", "professional", "friendly"] as const;
+export type TonePreset = (typeof TonePresetValues)[number];
 
 export interface AgentConfigData {
   id: string;

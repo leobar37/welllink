@@ -1,22 +1,17 @@
 import { createTool } from "@voltagent/core";
 import { z } from "zod";
-import { db } from "../../../../db";
-import { timeSlot } from "../../../../db/schema/time-slot";
-import { reservationRequest } from "../../../../db/schema/reservation-request";
-import { eq, and, gte, desc } from "drizzle-orm";
+import { TimeSlotRepository } from "../../../../services/repository/time-slot";
+import { ReservationRequestRepository } from "../../../../services/repository/reservation-request";
 
-/**
- * Input schema for checking availability
- */
+const timeSlotRepository = new TimeSlotRepository();
+const reservationRequestRepository = new ReservationRequestRepository();
+
 const CheckAvailabilityInput = z.object({
   profileId: z.string().describe("The profile/doctor ID"),
   serviceId: z.string().describe("The service ID to check availability for"),
   date: z.string().describe("Date in YYYY-MM-DD format to check availability"),
 });
 
-/**
- * Input schema for creating a reservation request
- */
 const CreateReservationInput = z.object({
   profileId: z.string().describe("The profile/doctor ID"),
   slotId: z.string().describe("The time slot ID"),
@@ -24,12 +19,12 @@ const CreateReservationInput = z.object({
   patientName: z.string().describe("Patient full name"),
   patientPhone: z.string().describe("Patient phone number"),
   patientEmail: z.string().optional().describe("Patient email (optional)"),
-  chiefComplaint: z.string().optional().describe("Main complaint or reason for visit"),
+  chiefComplaint: z
+    .string()
+    .optional()
+    .describe("Main complaint or reason for visit"),
 });
 
-/**
- * Tool to check available time slots for a service on a specific date
- */
 export const checkAvailabilityTool = createTool({
   name: "check_availability",
   description:
@@ -40,27 +35,12 @@ export const checkAvailabilityTool = createTool({
       const dateObj = new Date(date);
       const startOfDay = new Date(dateObj);
       startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date(dateObj);
-      endOfDay.setHours(23, 59, 59, 999);
 
-      const slots = await db
-        .select({
-          id: timeSlot.id,
-          startTime: timeSlot.startTime,
-          endTime: timeSlot.endTime,
-          maxReservations: timeSlot.maxReservations,
-          currentReservations: timeSlot.currentReservations,
-        })
-        .from(timeSlot)
-        .where(
-          and(
-            eq(timeSlot.profileId, profileId),
-            eq(timeSlot.serviceId, serviceId),
-            eq(timeSlot.status, "available"),
-            gte(timeSlot.startTime, startOfDay)
-          )
-        )
-        .orderBy(timeSlot.startTime);
+      const slots = await timeSlotRepository.findAvailableSlots(
+        profileId,
+        serviceId,
+        startOfDay,
+      );
 
       const availableSlots = slots
         .filter((slot) => slot.currentReservations < slot.maxReservations)
@@ -86,9 +66,6 @@ export const checkAvailabilityTool = createTool({
   },
 });
 
-/**
- * Tool to create a reservation request (pending approval)
- */
 export const createReservationTool = createTool({
   name: "create_reservation",
   description:
@@ -96,21 +73,30 @@ export const createReservationTool = createTool({
   parameters: CreateReservationInput,
   execute: async (data) => {
     try {
-      const requestedTime = new Date();
+      const slot = await timeSlotRepository.findById(data.slotId);
+      if (!slot) {
+        return {
+          error: true,
+          message: "Time slot not found",
+        };
+      }
 
-      const [reservation] = await db
-        .insert(reservationRequest)
-        .values({
-          ...data,
-          requestedTime,
-          expiresAt: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          status: "pending",
-          urgencyLevel: "normal",
-          preferredContactMethod: "whatsapp",
-        })
-        .returning();
+      const reservation = await reservationRequestRepository.create({
+        profileId: data.profileId,
+        slotId: data.slotId,
+        serviceId: data.serviceId,
+        patientName: data.patientName,
+        patientPhone: data.patientPhone,
+        patientEmail: data.patientEmail || null,
+        chiefComplaint: data.chiefComplaint || null,
+        status: "pending",
+        urgencyLevel: "normal",
+        preferredContactMethod: "whatsapp",
+        requestedTime: slot.startTime,
+        expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+      });
+
+      await timeSlotRepository.updateStatus(data.slotId, "pending_approval");
 
       return {
         success: true,

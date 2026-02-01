@@ -1,41 +1,38 @@
 import { createTool } from "@voltagent/core";
 import { z } from "zod";
-import { db } from "../../../../db";
-import { client } from "../../../../db/schema/client";
+import { ClientService } from "../../../../services/business/client";
+import { ClientRepository } from "../../../../services/repository/client";
+import { ClientNoteRepository } from "../../../../services/repository/client-note";
 import { ClientLabel } from "../../../../db/schema/client";
-import { eq, and } from "drizzle-orm";
 
-/**
- * Input schema for patient lookup
- */
+const clientRepository = new ClientRepository();
+const clientNoteRepository = new ClientNoteRepository();
+const clientService = new ClientService(clientRepository, clientNoteRepository);
+
 const PatientLookupInput = z.object({
   profileId: z.string().describe("The profile ID to look up the patient in"),
-  phone: z.string().describe("Patient phone number with country code, e.g., +51987654321"),
+  phone: z
+    .string()
+    .describe("Patient phone number with country code, e.g., +51987654321"),
 });
 
-/**
- * Input schema for patient creation
- */
 const CreatePatientInput = z.object({
-  profileId: z.string().describe("The profile ID to associate the patient with"),
+  profileId: z
+    .string()
+    .describe("The profile ID to associate the patient with"),
   phone: z.string().describe("Patient phone number"),
   name: z.string().describe("Patient full name"),
   email: z.string().optional().describe("Patient email (optional)"),
 });
 
-/**
- * Input schema for updating patient label
- */
 const UpdateLabelInput = z.object({
   profileId: z.string().describe("The profile ID the patient belongs to"),
   patientId: z.string().describe("Patient ID"),
-  label: z.enum(["consumidor", "prospecto", "afiliado"]).describe("New label for the patient"),
+  label: z
+    .enum(["consumidor", "prospecto", "afiliado"])
+    .describe("New label for the patient"),
 });
 
-/**
- * Patient tool for the AI agent
- * Handles patient lookups, creation, and label updates
- */
 export const getPatientTool = createTool({
   name: "get_patient",
   description:
@@ -43,16 +40,10 @@ export const getPatientTool = createTool({
   parameters: PatientLookupInput,
   execute: async ({ profileId, phone }) => {
     try {
-      const [patient] = await db
-        .select()
-        .from(client)
-        .where(
-          and(
-            eq(client.phone, phone),
-            eq(client.profileId, profileId)
-          )
-        )
-        .limit(1);
+      const patient = await clientService.findByPhoneAndProfile(
+        phone,
+        profileId,
+      );
 
       if (!patient) {
         return {
@@ -81,9 +72,6 @@ export const getPatientTool = createTool({
   },
 });
 
-/**
- * Tool to create a new patient
- */
 export const createPatientTool = createTool({
   name: "create_patient",
   description:
@@ -91,16 +79,13 @@ export const createPatientTool = createTool({
   parameters: CreatePatientInput,
   execute: async ({ profileId, phone, name, email }) => {
     try {
-      const [patient] = await db
-        .insert(client)
-        .values({
-          phone,
-          name,
-          email: email || null,
-          profileId,
-          label: ClientLabel.PROSPECTO,
-        })
-        .returning();
+      const patient = await clientService.createForProfile({
+        phone,
+        name,
+        email: email || null,
+        profileId,
+        label: ClientLabel.PROSPECTO,
+      });
 
       return {
         success: true,
@@ -121,9 +106,6 @@ export const createPatientTool = createTool({
   },
 });
 
-/**
- * Tool to update patient label
- */
 export const updatePatientLabelTool = createTool({
   name: "update_patient_label",
   description:
@@ -131,26 +113,13 @@ export const updatePatientLabelTool = createTool({
   parameters: UpdateLabelInput,
   execute: async ({ profileId, patientId, label }) => {
     try {
-      const [patient] = await db
-        .update(client)
-        .set({
+      const patient = await clientService.updateForProfile(
+        patientId,
+        profileId,
+        {
           label: label as ClientLabel,
-          updatedAt: new Date(),
-        })
-        .where(
-          and(
-            eq(client.id, patientId),
-            eq(client.profileId, profileId)
-          )
-        )
-        .returning();
-
-      if (!patient) {
-        return {
-          error: true,
-          message: `Patient with ID ${patientId} not found`,
-        };
-      }
+        },
+      );
 
       return {
         success: true,
