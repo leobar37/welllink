@@ -51,6 +51,9 @@ export const profile = pgTable(
       onDelete: "set null",
     }),
     whatsappNumber: varchar("whatsapp_number", { length: 20 }),
+    timezone: varchar("timezone", { length: 64 })
+      .notNull()
+      .default("America/Lima"),
     featuresConfig: jsonb("features_config")
       .$type<FeaturesConfig>()
       .default({}),
@@ -73,6 +76,12 @@ export const profile = pgTable(
     clinicRuc: varchar("clinic_ruc", { length: 20 }),
     metadata: jsonb("metadata").$type<Record<string, unknown>>(),
     faqConfig: jsonb("faq_config").$type<FAQConfig>().default({ faqs: [] }),
+    // Simple availability fields (replaces availability_rule table)
+    workDays: integer("work_days").array().default([1, 2, 3, 4, 5]), // ISO 1-7 (Mon=1, Sun=7)
+    workStartTime: varchar("work_start_time", { length: 5 }).default("09:00"), // "HH:MM" format
+    workEndTime: varchar("work_end_time", { length: 5 }).default("18:00"), // "HH:MM" format
+    appointmentDuration: integer("appointment_duration").default(30), // minutes
+    isAcceptingAppointments: boolean("is_accepting_appointments").notNull().default(true),
   },
   (table) => [
     index("profile_user_id_idx").on(table.userId),

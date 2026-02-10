@@ -7,7 +7,12 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   plugins: [reactRouter(), tailwindcss()],
   server: {
-    port: 5179,
+    proxy: {
+      "/api": {
+        target: "http://localhost:5300",
+        changeOrigin: true,
+      },
+    },
   },
   resolve: {
     alias: {

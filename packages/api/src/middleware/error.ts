@@ -68,24 +68,33 @@ export const errorMiddleware = new Elysia({ name: "error" }).onError(
       };
     }
 
-    // Handle database query errors (Postgres errors, Drizzle errors, etc.)
     const errorMessage = error instanceof Error ? error.message : String(error);
-    if (
-      errorMessage.includes("Failed query") ||
-      errorMessage.includes("relation") ||
-      errorMessage.includes("column") ||
-      errorMessage.includes("database") ||
-      errorMessage.includes("connection")
-    ) {
+    const sqlKeywords = [
+      "Failed query",
+      "relation",
+      "column",
+      "database",
+      "connection",
+      "select",
+      "insert",
+      "update",
+      "delete",
+      "from",
+      "where",
+      "params:",
+    ];
+    const isDbError = sqlKeywords.some((keyword) =>
+      errorMessage.includes(keyword),
+    );
+
+    if (isDbError) {
       console.error("Database error:", error);
       set.status = 500;
       return {
-        error: "Database operation failed",
+        success: false,
+        error: "Internal server error",
         code: "DATABASE_ERROR",
-        message:
-          process.env.NODE_ENV === "development"
-            ? errorMessage
-            : "An error occurred while processing your request",
+        message: "An error occurred while processing your request",
       };
     }
 

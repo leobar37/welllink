@@ -7,6 +7,16 @@ import type {
 // Re-export PaymentMethodType from schema for convenience
 export type { PaymentMethodType } from "../../../api/src/db/schema";
 
+export type MedicalService = {
+  id: string;
+  name: string;
+  description?: string;
+  duration: number;
+  price?: string;
+  category?: string;
+  isActive: boolean;
+};
+
 interface BaseFeature<Config = Record<string, unknown>> {
   id: string;
   type: string;

@@ -19,10 +19,10 @@ export * from "./whatsapp-context";
 
 // MEDICAL RESERVATION TABLES
 export * from "./medical-service";
-export * from "./time-slot";
+// time-slot: REMOVED - availability simplified, no pre-generated slots
 export * from "./reservation-request";
 export * from "./reservation";
-export * from "./availability-rule";
+// availability-rule: REMOVED - availability now in profile table (workDays, workStartTime, workEndTime)
 
 // NEW TABLES
 export * from "./client";

@@ -8,9 +8,9 @@ import {
   decimal,
   index,
   jsonb,
+  foreignKey,
 } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
-import { timeSlot } from "./time-slot";
 import { medicalService } from "./medical-service";
 import { reservationRequest } from "./reservation-request";
 
@@ -32,9 +32,6 @@ export const reservation = pgTable(
     profileId: uuid("profile_id")
       .notNull()
       .references(() => profile.id, { onDelete: "cascade" }),
-    slotId: uuid("slot_id")
-      .notNull()
-      .references(() => timeSlot.id, { onDelete: "cascade" }),
     serviceId: uuid("service_id")
       .notNull()
       .references(() => medicalService.id, { onDelete: "cascade" }),
@@ -52,6 +49,13 @@ export const reservation = pgTable(
       .default("confirmed"),
     source: varchar("source", { length: 50 }).default("whatsapp"),
     notes: text("notes"),
+
+    // New fields for direct reservation model (no slots)
+    scheduledAtUtc: timestamp("scheduled_at_utc").notNull(),
+    scheduledTimezone: varchar("scheduled_timezone", { length: 64 })
+      .notNull()
+      .default("America/Lima"),
+    rescheduledFrom: uuid("rescheduled_from"),
 
     reminder24hSent: boolean("reminder_24h_sent").default(false),
     reminder2hSent: boolean("reminder_2h_sent").default(false),
@@ -76,10 +80,17 @@ export const reservation = pgTable(
   },
   (table) => ({
     profileIdIdx: index("idx_reservation_profile_id").on(table.profileId),
-    slotIdIdx: index("idx_reservation_slot_id").on(table.slotId),
     statusIdx: index("idx_reservation_status").on(table.status),
     phoneIdx: index("idx_reservation_patient_phone").on(table.patientPhone),
     createdIdx: index("idx_reservation_created").on(table.createdAt),
+    scheduledAtUtcIdx: index("idx_reservation_scheduled_at_utc").on(
+      table.scheduledAtUtc,
+    ),
+    rescheduledFromFk: foreignKey({
+      columns: [table.rescheduledFrom],
+      foreignColumns: [table.id],
+      name: "fk_reservation_rescheduled_from",
+    }),
   }),
 );
 

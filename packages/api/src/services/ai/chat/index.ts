@@ -20,7 +20,6 @@ export {
   getServiceDetailsTool,
 
   // Appointment tools
-  checkAvailabilityTool,
   createReservationTool,
 
   // FAQ tools

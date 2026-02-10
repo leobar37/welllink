@@ -5,6 +5,7 @@ import {
 } from "../services/storage";
 import { env } from "../config/env";
 import { AssetRepository } from "../services/repository/asset";
+import { getMessageStrategy } from "../services/ai/messaging";
 import { ProfileRepository } from "../services/repository/profile";
 import { SocialLinkRepository } from "../services/repository/social-link";
 // health-survey: REMOVED - legacy wellness feature
@@ -32,10 +33,10 @@ import { CampaignRepository } from "../services/repository/campaign";
 import { CampaignAudienceRepository } from "../services/repository/campaign-audience";
 
 import { MedicalServiceRepository } from "../services/repository/medical-service";
-import { TimeSlotRepository } from "../services/repository/time-slot";
+// TimeSlotRepository: REMOVED - availability simplified, no pre-generated slots
 import { ReservationRequestRepository } from "../services/repository/reservation-request";
 import { ReservationRepository } from "../services/repository/reservation";
-import { AvailabilityRuleRepository } from "../services/repository/availability-rule";
+// AvailabilityRuleRepository: REMOVED - availability now in profile table
 import { PaymentMethodRepository } from "../services/repository/payment-method";
 
 import { ClientService } from "../services/business/client";
@@ -47,6 +48,7 @@ import { TemplateVariablesService } from "../services/business/template-variable
 import { ApprovalService } from "../services/business/approval";
 import { NotificationService } from "../services/business/notification";
 import { PaymentMethodService } from "../services/business/payment-method";
+import { AvailabilityValidationService } from "../services/business/availability-validation";
 
 let storageInstance: StorageStrategy | null = null;
 let initialized = false;
@@ -122,10 +124,10 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     const campaignAudienceRepository = new CampaignAudienceRepository();
 
     const medicalServiceRepository = new MedicalServiceRepository();
-    const timeSlotRepository = new TimeSlotRepository();
+    // timeSlotRepository: REMOVED - availability simplified, no pre-generated slots
     const reservationRequestRepository = new ReservationRequestRepository();
     const reservationRepository = new ReservationRepository();
-    const availabilityRuleRepository = new AvailabilityRuleRepository();
+    // availabilityRuleRepository: REMOVED - availability now in profile table
     const paymentMethodRepository = new PaymentMethodRepository();
 
     // Evolution API service
@@ -143,8 +145,8 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     // NEW RESERVATION SERVICES
     const approvalService = new ApprovalService(
       reservationRequestRepository,
-      timeSlotRepository,
       reservationRepository,
+      profileRepository,
     );
 
     const notificationService = new NotificationService(
@@ -156,6 +158,10 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
 
     const paymentMethodService = new PaymentMethodService(
       paymentMethodRepository,
+    );
+
+    const availabilityValidationService = new AvailabilityValidationService(
+      profileRepository,
     );
 
     // Services
@@ -225,10 +231,10 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         campaignRepository,
         campaignAudienceRepository,
         medicalServiceRepository,
-        timeSlotRepository,
+        // timeSlotRepository: REMOVED - availability simplified
         reservationRequestRepository,
         reservationRepository,
-        availabilityRuleRepository,
+        // availabilityRuleRepository: REMOVED - availability now in profile table
         paymentMethodRepository,
         // Services
         assetService,
@@ -251,6 +257,9 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         approvalService,
         notificationService,
         paymentMethodService,
+        availabilityValidationService,
+        // AI Messaging Strategy
+        getMessageStrategy,
       },
     };
   },

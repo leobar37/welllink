@@ -8,7 +8,6 @@ import {
   updatePatientLabelTool,
   listServicesTool,
   getServiceDetailsTool,
-  checkAvailabilityTool,
   createReservationTool,
   searchFAQTool,
   listPaymentMethodsTool,
@@ -38,7 +37,6 @@ export function createMedicalChatAgent(): Agent {
       getServiceDetailsTool,
 
       // Appointment scheduling tools
-      checkAvailabilityTool,
       createReservationTool,
 
       // FAQ and information tools

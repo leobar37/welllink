@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Bot, MessageCircle, Settings, Layout } from "lucide-react";
-import { useAgentConfig, TonePreset } from "@/hooks/use-agent-config";
+import { useAgentConfig, type TonePreset } from "@/hooks/use-agent-config";
 import { ToneSettingsForm } from "@/components/agent/ToneSettingsForm";
 import { SuggestionsConfig } from "@/components/agent/SuggestionsConfig";
 

@@ -4,7 +4,7 @@ export * from "./types";
 export * from "./request-expiration";
 export * from "./reminders";
 export * from "./doctor-notifications";
-export * from "./slot-generation";
+// slot-generation: REMOVED - availability simplified, no pre-generated slots
 export * from "./follow-up";
 export * from "./reservation-confirmation";
 
@@ -14,10 +14,7 @@ import {
   notifyDoctorNewRequest,
   notifyDoctorRequestExpired,
 } from "./doctor-notifications";
-import {
-  generateDailySlots,
-  dailySlotGenerationForAll,
-} from "./slot-generation";
+// slot-generation functions: REMOVED - availability simplified
 import { sendFollowUpMessage } from "./follow-up";
 import {
   handleReservationApproved,
@@ -30,8 +27,7 @@ export const functions = [
   send2HourReminder,
   notifyDoctorNewRequest,
   notifyDoctorRequestExpired,
-  generateDailySlots,
-  dailySlotGenerationForAll,
+  // slot-generation functions: REMOVED - availability simplified
   sendFollowUpMessage,
   handleReservationApproved,
   handleReservationCancelled,

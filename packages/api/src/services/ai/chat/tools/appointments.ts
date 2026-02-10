@@ -1,109 +1,78 @@
 import { createTool } from "@voltagent/core";
 import { z } from "zod";
-import { TimeSlotRepository } from "../../../../services/repository/time-slot";
 import { ReservationRequestRepository } from "../../../../services/repository/reservation-request";
 
-const timeSlotRepository = new TimeSlotRepository();
 const reservationRequestRepository = new ReservationRequestRepository();
 
-const CheckAvailabilityInput = z.object({
-  profileId: z.string().describe("The profile/doctor ID"),
-  serviceId: z.string().describe("The service ID to check availability for"),
-  date: z.string().describe("Date in YYYY-MM-DD format to check availability"),
+const metadataSchema = z.object({
+  symptoms: z
+    .array(z.string())
+    .optional()
+    .describe("Síntomas reportados por el paciente"),
+  urgencyLevel: z
+    .enum(["low", "normal", "high", "urgent"])
+    .optional()
+    .describe("Nivel de urgencia de la consulta"),
+  isNewPatient: z.boolean().optional().describe("True si es paciente nuevo"),
+  insuranceProvider: z
+    .string()
+    .optional()
+    .describe("Aseguradora/seguro médico"),
+  notes: z.string().optional().describe("Notas adicionales"),
 });
 
 const CreateReservationInput = z.object({
-  profileId: z.string().describe("The profile/doctor ID"),
-  slotId: z.string().describe("The time slot ID"),
-  serviceId: z.string().describe("The service ID"),
-  patientName: z.string().describe("Patient full name"),
-  patientPhone: z.string().describe("Patient phone number"),
-  patientEmail: z.string().optional().describe("Patient email (optional)"),
+  profileId: z.string().describe("ID del perfil/doctor"),
+  serviceId: z.string().describe("ID del servicio médico"),
+  preferredDate: z.string().describe("Fecha preferida en formato YYYY-MM-DD"),
+  preferredTime: z
+    .string()
+    .describe("Hora preferida en formato HH:MM (24 horas)"),
+  timezone: z
+    .string()
+    .describe("Zona horaria IANA del paciente (ej: America/Lima)"),
+  patientName: z.string().describe("Nombre completo del paciente"),
+  patientPhone: z.string().describe("Número de teléfono del paciente"),
+  patientEmail: z.string().optional().describe("Email del paciente (opcional)"),
   chiefComplaint: z
     .string()
     .optional()
-    .describe("Main complaint or reason for visit"),
-});
-
-export const checkAvailabilityTool = createTool({
-  name: "check_availability",
-  description:
-    "Check available time slots for a service on a specific date. Use this when a patient wants to schedule an appointment. Returns available slots with start times. Only shows slots that are currently available (not booked).",
-  parameters: CheckAvailabilityInput,
-  execute: async ({ profileId, serviceId, date }) => {
-    try {
-      const dateObj = new Date(date);
-      const startOfDay = new Date(dateObj);
-      startOfDay.setHours(0, 0, 0, 0);
-
-      const slots = await timeSlotRepository.findAvailableSlots(
-        profileId,
-        serviceId,
-        startOfDay,
-      );
-
-      const availableSlots = slots
-        .filter((slot) => slot.currentReservations < slot.maxReservations)
-        .map((slot) => ({
-          id: slot.id,
-          startTime: slot.startTime.toISOString(),
-          endTime: slot.endTime.toISOString(),
-          available: slot.maxReservations - slot.currentReservations,
-        }));
-
-      return {
-        success: true,
-        date,
-        availableSlots,
-        totalAvailable: availableSlots.length,
-      };
-    } catch (error) {
-      return {
-        error: true,
-        message: `Error checking availability: ${error instanceof Error ? error.message : "Unknown error"}`,
-      };
-    }
-  },
+    .describe("Motivo principal de la consulta"),
+  metadata: metadataSchema
+    .optional()
+    .describe("Información adicional del paciente"),
 });
 
 export const createReservationTool = createTool({
   name: "create_reservation",
   description:
-    "Create a new reservation request. Use this when a patient confirms they want to book an appointment. The request will be pending approval and the patient will be notified. Returns the reservation ID for tracking.",
+    "Crear una nueva solicitud de cita médica. Usa esto cuando un paciente confirma que quiere agendar una cita. La solicitud quedará pendiente de aprobación. El paciente será notificado por WhatsApp.",
   parameters: CreateReservationInput,
   execute: async (data) => {
     try {
-      const slot = await timeSlotRepository.findById(data.slotId);
-      if (!slot) {
-        return {
-          error: true,
-          message: "Time slot not found",
-        };
-      }
-
       const reservation = await reservationRequestRepository.create({
         profileId: data.profileId,
-        slotId: data.slotId,
         serviceId: data.serviceId,
         patientName: data.patientName,
         patientPhone: data.patientPhone,
         patientEmail: data.patientEmail || null,
         chiefComplaint: data.chiefComplaint || null,
         status: "pending",
-        urgencyLevel: "normal",
+        urgencyLevel: data.metadata?.urgencyLevel || "normal",
         preferredContactMethod: "whatsapp",
-        requestedTime: slot.startTime,
-        expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+        preferredAtUtc: new Date(), // Will be converted by the service
+        requestedTimezone: data.timezone,
+        metadata: data.metadata || {},
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       });
-
-      await timeSlotRepository.updateStatus(data.slotId, "pending_approval");
 
       return {
         success: true,
         reservation: {
           id: reservation.id,
           status: reservation.status,
-          requestedTime: reservation.requestedTime.toISOString(),
+          preferredAtUtc: reservation.preferredAtUtc.toISOString(),
+          requestedTimezone: reservation.requestedTimezone,
           expiresAt: reservation.expiresAt.toISOString(),
           message:
             "Tu solicitud de cita ha sido enviada. El médico la revisará y confirmará pronto. Te notificaremos por WhatsApp cuando sea aprobada.",
@@ -112,7 +81,7 @@ export const createReservationTool = createTool({
     } catch (error) {
       return {
         error: true,
-        message: `Error creating reservation: ${error instanceof Error ? error.message : "Unknown error"}`,
+        message: `Error creando solicitud: ${error instanceof Error ? error.message : "Error desconocido"}`,
       };
     }
   },

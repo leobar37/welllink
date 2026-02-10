@@ -1,5 +1,4 @@
 import { Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -9,7 +8,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { formatDuration, formatPrice } from "@/components/medical-services/utils/formatters";
+import {
+  formatDuration,
+  formatPrice,
+} from "@/components/medical-services/utils/formatters";
 import type { MedicalService } from "@/lib/types";
 
 interface ServiceSelectorProps {
@@ -51,7 +53,7 @@ export function ServiceSelector({
             key={service.id}
             className={cn(
               "cursor-pointer transition-all hover:shadow-md",
-              isSelected && "ring-2 ring-primary"
+              isSelected && "ring-2 ring-primary",
             )}
             onClick={() => onSelect(service)}
           >
@@ -69,7 +71,9 @@ export function ServiceSelector({
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary">{formatDuration(service.duration)}</Badge>
+                <Badge variant="secondary">
+                  {formatDuration(service.duration)}
+                </Badge>
                 {service.price && (
                   <Badge variant="outline">{formatPrice(service.price)}</Badge>
                 )}

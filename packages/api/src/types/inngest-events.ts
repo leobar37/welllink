@@ -8,7 +8,7 @@ export interface MedicalReservationEvents {
       patientEmail?: string;
       serviceId: string;
       serviceName: string;
-      slotId: string;
+      // slotId: REMOVED - availability simplified
       appointmentTime: string;
       appointmentEndTime: string;
       timezone: string;
@@ -26,7 +26,7 @@ export interface MedicalReservationEvents {
     data: {
       requestId: string;
       profileId: string;
-      slotId: string;
+      // slotId: REMOVED - availability simplified
       serviceId: string;
       patientName: string;
       patientPhone: string;
@@ -37,7 +37,8 @@ export interface MedicalReservationEvents {
       currentMedications?: string;
       allergies?: string;
       urgencyLevel: "low" | "normal" | "high" | "urgent";
-      requestedTime: string;
+      preferredAtUtc: string;
+      requestedTimezone: string;
       expiresAt: string;
     };
   };
@@ -49,6 +50,13 @@ export interface MedicalReservationEvents {
       requestId: string;
       approvedBy: string;
       approvedAt: string;
+      patientName: string;
+      patientPhone: string;
+      appointmentTime: string;
+      serviceName: string;
+      doctorName: string;
+      clinicName: string;
+      clinicAddress: string;
       changes?: {
         originalTime?: string;
         newTime?: string;
@@ -110,6 +118,7 @@ export interface MedicalReservationEvents {
       doctorName: string;
       clinicName: string;
       clinicAddress: string;
+      requestedTimezone: string;
       preparationInstructions?: string;
     };
   };
@@ -124,6 +133,7 @@ export interface MedicalReservationEvents {
       serviceName: string;
       clinicName: string;
       clinicAddress: string;
+      requestedTimezone: string;
       parkingInfo?: string;
       buildingInfo?: string;
       floorInfo?: string;
@@ -143,33 +153,20 @@ export interface MedicalReservationEvents {
     };
   };
 
-  "slot/generate-daily": {
-    data: {
-      profileId: string;
-      targetDate: string;
-      timezone: string;
-      generateForServices: string[];
-    };
-  };
+  // slot/generate-daily: REMOVED - availability simplified, no pre-generated slots
 
-  "slot/expired-cleanup": {
-    data: {
-      profileId: string;
-      expiredSlotIds: string[];
-      cleanupDate: string;
-    };
-  };
+  // slot/expired-cleanup: REMOVED - availability simplified, no pre-generated slots
 
   "availability/changed": {
     data: {
       profileId: string;
       changedBy: string;
       changes: {
-        dayOfWeek?: number;
-        startTime?: string;
-        endTime?: string;
-        slotDuration?: number;
-        bufferTime?: number;
+        workDays?: number[];
+        workStartTime?: string;
+        workEndTime?: string;
+        appointmentDuration?: number;
+        isAcceptingAppointments?: boolean;
       };
       effectiveDate: string;
     };

@@ -1,24 +1,20 @@
 import { createdProfileIds } from "./profiles.seeder";
 import { createdMedicalServiceIds } from "./medical-services.seeder";
-import { createdTimeSlotIds } from "./time-slots.seeder";
 import { getTestUserId } from "./users.seeder";
-import { sql, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "../index";
 import { reservationRequest } from "../schema/reservation-request";
 
 export const createdReservationRequestIds: Record<string, string> = {};
-
-function getSlotKey(day: number, hour: number): string {
-  const period = hour < 12 ? "morning" : "afternoon";
-  return `slot_${period}_${day}_${hour}`;
-}
 
 const RESERVATION_REQUEST_DATA = [
   {
     key: "request_pending_1",
     profileKey: "maria",
     serviceKey: "consultation",
-    slotKey: getSlotKey(3, 10),
+    preferredDate: "2026-02-15",
+    preferredTime: "10:00",
+    timezone: "America/Lima",
     patientName: "Patricia Vega",
     patientPhone: "+51956789012",
     patientEmail: "patricia.vega@example.com",
@@ -33,14 +29,20 @@ const RESERVATION_REQUEST_DATA = [
     urgencyLevel: "normal",
     preferredContactMethod: "whatsapp",
     status: "pending",
-    requestedTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-    expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+    metadata: {
+      symptoms: ["Cansancio", "Insomnio"],
+      urgencyLevel: "normal",
+      isNewPatient: true,
+      notes: "Primera vez que visita un nutricionista",
+    },
   },
   {
     key: "request_pending_2",
     profileKey: "maria",
     serviceKey: "followUp",
-    slotKey: getSlotKey(3, 14),
+    preferredDate: "2026-02-16",
+    preferredTime: "14:00",
+    timezone: "America/Lima",
     patientName: "Carlos Mendoza",
     patientPhone: "+51967890123",
     patientEmail: "carlos.m@example.com",
@@ -54,14 +56,19 @@ const RESERVATION_REQUEST_DATA = [
     urgencyLevel: "low",
     preferredContactMethod: "phone",
     status: "pending",
-    requestedTime: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
-    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    metadata: {
+      urgencyLevel: "low",
+      isNewPatient: false,
+      insuranceProvider: "Essalud",
+    },
   },
   {
     key: "request_approved_1",
     profileKey: "maria",
     serviceKey: "consultation",
-    slotKey: getSlotKey(4, 9),
+    preferredDate: "2026-02-10",
+    preferredTime: "09:00",
+    timezone: "America/Lima",
     patientName: "Ana López",
     patientPhone: "+51978901234",
     patientEmail: "ana.lopez@example.com",
@@ -75,14 +82,19 @@ const RESERVATION_REQUEST_DATA = [
     urgencyLevel: "high",
     preferredContactMethod: "whatsapp",
     status: "approved",
-    requestedTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
-    expiresAt: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
+    metadata: {
+      symptoms: ["Hinchazón abdominal"],
+      urgencyLevel: "high",
+      isNewPatient: true,
+    },
   },
   {
     key: "request_rejected_1",
     profileKey: "maria",
     serviceKey: "wellnessPlan",
-    slotKey: getSlotKey(5, 15),
+    preferredDate: "2026-02-12",
+    preferredTime: "15:00",
+    timezone: "America/Lima",
     patientName: "Miguel Torres",
     patientPhone: "+51989012345",
     patientEmail: null,
@@ -90,37 +102,32 @@ const RESERVATION_REQUEST_DATA = [
     patientGender: "masculino",
     chiefComplaint: "Plan de 3 meses intensivo",
     symptoms: "Presión alta",
-    medicalHistory: "Hipertensión, cholesterol alto",
+    medicalHistory: "Hipertensión, colesterol alto",
     currentMedications: "Losartán, Atorvastatina",
     allergies: "Ninguna",
     urgencyLevel: "urgent",
     preferredContactMethod: "phone",
     status: "rejected",
-    requestedTime: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
-    expiresAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
-  },
-  {
-    key: "request_pending_3",
-    profileKey: "maria",
-    serviceKey: "consultation",
-    slotKey: getSlotKey(4, 11),
-    patientName: "Sandra Ruiz",
-    patientPhone: "+51990123456",
-    patientEmail: "sandra.ruiz@example.com",
-    patientAge: 30,
-    patientGender: "femenino",
-    chiefComplaint: "Alimentación para atletas",
-    symptoms: "Ninguno",
-    medicalHistory: "Ninguna",
-    currentMedications: "Ninguno",
-    allergies: "Lacteos",
-    urgencyLevel: "normal",
-    preferredContactMethod: "whatsapp",
-    status: "pending",
-    requestedTime: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
-    expiresAt: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000),
+    rejectionReason:
+      "El horario solicitado no está disponible. Por favor propone otra fecha.",
+    metadata: {
+      symptoms: ["Hipertensión"],
+      urgencyLevel: "urgent",
+      isNewPatient: false,
+    },
   },
 ];
+
+function getPreferredAtUtc(
+  dateStr: string,
+  timeStr: string,
+  timezone: string,
+): Date {
+  // Simple conversion for seeder purposes
+  // In production, use date-fns-tz
+  const dateTimeStr = `${dateStr}T${timeStr}:00`;
+  return new Date(dateTimeStr);
+}
 
 export async function seedReservationRequests() {
   console.log("📝 Seeding reservation requests...");
@@ -138,11 +145,19 @@ export async function seedReservationRequests() {
   console.log(`  ✓ Removed ${deletedCount} request(s)`);
 
   for (const requestData of RESERVATION_REQUEST_DATA) {
-    const { key, profileKey, serviceKey, slotKey, ...data } = requestData;
+    const {
+      key,
+      profileKey,
+      serviceKey,
+      preferredDate,
+      preferredTime,
+      timezone,
+      rejectionReason,
+      ...data
+    } = requestData;
 
     const profileId = createdProfileIds[profileKey];
     const serviceId = createdMedicalServiceIds[serviceKey];
-    const slotId = createdTimeSlotIds[slotKey];
 
     if (!profileId) {
       console.log(`  ⚠️  Profile ${profileKey} not found, skipping request`);
@@ -154,31 +169,48 @@ export async function seedReservationRequests() {
       continue;
     }
 
-    if (!slotId) {
-      console.log(`  ⚠️  Slot ${slotKey} not found, skipping request`);
-      continue;
+    const preferredAtUtc = getPreferredAtUtc(
+      preferredDate,
+      preferredTime,
+      timezone,
+    );
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
+
+    const insertData: any = {
+      profileId,
+      serviceId,
+      patientName: data.patientName,
+      patientPhone: data.patientPhone,
+      patientEmail: data.patientEmail || null,
+      patientAge: data.patientAge || null,
+      patientGender: data.patientGender || null,
+      chiefComplaint: data.chiefComplaint || null,
+      symptoms: data.symptoms || null,
+      medicalHistory: data.medicalHistory || null,
+      currentMedications: data.currentMedications || null,
+      allergies: data.allergies || null,
+      urgencyLevel: data.urgencyLevel || "normal",
+      preferredContactMethod: data.preferredContactMethod || "whatsapp",
+      status: data.status,
+      preferredAtUtc,
+      requestedTimezone: timezone,
+      metadata: data.metadata || {},
+      expiresAt,
+    };
+
+    if (rejectionReason) {
+      insertData.rejectionReason = rejectionReason;
     }
 
-    // Insert using SQL directly
-    const result = await db.execute(sql`
-      INSERT INTO reservation_request (
-        profile_id, slot_id, service_id, patient_name, patient_phone, patient_email,
-        patient_age, patient_gender, chief_complaint, symptoms, medical_history,
-        current_medications, allergies, urgency_level, preferred_contact_method,
-        status, requested_time, expires_at
-      ) VALUES (
-        ${profileId}, ${slotId}, ${serviceId}, ${data.patientName}, ${data.patientPhone}, ${data.patientEmail},
-        ${data.patientAge}, ${data.patientGender}, ${data.chiefComplaint}, ${data.symptoms}, ${data.medicalHistory},
-        ${data.currentMedications}, ${data.allergies}, ${data.urgencyLevel}, ${data.preferredContactMethod},
-        ${data.status}, ${data.requestedTime}, ${data.expiresAt}
-      ) RETURNING id
-    `);
+    const [created] = await db
+      .insert(reservationRequest)
+      .values(insertData)
+      .returning({ id: reservationRequest.id });
 
-    const createdId = result[0]?.id || result[0]?.insertedId;
-    if (createdId) {
-      createdReservationRequestIds[key] = String(createdId);
+    if (created) {
+      createdReservationRequestIds[key] = created.id;
       console.log(
-        `  ✓ Created request: ${data.patientName} (${data.status}) - ID: ${createdId}`,
+        `  ✓ Created request: ${data.patientName} (${data.status}) - ID: ${created.id}`,
       );
     }
   }

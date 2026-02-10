@@ -7,7 +7,6 @@ import { WhatsAppConfigRepository } from "../../services/repository/whatsapp-con
 import { ProfileRepository } from "../../services/repository/profile";
 import { MedicalServiceRepository } from "../../services/repository/medical-service";
 import { ReservationRepository } from "../../services/repository/reservation";
-import { TimeSlotRepository } from "../../services/repository/time-slot";
 
 function createNotificationService() {
   return new NotificationService(
@@ -32,7 +31,6 @@ export const send24HourReminder = inngest.createFunction(
     const result = await step.run("send-whatsapp-reminder-24h", async () => {
       const notificationService = createNotificationService();
       const reservationRepository = new ReservationRepository();
-      const timeSlotRepository = new TimeSlotRepository();
 
       const reservation = await reservationRepository.findById(
         event.data.reservationId,
@@ -41,13 +39,12 @@ export const send24HourReminder = inngest.createFunction(
         return { success: false, error: "Reservation not found" };
       }
 
-      const slot = await timeSlotRepository.findById(reservation.slotId);
       const service = await new MedicalServiceRepository().findById(
         reservation.serviceId,
       );
 
-      if (!slot || !service) {
-        return { success: false, error: "Slot or service not found" };
+      if (!service) {
+        return { success: false, error: "Service not found" };
       }
 
       const sent = await notificationService.sendAppointmentReminder(
@@ -56,7 +53,7 @@ export const send24HourReminder = inngest.createFunction(
         event.data.patientName,
         service.name,
         new Date(event.data.appointmentTime),
-        formatTime(new Date(event.data.appointmentTime)),
+        event.data.requestedTimezone || "America/Lima",
         24,
       );
 
@@ -92,7 +89,6 @@ export const send2HourReminder = inngest.createFunction(
     const result = await step.run("send-whatsapp-reminder-2h", async () => {
       const notificationService = createNotificationService();
       const reservationRepository = new ReservationRepository();
-      const timeSlotRepository = new TimeSlotRepository();
 
       const reservation = await reservationRepository.findById(
         event.data.reservationId,
@@ -101,13 +97,12 @@ export const send2HourReminder = inngest.createFunction(
         return { success: false, error: "Reservation not found" };
       }
 
-      const slot = await timeSlotRepository.findById(reservation.slotId);
       const service = await new MedicalServiceRepository().findById(
         reservation.serviceId,
       );
 
-      if (!slot || !service) {
-        return { success: false, error: "Slot or service not found" };
+      if (!service) {
+        return { success: false, error: "Service not found" };
       }
 
       const sent = await notificationService.sendAppointmentReminder(
@@ -116,7 +111,7 @@ export const send2HourReminder = inngest.createFunction(
         event.data.patientName,
         service.name,
         new Date(event.data.appointmentTime),
-        formatTime(new Date(event.data.appointmentTime)),
+        event.data.requestedTimezone || "America/Lima",
         2,
       );
 

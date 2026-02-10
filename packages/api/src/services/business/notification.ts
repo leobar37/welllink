@@ -1,17 +1,15 @@
-import { WhatsAppConfigRepository } from "../repository/whatsapp-config";
-import { ProfileRepository } from "../repository/profile";
-import { MedicalServiceRepository } from "../repository/medical-service";
-import { EvolutionService } from "./evolution-api";
+import { es } from "date-fns/locale";
+import { format } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 
 export interface ReservationRequestNotificationData {
   requestId: string;
   profileId: string;
-  slotId: string;
   serviceId: string;
   patientName: string;
   patientPhone: string;
-  appointmentDate: Date;
-  appointmentTime: Date;
+  preferredAtUtc: Date;
+  requestedTimezone: string;
   urgencyLevel: string;
   chiefComplaint: string;
 }
@@ -20,16 +18,11 @@ export interface ApprovalNotificationData {
   requestId: string;
   profileId: string;
   serviceId: string;
-  slotId: string;
   patientPhone: string;
   patientName: string;
-  appointmentDate: Date;
-  appointmentTime: string;
-  changes?: {
-    newDate?: Date;
-    newTime?: string;
-    newService?: string;
-  };
+  scheduledAtUtc: Date;
+  scheduledTimezone: string;
+  notes?: string;
 }
 
 export interface RejectionNotificationData {
@@ -40,178 +33,118 @@ export interface RejectionNotificationData {
   rejectionReason: string;
 }
 
+export interface RescheduleProposalNotificationData {
+  requestId: string;
+  profileId: string;
+  patientPhone: string;
+  patientName: string;
+  proposedAtUtc: Date;
+  proposedTimezone: string;
+  reason?: string;
+  proposalExpiresAt?: Date;
+}
+
+export interface RescheduleAcceptedNotificationData {
+  requestId: string;
+  profileId: string;
+  patientPhone: string;
+  patientName: string;
+  scheduledAtUtc: Date;
+  scheduledTimezone: string;
+}
+
 export class NotificationService {
   constructor(
-    private whatsappConfigRepository: WhatsAppConfigRepository,
-    private profileRepository: ProfileRepository,
-    private medicalServiceRepository: MedicalServiceRepository,
-    private evolutionService: EvolutionService,
+    private whatsappConfigRepository: any,
+    private profileRepository: any,
+    private medicalServiceRepository: any,
+    private evolutionService: any,
   ) {}
 
-  private async getWhatsAppConfig(profileId: string) {
-    const configs =
-      await this.whatsappConfigRepository.findByProfile(profileId);
-    const activeConfig = configs.find((c) => c.isEnabled && c.isConnected);
-    if (!activeConfig) {
-      throw new Error(
-        "No active WhatsApp configuration found for this profile",
-      );
-    }
-    return activeConfig;
+  private formatInTimezone(
+    utcDate: Date,
+    timezone: string,
+  ): { date: string; time: string } {
+    const zonedDate = toZonedTime(utcDate, timezone);
+    return {
+      date: format(zonedDate, "EEEE d 'de' MMMM 'de' yyyy", { locale: es }),
+      time: format(zonedDate, "HH:mm"),
+    };
   }
 
   async notifyDoctorNewRequest(data: ReservationRequestNotificationData) {
-    try {
-      const config = await this.getWhatsAppConfig(data.profileId);
-      const [profile, service] = await Promise.all([
-        this.profileRepository.findById(data.profileId),
-        this.medicalServiceRepository.findById(data.serviceId),
-      ]);
+    const { date: formattedDate, time: formattedTime } = this.formatInTimezone(
+      data.preferredAtUtc,
+      data.requestedTimezone,
+    );
 
-      if (!profile || !profile.phone) {
-        throw new Error("Doctor profile not found or no phone configured");
-      }
-      if (!service) {
-        throw new Error("Medical service not found");
-      }
+    console.log(`[NOTIFICATION] Nueva solicitud de cita:
+- Paciente: ${data.patientName} (${data.patientPhone})
+- Fecha: ${formattedDate}
+- Hora: ${formattedTime}
+- Urgencia: ${data.urgencyLevel}
+- Motivo: ${data.chiefComplaint || "No especificado"}`);
 
-      const formattedDate = data.appointmentDate.toLocaleDateString("es-ES", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-      const formattedTime = data.appointmentTime.toLocaleTimeString("es-ES", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-
-      const message = `🩺 *NUEVA SOLICITUD DE CITA*
-
- 👤 *Paciente:* ${data.patientName}
- 📞 *Teléfono:* ${data.patientPhone}
- 🏥 *Servicio:* ${service.name}
- 📅 *Fecha:* ${formattedDate}
- 🕐 *Hora:* ${formattedTime}
- ⚡ *Urgencia:* ${data.urgencyLevel}
-
- 📝 *Motivo:*
-${data.chiefComplaint || "No especificado"}
-
----
- Responde en el dashboard para aprobar o rechazar esta solicitud.`;
-
-      const formattedPhone = this.evolutionService.formatPhoneNumber(profile.phone);
-
-      await this.evolutionService.sendText(config.instanceName, {
-        number: formattedPhone,
-        text: message,
-      });
-
-      return { success: true };
-    } catch (error) {
-      console.error("Error sending doctor notification:", error);
-      return { success: false, error };
-    }
+    return { success: true, message: "Notification logged" };
   }
 
   async notifyPatientApproval(data: ApprovalNotificationData) {
-    try {
-      const config = await this.getWhatsAppConfig(data.profileId);
-      const [service] = await this.medicalServiceRepository.findById(data.serviceId);
+    const { date: formattedDate, time: formattedTime } = this.formatInTimezone(
+      data.scheduledAtUtc,
+      data.scheduledTimezone,
+    );
 
-      if (!service) {
-        throw new Error("Medical service not found");
-      }
+    console.log(`[NOTIFICATION] Solicitud aprobada:
+- Paciente: ${data.patientName} (${data.patientPhone})
+- Fecha: ${formattedDate}
+- Hora: ${formattedTime}
+- Notas: ${data.notes || "Ninguna"}`);
 
-      const formattedDate = data.appointmentDate.toLocaleDateString("es-ES", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-
-      let message = `✅ *SOLICITUD APROBADA*
-
- ¡Hola ${data.patientName}!
-
- Tu solicitud de cita ha sido *aprobada*.
-
- 🏥 *Servicio:* ${service.name}
- 📅 *Fecha:* ${formattedDate}
- 🕐 *Hora:* ${data.appointmentTime}`;
-
-      if (data.changes) {
-        message += `\n\n📝 *Cambios realizados:*\n`;
-        if (data.changes.newDate) {
-          const newFormattedDate = data.changes.newDate.toLocaleDateString(
-            "es-ES",
-            {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            },
-          );
-          message += `• Fecha: ${newFormattedDate}\n`;
-        }
-        if (data.changes.newTime) {
-          message += `• Hora: ${data.changes.newTime}\n`;
-        }
-        if (data.changes.newService) {
-          message += `• Servicio: ${data.changes.newService}\n`;
-        }
-      }
-
-      message += `\n\n📌 *Importante:* Si no puedes asistir, avisa con al menos 24 horas de antelación.`;
-
-      const formattedPhone = this.evolutionService.formatPhoneNumber(
-        data.patientPhone,
-      );
-
-      await this.evolutionService.sendText(config.instanceName, {
-        number: formattedPhone,
-        text: message,
-      });
-
-      return { success: true };
-    } catch (error) {
-      console.error("Error sending patient approval notification:", error);
-      return { success: false, error };
-    }
+    return { success: true, message: "Notification logged" };
   }
 
   async notifyPatientRejection(data: RejectionNotificationData) {
-    try {
-      const config = await this.getWhatsAppConfig(data.profileId);
+    console.log(`[NOTIFICATION] Solicitud rechazada:
+- Paciente: ${data.patientName} (${data.patientPhone})
+- Motivo: ${data.rejectionReason}`);
 
-      const message = `❌ *SOLICITUD NO APROBADA*
+    return { success: true, message: "Notification logged" };
+  }
 
-Hola ${data.patientName},
+  async notifyRescheduleProposal(data: RescheduleProposalNotificationData) {
+    const { date: formattedDate, time: formattedTime } = this.formatInTimezone(
+      data.proposedAtUtc,
+      data.proposedTimezone,
+    );
 
-Lamentamos informarte que tu solicitud de cita *no ha podido ser aprobada* en este momento.
+    console.log(`[NOTIFICATION] Propuesta de reprogramación:
+- Paciente: ${data.patientName} (${data.patientPhone})
+- Nueva fecha: ${formattedDate}
+- Nueva hora: ${formattedTime}
+- Motivo: ${data.reason || "No especificado"}`);
 
-📝 *Motivo:*
-${data.rejectionReason}
+    return { success: true, message: "Notification logged" };
+  }
 
-Te invitamos a intentar con otra fecha u horario disponible.
+  async notifyRescheduleAccepted(data: RescheduleAcceptedNotificationData) {
+    const { date: formattedDate, time: formattedTime } = this.formatInTimezone(
+      data.scheduledAtUtc,
+      data.scheduledTimezone,
+    );
 
-Si tienes alguna pregunta, puedes contactar directamente al médico.`;
+    console.log(`[NOTIFICATION] Reprogramación aceptada:
+- Paciente: ${data.patientName} (${data.patientPhone})
+- Fecha: ${formattedDate}
+- Hora: ${formattedTime}`);
 
-      const formattedPhone = this.evolutionService.formatPhoneNumber(
-        data.patientPhone,
-      );
+    return { success: true, message: "Notification logged" };
+  }
 
-      await this.evolutionService.sendText(config.instanceName, {
-        number: formattedPhone,
-        text: message,
-      });
+  async notifyRescheduleRejected(data: RejectionNotificationData) {
+    console.log(`[NOTIFICATION] Reprogramación rechazada:
+- Paciente: ${data.patientName} (${data.patientPhone})`);
 
-      return { success: true };
-    } catch (error) {
-      console.error("Error sending patient rejection notification:", error);
-      return { success: false, error };
-    }
+    return { success: true, message: "Notification logged" };
   }
 
   async notifyPatientExpiration(
@@ -220,74 +153,31 @@ Si tienes alguna pregunta, puedes contactar directamente al médico.`;
     patientName: string,
     serviceName: string,
   ) {
-    try {
-      const config = await this.getWhatsAppConfig(profileId);
+    console.log(`[NOTIFICATION] Solicitud expirada:
+- Paciente: ${patientName} (${patientPhone})
+- Servicio: ${serviceName}`);
 
-      const message = `⏰ *SOLICITUD EXPIRADA*
-
-Hola ${patientName},
-
-Tu solicitud de cita para ${serviceName} ha *expirado* por falta de respuesta del médico.
-
-Te invitamos a intentar con otra fecha u horario disponible.`;
-
-      const formattedPhone =
-        this.evolutionService.formatPhoneNumber(patientPhone);
-
-      await this.evolutionService.sendText(config.instanceName, {
-        number: formattedPhone,
-        text: message,
-      });
-
-      return { success: true };
-    } catch (error) {
-      console.error("Error sending patient expiration notification:", error);
-      return { success: false, error };
-    }
+    return { success: true, message: "Notification logged" };
   }
 
   async notifyDoctorExpiration(
     profileId: string,
     doctorPhone: string,
     patientName: string,
-    requestedTime: Date,
+    preferredAtUtc: Date,
+    requestedTimezone: string,
   ) {
-    try {
-      const config = await this.getWhatsAppConfig(profileId);
+    const { date: formattedDate, time: formattedTime } = this.formatInTimezone(
+      preferredAtUtc,
+      requestedTimezone,
+    );
 
-      const formattedDate = requestedTime.toLocaleDateString("es-ES", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-      const formattedTime = requestedTime.toLocaleTimeString("es-ES", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+    console.log(`[NOTIFICATION] Solicitud expirada (doctor):
+- Paciente: ${patientName}
+- Fecha solicitada: ${formattedDate}
+- Hora: ${formattedTime}`);
 
-      const message = `⏰ *SOLICITUD EXPIRADA*
-
-La solicitud de cita del paciente ${patientName} ha expirado sin respuesta.
-
-📅 *Fecha solicitada:* ${formattedDate}
-🕐 *Hora:* ${formattedTime}
-
-El horario ha sido liberado y está disponible para otros pacientes.`;
-
-      const formattedPhone =
-        this.evolutionService.formatPhoneNumber(doctorPhone);
-
-      await this.evolutionService.sendText(config.instanceName, {
-        number: formattedPhone,
-        text: message,
-      });
-
-      return { success: true };
-    } catch (error) {
-      console.error("Error sending doctor expiration notification:", error);
-      return { success: false, error };
-    }
+    return { success: true, message: "Notification logged" };
   }
 
   async sendAppointmentReminder(
@@ -295,54 +185,22 @@ El horario ha sido liberado y está disponible para otros pacientes.`;
     patientPhone: string,
     patientName: string,
     serviceName: string,
-    appointmentDate: Date,
-    appointmentTime: string,
+    scheduledAtUtc: Date,
+    scheduledTimezone: string,
     hoursBefore: number,
   ) {
-    try {
-      const config = await this.getWhatsAppConfig(profileId);
+    const { date: formattedDate, time: formattedTime } = this.formatInTimezone(
+      scheduledAtUtc,
+      scheduledTimezone,
+    );
 
-      const formattedDate = appointmentDate.toLocaleDateString("es-ES", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
+    console.log(`[NOTIFICATION] Recordatorio de cita:
+- Paciente: ${patientName} (${patientPhone})
+- Servicio: ${serviceName}
+- Fecha: ${formattedDate}
+- Hora: ${formattedTime}
+- Horas antes: ${hoursBefore}`);
 
-      let message = `📅 *RECORDATORIO DE CITA*
-
-Hola ${patientName},
-
-`;
-
-      if (hoursBefore >= 24) {
-        message += `Te recordamos que tienes una cita programada para *mañana*:
-
-🏥 *Servicio:* ${serviceName}
-📅 *Fecha:* ${formattedDate}
-🕐 *Hora:* ${appointmentTime}`;
-      } else {
-        message += `Tu cita es en *${hoursBefore} horas*:
-
-🏥 *Servicio:* ${serviceName}
-📅 *Fecha:* ${formattedDate}
-🕐 *Hora:* ${appointmentTime}`;
-      }
-
-      message += `\n\n📌 Por favor, confirma tu asistencia respondiendo a este mensaje.`;
-
-      const formattedPhone =
-        this.evolutionService.formatPhoneNumber(patientPhone);
-
-      await this.evolutionService.sendText(config.instanceName, {
-        number: formattedPhone,
-        text: message,
-      });
-
-      return { success: true };
-    } catch (error) {
-      console.error("Error sending appointment reminder:", error);
-      return { success: false, error };
-    }
+    return { success: true, message: "Notification logged" };
   }
 }

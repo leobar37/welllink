@@ -9,7 +9,6 @@ import type { MedicalReservationEvents } from "../../types/inngest-events";
 import { ProfileRepository } from "../../services/repository/profile";
 import { MedicalServiceRepository } from "../../services/repository/medical-service";
 import { ReservationRepository } from "../../services/repository/reservation";
-import { TimeSlotRepository } from "../../services/repository/time-slot";
 import { db } from "../../db";
 import { profile } from "../../db/schema";
 import { eq, and } from "drizzle-orm";
@@ -37,7 +36,6 @@ export const handleReservationApproved = inngest.createFunction(
 
     await step.run("fetch-reservation-details", async () => {
       const reservationRepository = new ReservationRepository();
-      const timeSlotRepository = new TimeSlotRepository();
       const medicalServiceRepository = new MedicalServiceRepository();
       const profileRepository = new ProfileRepository();
 
@@ -49,7 +47,6 @@ export const handleReservationApproved = inngest.createFunction(
         return null;
       }
 
-      const slot = await timeSlotRepository.findById(reservation.slotId);
       const service = await medicalServiceRepository.findById(
         reservation.serviceId,
       );
@@ -57,7 +54,7 @@ export const handleReservationApproved = inngest.createFunction(
         event.data.profileId,
       );
 
-      return { reservation, slot, service, profile: profileData };
+      return { reservation, service, profile: profileData };
     });
 
     await step.run("schedule-reminders", async () => {
@@ -187,17 +184,7 @@ export const handleReservationCancelled = inngest.createFunction(
         "cancelled",
       );
 
-      const slotRepository = new TimeSlotRepository();
-      const reservation = await reservationRepository.findById(
-        event.data.reservationId,
-      );
-
-      if (reservation) {
-        await slotRepository.updateStatus(reservation.slotId, "available");
-        await slotRepository.decrementReservations(reservation.slotId);
-      }
-
-      return { cancelled: true, slotUpdated: !!reservation };
+      return { cancelled: true };
     });
 
     return {

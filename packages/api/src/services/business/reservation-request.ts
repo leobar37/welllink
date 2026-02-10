@@ -3,14 +3,20 @@ import {
   BadRequestException,
 } from "../../utils/http-exceptions";
 import { ReservationRequestRepository } from "../repository/reservation-request";
-import { TimeSlotRepository } from "../repository/time-slot";
 import { MedicalServiceRepository } from "../repository/medical-service";
+import { AvailabilityValidationService } from "./availability-validation";
 import type { NewReservationRequest } from "../../db/schema/reservation-request";
-import { sendMedicalEvent } from "../../lib/inngest-client";
+import { parse } from "date-fns";
+import { fromZonedTime } from "date-fns-tz";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
 export interface CreateReservationRequestData {
-  slotId: string;
+  profileId: string;
   serviceId: string;
+  preferredDate: string; // ISO date string "YYYY-MM-DD"
+  preferredTime: string; // Time string "HH:MM"
+  timezone: string; // IANA timezone string
   patientName: string;
   patientPhone: string;
   patientEmail?: string;
@@ -22,29 +28,31 @@ export interface CreateReservationRequestData {
   currentMedications?: string;
   allergies?: string;
   urgencyLevel?: "low" | "normal" | "high" | "urgent";
+  metadata?: {
+    symptoms?: string[];
+    urgencyLevel?: "low" | "normal" | "high" | "urgent";
+    isNewPatient?: boolean;
+    insuranceProvider?: string;
+    notes?: string;
+  };
 }
 
 export class ReservationRequestService {
   constructor(
     private reservationRequestRepository: ReservationRequestRepository,
-    private timeSlotRepository: TimeSlotRepository,
     private medicalServiceRepository: MedicalServiceRepository,
+    private availabilityValidationService: AvailabilityValidationService,
   ) {}
 
   async createRequest(data: CreateReservationRequestData) {
-    const { slotId, serviceId, patientPhone } = data;
-
-    // Validate slot availability
-    const slot = await this.timeSlotRepository.findById(slotId);
-    if (!slot) {
-      throw new NotFoundException("Time slot not found");
-    }
-
-    if (slot.status !== "available") {
-      throw new BadRequestException(
-        "This time slot is not available for booking",
-      );
-    }
+    const {
+      profileId,
+      serviceId,
+      preferredDate,
+      preferredTime,
+      timezone,
+      patientPhone,
+    } = data;
 
     // Validate service exists
     const service = await this.medicalServiceRepository.findById(serviceId);
@@ -52,27 +60,46 @@ export class ReservationRequestService {
       throw new NotFoundException("Medical service not found");
     }
 
-    // Check slot capacity
-    if (slot.currentReservations >= slot.maxReservations) {
-      throw new BadRequestException("This time slot is fully booked");
+    // Validate that the requested time is within business hours
+    const validation =
+      await this.availabilityValidationService.validateAgainstRules(
+        profileId,
+        preferredDate,
+        preferredTime,
+        timezone,
+      );
+
+    if (!validation.valid) {
+      throw new BadRequestException(validation.reason);
     }
 
-    // Check if patient has existing pending request for this slot
-    const existingRequest =
-      await this.reservationRequestRepository.findByPatientPhone(patientPhone);
-    const pendingForSlot = existingRequest.find(
-      (r) => r.slotId === slotId && r.status === "pending",
+    // Convert to UTC for storage
+    const localDateTime = parse(
+      `${preferredDate}T${preferredTime}:00`,
+      "yyyy-MM-dd'T'HH:mm:ss",
+      new Date(),
     );
-    if (pendingForSlot) {
+
+    const preferredAtUtc = fromZonedTime(localDateTime, timezone);
+
+    // Check if patient has existing pending request for the same time
+    const existingRequests =
+      await this.reservationRequestRepository.findByPatientPhone(patientPhone);
+    const pendingForTime = existingRequests.find(
+      (r) =>
+        r.status === "pending" &&
+        format(r.preferredAtUtc, "yyyy-MM-dd HH:mm") ===
+          format(preferredAtUtc, "yyyy-MM-dd HH:mm"),
+    );
+    if (pendingForTime) {
       throw new BadRequestException(
-        "You already have a pending request for this time slot",
+        "Ya tienes una solicitud pendiente para esta fecha y hora",
       );
     }
 
     // Create reservation request
     const request: NewReservationRequest = {
-      profileId: slot.profileId,
-      slotId,
+      profileId,
       serviceId,
       patientName: data.patientName,
       patientPhone: data.patientPhone,
@@ -86,36 +113,17 @@ export class ReservationRequestService {
       allergies: data.allergies,
       urgencyLevel: data.urgencyLevel || "normal",
       status: "pending",
-      requestedTime: slot.startTime,
-      expiresAt: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
+      preferredAtUtc,
+      requestedTimezone: timezone,
+      metadata: data.metadata || {},
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
     };
 
     const createdRequest =
       await this.reservationRequestRepository.create(request);
 
-    await this.timeSlotRepository.updateStatus(slotId, "pending_approval");
-
-    await sendMedicalEvent("reservation/request-created", {
-      requestId: createdRequest.id,
-      profileId: createdRequest.profileId,
-      slotId: createdRequest.slotId,
-      serviceId: createdRequest.serviceId,
-      patientName: createdRequest.patientName,
-      patientPhone: createdRequest.patientPhone,
-      patientEmail: createdRequest.patientEmail,
-      chiefComplaint: createdRequest.chiefComplaint,
-      symptoms: createdRequest.symptoms,
-      medicalHistory: createdRequest.medicalHistory,
-      currentMedications: createdRequest.currentMedications,
-      allergies: createdRequest.allergies,
-      urgencyLevel: createdRequest.urgencyLevel,
-      requestedTime: createdRequest.requestedTime.toISOString(),
-      expiresAt: createdRequest.expiresAt.toISOString(),
-    });
-
     return {
       request: createdRequest,
-      slot,
       service,
     };
   }
@@ -133,15 +141,13 @@ export class ReservationRequestService {
       );
     }
 
-    // Fetch related data
-    const [slot, service] = await Promise.all([
-      this.timeSlotRepository.findById(request.slotId),
-      this.medicalServiceRepository.findById(request.serviceId),
-    ]);
+    // Fetch related service data
+    const service = await this.medicalServiceRepository.findById(
+      request.serviceId,
+    );
 
     return {
       ...request,
-      slot,
       service,
     };
   }
@@ -153,14 +159,12 @@ export class ReservationRequestService {
     // Fetch related data for each request
     const enrichedRequests = await Promise.all(
       requests.map(async (request) => {
-        const [slot, service] = await Promise.all([
-          this.timeSlotRepository.findById(request.slotId),
-          this.medicalServiceRepository.findById(request.serviceId),
-        ]);
+        const service = await this.medicalServiceRepository.findById(
+          request.serviceId,
+        );
 
         return {
           ...request,
-          slot,
           service,
         };
       }),
@@ -170,7 +174,12 @@ export class ReservationRequestService {
   }
 
   async getRequestsByStatus(
-    status: "pending" | "approved" | "rejected" | "expired",
+    status:
+      | "pending"
+      | "approved"
+      | "rejected"
+      | "expired"
+      | "counter_proposed",
   ) {
     const requests =
       await this.reservationRequestRepository.findByStatus(status);
@@ -178,14 +187,12 @@ export class ReservationRequestService {
     // Fetch related data for each request
     const enrichedRequests = await Promise.all(
       requests.map(async (request) => {
-        const [slot, service] = await Promise.all([
-          this.timeSlotRepository.findById(request.slotId),
-          this.medicalServiceRepository.findById(request.serviceId),
-        ]);
+        const service = await this.medicalServiceRepository.findById(
+          request.serviceId,
+        );
 
         return {
           ...request,
-          slot,
           service,
         };
       }),
@@ -201,14 +208,12 @@ export class ReservationRequestService {
     // Fetch related data for each request
     const enrichedRequests = await Promise.all(
       requests.map(async (request) => {
-        const [slot, service] = await Promise.all([
-          this.timeSlotRepository.findById(request.slotId),
-          this.medicalServiceRepository.findById(request.serviceId),
-        ]);
+        const service = await this.medicalServiceRepository.findById(
+          request.serviceId,
+        );
 
         return {
           ...request,
-          slot,
           service,
         };
       }),

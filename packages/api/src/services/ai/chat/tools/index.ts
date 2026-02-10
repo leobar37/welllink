@@ -9,7 +9,7 @@ export {
 export { listServicesTool, getServiceDetailsTool } from "./services";
 
 // Appointment scheduling tools
-export { checkAvailabilityTool, createReservationTool } from "./appointments";
+export { createReservationTool } from "./appointments";
 
 // FAQ and information tools
 export { searchFAQTool } from "./faq";

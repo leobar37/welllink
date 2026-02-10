@@ -8,8 +8,8 @@ import { seedSocialLinks } from "./seeders/social-links.seeder";
 import { seedAnalytics } from "./seeders/analytics.seeder";
 import { seedProfileCustomizations } from "./seeders/profile-customization.seeder";
 import { seedMedicalServices } from "./seeders/medical-services.seeder";
-import { seedTimeSlots } from "./seeders/time-slots.seeder";
-import { seedAvailabilityRules } from "./seeders/availability-rules.seeder";
+// time-slots seeder: REMOVED - availability simplified, no pre-generated slots
+// availability-rules seeder: REMOVED - availability now in profile table
 import { seedClients } from "./seeders/clients.seeder";
 import { seedReservations } from "./seeders/reservations.seeder";
 import { seedCampaigns } from "./seeders/campaigns.seeder";
@@ -70,6 +70,7 @@ async function cleanupSeedData() {
         avatar_id uuid REFERENCES asset(id) ON DELETE SET NULL,
         cover_image_id uuid REFERENCES asset(id) ON DELETE SET NULL,
         whatsapp_number varchar(20),
+        timezone varchar(64) NOT NULL DEFAULT 'America/Lima',
         features_config jsonb DEFAULT '{}',
         is_default boolean NOT NULL DEFAULT true,
         is_published boolean NOT NULL DEFAULT false,
@@ -85,7 +86,12 @@ async function cleanupSeedData() {
         clinic_website varchar(255),
         clinic_ruc varchar(20),
         metadata jsonb DEFAULT '{}',
-        faq_config jsonb DEFAULT '{"faqs":[]}'
+        faq_config jsonb DEFAULT '{"faqs":[]}',
+        work_days integer[] DEFAULT '{1,2,3,4,5}',
+        work_start_time varchar(5) DEFAULT '09:00',
+        work_end_time varchar(5) DEFAULT '18:00',
+        appointment_duration integer DEFAULT 30,
+        is_accepting_appointments boolean NOT NULL DEFAULT true
       );
     `);
 
@@ -129,36 +135,7 @@ async function cleanupSeedData() {
       );
     }
 
-    // Drop and recreate availability_rule table (was dropped by CASCADE)
-    try {
-      await db.execute(sql`DROP TABLE IF EXISTS availability_rule CASCADE`);
-      await db.execute(sql`
-        CREATE TABLE availability_rule (
-          id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-          profile_id uuid NOT NULL REFERENCES profile(id) ON DELETE CASCADE,
-          day_of_week integer NOT NULL CHECK (day_of_week >= 0 AND day_of_week <= 6),
-          start_time time NOT NULL,
-          end_time time NOT NULL,
-          slot_duration integer NOT NULL DEFAULT 30,
-          buffer_time integer NOT NULL DEFAULT 0,
-          max_appointments_per_slot integer NOT NULL DEFAULT 1,
-          effective_from timestamp NOT NULL DEFAULT NOW(),
-          effective_to timestamp,
-          is_active boolean NOT NULL DEFAULT true,
-          metadata jsonb DEFAULT '{}',
-          created_at timestamp NOT NULL DEFAULT NOW(),
-          updated_at timestamp NOT NULL DEFAULT NOW()
-        );
-      `);
-      await db.execute(
-        sql`CREATE INDEX IF NOT EXISTS availability_rule_profile_id_idx ON availability_rule(profile_id)`,
-      );
-      console.log("  ✓ Recreated availability_rule table with all columns");
-    } catch (error: any) {
-      console.log(
-        `  ℹ️  Availability rule table cleanup: ${error.message || "skipped"}`,
-      );
-    }
+    // Availability Rule table: REMOVED - availability now configured in profile table
 
     // Drop and recreate medical_service table (was dropped by CASCADE)
     try {
@@ -191,36 +168,7 @@ async function cleanupSeedData() {
       );
     }
 
-    // Drop and recreate time_slot table (was dropped by CASCADE)
-    try {
-      await db.execute(sql`DROP TABLE IF EXISTS time_slot CASCADE`);
-      await db.execute(sql`
-        CREATE TABLE time_slot (
-          id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-          profile_id uuid NOT NULL REFERENCES profile(id) ON DELETE CASCADE,
-          service_id uuid NOT NULL REFERENCES medical_service(id) ON DELETE CASCADE,
-          start_time timestamp NOT NULL,
-          end_time timestamp NOT NULL,
-          max_reservations integer NOT NULL DEFAULT 1,
-          current_reservations integer NOT NULL DEFAULT 0,
-          status varchar(50) DEFAULT 'available',
-          metadata jsonb DEFAULT '{}',
-          created_at timestamp NOT NULL DEFAULT now(),
-          expires_at timestamp
-        );
-      `);
-      await db.execute(
-        sql`CREATE INDEX IF NOT EXISTS time_slot_profile_id_idx ON time_slot(profile_id)`,
-      );
-      await db.execute(
-        sql`CREATE INDEX IF NOT EXISTS time_slot_service_id_idx ON time_slot(service_id)`,
-      );
-      console.log("  ✓ Recreated time_slot table with metadata column");
-    } catch (error: any) {
-      console.log(
-        `  ℹ️  Time slot table cleanup: ${error.message || "skipped"}`,
-      );
-    }
+    // Time Slot table: REMOVED - availability simplified, no pre-generated slots
 
     // Drop and recreate client table (was dropped by CASCADE)
     try {
@@ -261,7 +209,6 @@ async function cleanupSeedData() {
         CREATE TABLE reservation (
           id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
           profile_id uuid NOT NULL REFERENCES profile(id) ON DELETE CASCADE,
-          slot_id uuid NOT NULL REFERENCES time_slot(id) ON DELETE CASCADE,
           service_id uuid NOT NULL REFERENCES medical_service(id) ON DELETE CASCADE,
           request_id uuid REFERENCES reservation_request(id) ON DELETE SET NULL,
           patient_name varchar(255) NOT NULL,
@@ -270,6 +217,9 @@ async function cleanupSeedData() {
           status varchar(50) DEFAULT 'confirmed',
           source varchar(50) DEFAULT 'whatsapp',
           notes text,
+          scheduled_at_utc timestamp NOT NULL,
+          scheduled_timezone varchar(64) NOT NULL DEFAULT 'America/Lima',
+          rescheduled_from uuid REFERENCES reservation(id) ON DELETE SET NULL,
           reminder_24h_sent boolean DEFAULT false,
           reminder_2h_sent boolean DEFAULT false,
           reminder_24h_scheduled boolean DEFAULT false,
@@ -285,13 +235,22 @@ async function cleanupSeedData() {
         );
       `);
       await db.execute(
-        sql`CREATE INDEX IF NOT EXISTS reservation_profile_id_idx ON reservation(profile_id)`,
+        sql`CREATE INDEX IF NOT EXISTS idx_reservation_profile_id ON reservation(profile_id)`,
       );
       await db.execute(
-        sql`CREATE INDEX IF NOT EXISTS reservation_slot_id_idx ON reservation(slot_id)`,
+        sql`CREATE INDEX IF NOT EXISTS idx_reservation_status ON reservation(status)`,
       );
       await db.execute(
-        sql`CREATE INDEX IF NOT EXISTS reservation_status_idx ON reservation(status)`,
+        sql`CREATE INDEX IF NOT EXISTS idx_reservation_patient_phone ON reservation(patient_phone)`,
+      );
+      await db.execute(
+        sql`CREATE INDEX IF NOT EXISTS idx_reservation_created ON reservation(created_at)`,
+      );
+      await db.execute(
+        sql`CREATE INDEX IF NOT EXISTS idx_reservation_scheduled_at_utc ON reservation(scheduled_at_utc)`,
+      );
+      await db.execute(
+        sql`ALTER TABLE reservation ADD CONSTRAINT fk_reservation_rescheduled_from FOREIGN KEY (rescheduled_from) REFERENCES reservation(id) ON DELETE SET NULL`,
       );
       console.log("  ✓ Recreated reservation table with metadata column");
     } catch (error: any) {
@@ -304,7 +263,7 @@ async function cleanupSeedData() {
   }
 
   // Try to delete test users, catch errors if tables don't exist
-  const testEmails = ["test@wellness.com"];
+  const testEmails = ["test@wellness.com", "clinic@wellness.com"];
 
   for (const email of testEmails) {
     try {
@@ -397,14 +356,12 @@ async function seed() {
 
     // 6. Health Survey Responses: REMOVED - legacy wellness feature
 
-    // 7. Availability Rules (depends on profiles)
-    await seedAvailabilityRules();
+    // 7. Availability Rules: REMOVED - availability now configured in profile table
 
     // 8. Medical Services (depends on profiles)
     await seedMedicalServices();
 
-    // 9. Time Slots (depends on profiles & medical services)
-    await seedTimeSlots();
+    // 9. Time Slots: REMOVED - availability simplified, no pre-generated slots
 
     // 10. Clients (depends on profiles)
     await seedClients();
@@ -434,11 +391,9 @@ async function seed() {
     console.log("  - 4 social links created");
     console.log("  - 2 profile customizations created");
     // health survey responses: REMOVED
-    console.log(
-      "  - 10 availability rules created (Mon-Fri, morning & afternoon)",
-    );
+    // availability rules: REMOVED - now configured in profile table
     console.log("  - 4 medical services created");
-    console.log("  - 30+ time slots for the next 7 days");
+    // time slots: REMOVED - availability simplified
     console.log("  - 5 clients created");
     console.log(
       "  - 4 reservations (confirmed, completed, cancelled, no_show)",

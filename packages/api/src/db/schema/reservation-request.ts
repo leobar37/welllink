@@ -6,9 +6,9 @@ import {
   timestamp,
   integer,
   index,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
-import { timeSlot } from "./time-slot";
 import { medicalService } from "./medical-service";
 
 export const requestStatus = [
@@ -16,6 +16,7 @@ export const requestStatus = [
   "approved",
   "rejected",
   "expired",
+  "counter_proposed",
 ] as const;
 export const urgencyLevel = ["low", "normal", "high", "urgent"] as const;
 export const contactMethod = ["whatsapp", "phone", "email"] as const;
@@ -24,6 +25,15 @@ export type RequestStatus = (typeof requestStatus)[number];
 export type UrgencyLevel = (typeof urgencyLevel)[number];
 export type ContactMethod = (typeof contactMethod)[number];
 
+// Metadata structure for reservation requests
+export interface ReservationRequestMetadata {
+  symptoms?: string[];
+  urgencyLevel?: UrgencyLevel;
+  isNewPatient?: boolean;
+  insuranceProvider?: string;
+  notes?: string;
+}
+
 export const reservationRequest = pgTable(
   "reservation_request",
   {
@@ -31,9 +41,6 @@ export const reservationRequest = pgTable(
     profileId: uuid("profile_id")
       .notNull()
       .references(() => profile.id, { onDelete: "cascade" }),
-    slotId: uuid("slot_id")
-      .notNull()
-      .references(() => timeSlot.id, { onDelete: "cascade" }),
     serviceId: uuid("service_id")
       .notNull()
       .references(() => medicalService.id, { onDelete: "cascade" }),
@@ -60,8 +67,21 @@ export const reservationRequest = pgTable(
       .$type<RequestStatus>()
       .notNull()
       .default("pending"),
-    requestedTime: timestamp("requested_time").notNull(),
+
+    // Request expiration for pending requests
     expiresAt: timestamp("expires_at").notNull(),
+
+    // New fields for direct request model (no slots)
+    preferredAtUtc: timestamp("preferred_at_utc").notNull(),
+    requestedTimezone: varchar("requested_timezone", { length: 64 })
+      .notNull()
+      .default("America/Lima"),
+    metadata: jsonb("metadata").$type<ReservationRequestMetadata>(),
+
+    // Reschedule proposal fields
+    proposedAtUtc: timestamp("proposed_at_utc"),
+    proposalReason: text("proposal_reason"),
+    proposalExpiresAt: timestamp("proposal_expires_at"),
 
     approvedBy: uuid("approved_by").references(() => profile.id),
     approvedAt: timestamp("approved_at"),
@@ -75,10 +95,12 @@ export const reservationRequest = pgTable(
   },
   (table) => ({
     profileIdIdx: index("idx_request_profile_id").on(table.profileId),
-    slotIdIdx: index("idx_request_slot_id").on(table.slotId),
     statusIdx: index("idx_request_status").on(table.status),
     expiresIdx: index("idx_request_expires").on(table.expiresAt),
     phoneIdx: index("idx_request_patient_phone").on(table.patientPhone),
+    preferredAtUtcIdx: index("idx_request_preferred_at_utc").on(
+      table.preferredAtUtc,
+    ),
   }),
 );
 

@@ -6,6 +6,7 @@ import {
   extractStructuredParts,
 } from "../../services/ai/chat/parser";
 import type { AIMessagePart } from "../../services/ai/chat/schema";
+import { getMessageStrategy } from "../../services/ai/messaging";
 
 const profileRepository = new ProfileRepository();
 
@@ -44,6 +45,7 @@ export const agentRoutes = new Elysia({ prefix: "/agent" })
         }
 
         const agent = getMedicalChatAgent();
+        const strategy = getMessageStrategy("webchat");
 
         // Build profile context message
         const profileContext = `Información del profesional que atienden:
@@ -61,22 +63,23 @@ ${profileInfo.bio ? `- Bio: ${profileInfo.bio}` : ""}
           conversationId,
           context: new Map([
             ["userPhone", phone || "unknown"],
-            ["channel", "web"],
+            ["channel", "webchat"],
             ["profileDisplayName", profileInfo.displayName],
             ["profileTitle", profileInfo.title],
             ["profileBio", profileInfo.bio],
+            ["supportsRichComponents", "true"],
           ]),
         });
 
-        // Try to extract structured parts from the response
-        const structuredParts = extractStructuredParts(result.text);
+        // Format response using strategy
+        const formatted = strategy.formatResponse(result.text);
 
         return {
           success: true,
-          text: result.text,
+          text: formatted.text,
           usage: result.usage,
-          parts: structuredParts || null,
-          hasStructuredResponse: structuredParts !== null,
+          parts: formatted.parts,
+          hasStructuredResponse: formatted.hasStructuredResponse,
         };
       } catch (error) {
         console.error("Agent chat error:", error);

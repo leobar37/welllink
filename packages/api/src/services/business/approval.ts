@@ -3,20 +3,19 @@ import {
   BadRequestException,
 } from "../../utils/http-exceptions";
 import { ReservationRequestRepository } from "../repository/reservation-request";
-import { TimeSlotRepository } from "../repository/time-slot";
 import { ReservationRepository } from "../repository/reservation";
+import { ProfileRepository } from "../repository/profile";
 import type { NewReservation } from "../../db/schema/reservation";
-import { sendMedicalEvent } from "../../lib/inngest-client";
+import { parse } from "date-fns";
+import { fromZonedTime } from "date-fns-tz";
 
 export interface ApproveRequestData {
   requestId: string;
   approvedBy: string;
+  scheduledDate: string;
+  scheduledTime: string;
+  timezone: string;
   notes?: string;
-  changes?: {
-    serviceId?: string;
-    timeSlotId?: string;
-    price?: number;
-  };
 }
 
 export interface RejectRequestData {
@@ -25,15 +24,36 @@ export interface RejectRequestData {
   rejectionReason: string;
 }
 
+export interface ProposeRescheduleData {
+  requestId: string;
+  proposedBy: string;
+  newDate: string;
+  newTime: string;
+  timezone: string;
+  reason?: string;
+}
+
+export interface RespondRescheduleData {
+  requestId: string;
+  decision: "accept" | "reject";
+}
+
 export class ApprovalService {
   constructor(
     private reservationRequestRepository: ReservationRequestRepository,
-    private timeSlotRepository: TimeSlotRepository,
     private reservationRepository: ReservationRepository,
+    private profileRepository: ProfileRepository,
   ) {}
 
   async approveRequest(data: ApproveRequestData) {
-    const { requestId, approvedBy, notes, changes } = data;
+    const {
+      requestId,
+      approvedBy,
+      scheduledDate,
+      scheduledTime,
+      timezone,
+      notes,
+    } = data;
 
     // Get the request
     const request = await this.reservationRequestRepository.findById(requestId);
@@ -47,49 +67,18 @@ export class ApprovalService {
       );
     }
 
-    // Check if request has expired
-    if (request.expiresAt < new Date()) {
-      throw new BadRequestException("Request has expired");
-    }
-
-    // Get the slot
-    const slot = await this.timeSlotRepository.findById(request.slotId);
-    if (!slot) {
-      throw new NotFoundException("Time slot not found");
-    }
-
-    // If changes are provided, validate them
-    let finalSlotId = request.slotId;
-    let finalServiceId = request.serviceId;
-    let finalPrice: number | undefined;
-
-    if (changes) {
-      if (changes.timeSlotId && changes.timeSlotId !== request.slotId) {
-        const newSlot = await this.timeSlotRepository.findById(
-          changes.timeSlotId,
-        );
-        if (!newSlot || newSlot.status !== "available") {
-          throw new BadRequestException("New time slot is not available");
-        }
-        // Release old slot
-        await this.timeSlotRepository.updateStatus(request.slotId, "available");
-        finalSlotId = changes.timeSlotId;
-      }
-
-      if (changes.serviceId) {
-        finalServiceId = changes.serviceId;
-      }
-
-      if (changes.price) {
-        finalPrice = changes.price;
-      }
-    }
+    // Convert scheduled date/time to UTC
+    const localDateTime = parse(
+      `${scheduledDate}T${scheduledTime}:00`,
+      "yyyy-MM-dd'T'HH:mm:ss",
+      new Date(),
+    );
+    const scheduledAtUtc = fromZonedTime(localDateTime, timezone);
 
     // Create reservation
     const reservationData: NewReservation = {
       profileId: request.profileId,
-      slotId: finalSlotId,
-      serviceId: finalServiceId,
+      serviceId: request.serviceId,
       requestId: request.id,
       patientName: request.patientName,
       patientPhone: request.patientPhone,
@@ -97,6 +86,8 @@ export class ApprovalService {
       status: "confirmed",
       source: "whatsapp",
       notes: notes || "",
+      scheduledAtUtc,
+      scheduledTimezone: timezone,
       reminder24hSent: false,
       reminder2hSent: false,
       reminder24hScheduled: false,
@@ -115,42 +106,9 @@ export class ApprovalService {
       approvedBy,
     );
 
-    // Update slot status to reserved
-    await this.timeSlotRepository.updateStatus(finalSlotId, "reserved");
-    await this.timeSlotRepository.incrementReservations(finalSlotId);
-
-    const changesData = changes
-      ? {
-          originalTime: slot.startTime.toISOString(),
-          newTime:
-            changes.timeSlotId && changes.timeSlotId !== request.slotId
-              ? newSlot?.startTime.toISOString()
-              : undefined,
-          originalService: request.serviceId,
-          newService: changes.serviceId || undefined,
-          notes: notes || undefined,
-          priceAdjustment: changes.price || undefined,
-          durationChange: undefined,
-        }
-      : {};
-
-    await sendMedicalEvent("reservation/approved", {
-      reservationId: reservation.id,
-      profileId: request.profileId,
-      requestId: request.id,
-      approvedBy,
-      approvedAt: new Date().toISOString(),
-      ...changesData,
-    });
-
     return {
       request: updatedRequest,
       reservation,
-      slot:
-        finalSlotId === request.slotId
-          ? slot
-          : await this.timeSlotRepository.findById(finalSlotId),
-      changes,
     };
   }
 
@@ -177,24 +135,14 @@ export class ApprovalService {
       rejectionReason,
     );
 
-    // Update slot status back to available
-    await this.timeSlotRepository.updateStatus(request.slotId, "available");
-
-    await sendMedicalEvent("reservation/rejected", {
-      requestId: request.id,
-      profileId: request.profileId,
-      rejectionReason,
-      rejectedBy,
-      rejectedAt: new Date().toISOString(),
-    });
-
     return {
       request: updatedRequest,
-      slot: await this.timeSlotRepository.findById(request.slotId),
     };
   }
 
-  async expireRequest(requestId: string) {
+  async proposeReschedule(data: ProposeRescheduleData) {
+    const { requestId, proposedBy, newDate, newTime, timezone, reason } = data;
+
     // Get the request
     const request = await this.reservationRequestRepository.findById(requestId);
     if (!request) {
@@ -202,28 +150,144 @@ export class ApprovalService {
     }
 
     if (request.status !== "pending") {
-      return { success: false, message: "Request not pending" };
+      throw new BadRequestException(
+        `Request is ${request.status}, cannot propose reschedule`,
+      );
     }
 
-    // Update request status
+    // Convert proposed date/time to UTC
+    const localDateTime = parse(
+      `${newDate}T${newTime}:00`,
+      "yyyy-MM-dd'T'HH:mm:ss",
+      new Date(),
+    );
+    const proposedAtUtc = fromZonedTime(localDateTime, timezone);
+
+    // Calculate expiration (e.g., 24 hours from now)
+    const proposalExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    // Update request with proposal
     const updatedRequest = await this.reservationRequestRepository.updateStatus(
       requestId,
-      "expired",
+      "counter_proposed",
+      undefined,
+      undefined,
     );
 
-    // Update slot status back to available
-    await this.timeSlotRepository.updateStatus(request.slotId, "available");
+    // Additional fields for proposal
+    await this.reservationRequestRepository.updateProposalDetails(
+      requestId,
+      proposedAtUtc,
+      reason || "",
+      proposalExpiresAt,
+    );
 
     return {
       request: updatedRequest,
-      slot: await this.timeSlotRepository.findById(request.slotId),
+      proposedAtUtc,
+      proposalExpiresAt,
     };
   }
 
+  async respondToReschedule(data: RespondRescheduleData) {
+    const { requestId, decision } = data;
+
+    // Get the request
+    const request = await this.reservationRequestRepository.findById(requestId);
+    if (!request) {
+      throw new NotFoundException("Reservation request not found");
+    }
+
+    if (request.status !== "counter_proposed") {
+      throw new BadRequestException(
+        `Request is ${request.status}, cannot respond to reschedule`,
+      );
+    }
+
+    if (decision === "accept") {
+      // Accept the proposal - create reservation with proposed time
+      if (!request.proposedAtUtc) {
+        throw new BadRequestException("No reschedule proposal found");
+      }
+
+      const reservationData: NewReservation = {
+        profileId: request.profileId,
+        serviceId: request.serviceId,
+        requestId: request.id,
+        patientName: request.patientName,
+        patientPhone: request.patientPhone,
+        patientEmail: request.patientEmail,
+        status: "confirmed",
+        source: "whatsapp",
+        scheduledAtUtc: request.proposedAtUtc,
+        scheduledTimezone: request.requestedTimezone,
+        rescheduledFrom: undefined, // This is the original, not a reschedule
+        reminder24hSent: false,
+        reminder2hSent: false,
+        reminder24hScheduled: false,
+        reminder2hScheduled: false,
+        noShow: false,
+        paymentStatus: "pending",
+      };
+
+      const reservation =
+        await this.reservationRepository.create(reservationData);
+
+      // Update request status to approved
+      const updatedRequest =
+        await this.reservationRequestRepository.updateStatus(
+          requestId,
+          "approved",
+        );
+
+      return {
+        request: updatedRequest,
+        reservation,
+      };
+    } else {
+      // Reject the proposal - return to pending
+      const updatedRequest =
+        await this.reservationRequestRepository.updateStatus(
+          requestId,
+          "pending",
+        );
+
+      // Clear proposal details
+      await this.reservationRequestRepository.clearProposal(requestId);
+
+      return {
+        request: updatedRequest,
+      };
+    }
+  }
+
   async cancelReservation(reservationId: string, cancelledBy: string) {
-    // This will be implemented when reservation service is created
+    // This will be implemented when needed
     throw new BadRequestException(
       "Reservation cancellation not yet implemented",
     );
+  }
+
+  async expireRequest(requestId: string): Promise<{ success: boolean; message?: string }> {
+    try {
+      const request = await this.reservationRequestRepository.findById(requestId);
+      if (!request) {
+        return { success: false, message: "Request not found" };
+      }
+
+      if (request.status !== "pending") {
+        return { success: false, message: `Request is ${request.status}, cannot expire` };
+      }
+
+      await this.reservationRequestRepository.updateStatus(
+        requestId,
+        "expired",
+      );
+
+      return { success: true, message: "Request expired successfully" };
+    } catch (error) {
+      console.error("Error expiring request:", error);
+      return { success: false, message: "Error expiring request" };
+    }
   }
 }

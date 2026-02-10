@@ -4,7 +4,7 @@ import { ChatButton } from "./chat-button";
 import { ChatDrawer } from "./chat-drawer";
 import type { AIMessagePart } from "@/components/ai-ui/types";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5300";
+const API_URL = import.meta.env.VITE_API_URL || "";
 
 interface ChatWidgetProps {
   profileId: string;

@@ -5,7 +5,6 @@ import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { BookingFlow } from "@/components/booking";
 import { usePublicServices } from "@/hooks/use-booking";
-import type { MedicalService } from "@/lib/types";
 import { ProfileThemeProvider } from "@/components/public-profile/theme-provider";
 
 export default function BookingRoute() {
@@ -15,7 +14,9 @@ export default function BookingRoute() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { data: services, isLoading: servicesLoading } = usePublicServices(username || "");
+  const { data: services, isLoading: servicesLoading } = usePublicServices(
+    username || "",
+  );
 
   useEffect(() => {
     async function fetchProfile() {
@@ -23,8 +24,14 @@ export default function BookingRoute() {
 
       try {
         setLoading(true);
-        const { data, error: profileError } = await api.api.public.profiles[username].get();
-        if (profileError) throw new Error(profileError.value ? String(profileError.value) : "Error fetching profile");
+        const { data, error: profileError } =
+          await api.api.public.profiles[username].get();
+        if (profileError)
+          throw new Error(
+            profileError.value
+              ? String(profileError.value)
+              : "Error fetching profile",
+          );
 
         setProfileData(data);
       } catch (err) {
@@ -39,7 +46,6 @@ export default function BookingRoute() {
   }, [username]);
 
   const handleBookingComplete = () => {
-    // Show success message or redirect
     navigate(`/${username}?booking=success`);
   };
 
@@ -58,7 +64,9 @@ export default function BookingRoute() {
           <Calendar className="h-8 w-8 text-destructive" />
         </div>
         <h1 className="text-xl font-bold mb-2">Perfil no encontrado</h1>
-        <p className="text-muted-foreground mb-4">{error || "El perfil que buscas no existe."}</p>
+        <p className="text-muted-foreground mb-4">
+          {error || "El perfil que buscas no existe."}
+        </p>
         <Button asChild variant="outline">
           <Link to={`/${username}`}>Volver al perfil</Link>
         </Button>
@@ -70,7 +78,6 @@ export default function BookingRoute() {
     <ProfileThemeProvider themeId={profileData.themeId}>
       <div className="min-h-screen bg-background">
         <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
-          {/* Back Button */}
           <Link
             to={`/${username}`}
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -79,18 +86,18 @@ export default function BookingRoute() {
             Volver al perfil
           </Link>
 
-          {/* Header */}
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Reservar Cita</h1>
             <p className="text-muted-foreground">
-              Selecciona un servicio y horario para tu cita con {profileData.profile.displayName}
+              Selecciona un servicio y horario para tu cita con{" "}
+              {profileData.profile.displayName}
             </p>
           </div>
 
-          {/* Booking Flow */}
           {services && services.length > 0 ? (
             <BookingFlow
               username={username || ""}
+              profileId={profileData.profile.id}
               services={services}
               onBookingComplete={handleBookingComplete}
             />

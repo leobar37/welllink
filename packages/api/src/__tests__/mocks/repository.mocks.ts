@@ -8,7 +8,7 @@
  */
 export const mockData = {
   reservationRequests: new Map<string, any>(),
-  timeSlots: new Map<string, any>(),
+  // timeSlots: REMOVED - availability simplified, no pre-generated slots
   medicalServices: new Map<string, any>(),
   reservations: new Map<string, any>(),
 };
@@ -18,7 +18,7 @@ export const mockData = {
  */
 export function resetMockData(): void {
   mockData.reservationRequests.clear();
-  mockData.timeSlots.clear();
+  // timeSlots: REMOVED - availability simplified
   mockData.medicalServices.clear();
   mockData.reservations.clear();
 }
@@ -28,7 +28,7 @@ export function resetMockData(): void {
  */
 export function seedMockData(data: {
   reservationRequests?: any[];
-  timeSlots?: any[];
+  // timeSlots: REMOVED - availability simplified
   medicalServices?: any[];
   reservations?: any[];
 }): void {
@@ -37,11 +37,7 @@ export function seedMockData(data: {
       mockData.reservationRequests.set(req.id, req);
     });
   }
-  if (data.timeSlots) {
-    data.timeSlots.forEach((slot) => {
-      mockData.timeSlots.set(slot.id, slot);
-    });
-  }
+  // timeSlots: REMOVED - availability simplified
   if (data.medicalServices) {
     data.medicalServices.forEach((service) => {
       mockData.medicalServices.set(service.id, service);
@@ -55,114 +51,8 @@ export function seedMockData(data: {
 }
 
 /**
- * Mock TimeSlotRepository
+ * Mock TimeSlotRepository: REMOVED - availability simplified, no pre-generated slots
  */
-export class MockTimeSlotRepository {
-  async create(data: any): Promise<any> {
-    const slot = {
-      id: `slot-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      ...data,
-      createdAt: new Date(),
-    };
-    mockData.timeSlots.set(slot.id, slot);
-    return slot;
-  }
-
-  async findById(id: string): Promise<any | null> {
-    return mockData.timeSlots.get(id) || null;
-  }
-
-  async findByProfileId(profileId: string): Promise<any[]> {
-    return Array.from(mockData.timeSlots.values()).filter(
-      (slot) => slot.profileId === profileId,
-    );
-  }
-
-  async findByProfileIdAndDate(profileId: string, date: Date): Promise<any[]> {
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
-
-    return Array.from(mockData.timeSlots.values()).filter((slot) => {
-      const slotTime = new Date(slot.startTime);
-      return (
-        slot.profileId === profileId &&
-        slotTime >= startOfDay &&
-        slotTime <= endOfDay
-      );
-    });
-  }
-
-  async findAvailableSlots(
-    profileId: string,
-    serviceId: string,
-    date: Date,
-  ): Promise<any[]> {
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    return Array.from(mockData.timeSlots.values()).filter((slot) => {
-      const slotTime = new Date(slot.startTime);
-      return (
-        slot.profileId === profileId &&
-        slot.serviceId === serviceId &&
-        slot.status === "available" &&
-        slotTime >= startOfDay
-      );
-    });
-  }
-
-  async updateStatus(id: string, status: string): Promise<any> {
-    const slot = mockData.timeSlots.get(id);
-    if (slot) {
-      slot.status = status;
-      mockData.timeSlots.set(id, slot);
-      return slot;
-    }
-    return null;
-  }
-
-  async incrementReservations(id: string): Promise<any> {
-    const slot = mockData.timeSlots.get(id);
-    if (slot) {
-      slot.currentReservations = (slot.currentReservations || 0) + 1;
-      mockData.timeSlots.set(id, slot);
-      return slot;
-    }
-    return null;
-  }
-
-  async decrementReservations(id: string): Promise<any> {
-    const slot = mockData.timeSlots.get(id);
-    if (slot && slot.currentReservations > 0) {
-      slot.currentReservations -= 1;
-      mockData.timeSlots.set(id, slot);
-      return slot;
-    }
-    return null;
-  }
-
-  async findExpiredPendingSlots(): Promise<any[]> {
-    const now = new Date();
-    return Array.from(mockData.timeSlots.values()).filter(
-      (slot) =>
-        slot.status === "pending_approval" &&
-        slot.expiresAt &&
-        new Date(slot.expiresAt) < now,
-    );
-  }
-
-  async bulkCreate(slots: any[]): Promise<any[]> {
-    const createdSlots = slots.map((slot) => ({
-      id: `slot-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      ...slot,
-      createdAt: new Date(),
-    }));
-    createdSlots.forEach((slot) => mockData.timeSlots.set(slot.id, slot));
-    return createdSlots;
-  }
-}
 
 /**
  * Mock MedicalServiceRepository
@@ -273,11 +163,7 @@ export class MockReservationRepository {
     );
   }
 
-  async findBySlotId(slotId: string): Promise<any[]> {
-    return Array.from(mockData.reservations.values()).filter(
-      (res) => res.slotId === slotId,
-    );
-  }
+  // findBySlotId: REMOVED - availability simplified, no slot-based reservations
 
   async findByPatientPhone(phone: string): Promise<any[]> {
     return Array.from(mockData.reservations.values()).filter(

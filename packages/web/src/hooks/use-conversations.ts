@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { extractErrorMessage } from "@/lib/error-handler";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5300";
+const API_URL = import.meta.env.VITE_API_URL || "";
 
 export type WhatsAppContextStatus =
   | "ACTIVE"

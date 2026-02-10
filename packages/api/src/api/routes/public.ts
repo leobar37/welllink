@@ -9,9 +9,10 @@ import { SocialLinkRepository } from "../../services/repository/social-link";
 import { AssetRepository } from "../../services/repository/asset";
 import { AnalyticsRepository } from "../../services/repository/analytics";
 import { MedicalServiceRepository } from "../../services/repository/medical-service";
-import { TimeSlotRepository } from "../../services/repository/time-slot";
+// AvailabilityRuleRepository: REMOVED - availability now in profile table
 import { ReservationRequestRepository } from "../../services/repository/reservation-request";
 import { ReservationRequestService } from "../../services/business/reservation-request";
+import { AvailabilityValidationService } from "../../services/business/availability-validation";
 import { DEFAULT_THEME_ID } from "../../config/themes";
 
 export const publicRoutes = new Elysia({ prefix: "/public" })
@@ -29,7 +30,7 @@ export const publicRoutes = new Elysia({ prefix: "/public" })
     const assetRepository = new AssetRepository();
     const analyticsRepository = new AnalyticsRepository();
     const medicalServiceRepository = new MedicalServiceRepository();
-    const timeSlotRepository = new TimeSlotRepository();
+    // availabilityRuleRepository: REMOVED - availability now in profile table
     const reservationRequestRepository = new ReservationRequestRepository();
 
     const profileService = new ProfileService(
@@ -48,10 +49,13 @@ export const publicRoutes = new Elysia({ prefix: "/public" })
       assetRepository,
     );
 
+    const availabilityValidationService = new AvailabilityValidationService(
+      profileRepository,
+    );
     const reservationRequestService = new ReservationRequestService(
       reservationRequestRepository,
-      timeSlotRepository,
       medicalServiceRepository,
+      availabilityValidationService,
     );
 
     return {
@@ -63,7 +67,12 @@ export const publicRoutes = new Elysia({ prefix: "/public" })
   })
   .get(
     "/profiles/:username",
-    async ({ params, profileService, socialLinkService, medicalServiceService }) => {
+    async ({
+      params,
+      profileService,
+      socialLinkService,
+      medicalServiceService,
+    }) => {
       // Create a guest context
       const guestCtx = {
         userId: "", // Empty string or specific guest ID
@@ -81,7 +90,9 @@ export const publicRoutes = new Elysia({ prefix: "/public" })
       );
 
       // Fetch active medical services
-      const allServices = await medicalServiceService.getServicesByProfile(profile.id);
+      const allServices = await medicalServiceService.getServicesByProfile(
+        profile.id,
+      );
       const medicalServices = allServices.filter((service) => service.isActive);
 
       // Build features array from profile's featuresConfig
@@ -129,68 +140,27 @@ export const publicRoutes = new Elysia({ prefix: "/public" })
       };
     },
   )
-  .get(
-    "/profiles/:username/services",
-    async ({ params, profileService }) => {
-      const guestCtx = {
-        userId: "",
-        email: "",
-        role: "guest",
-      };
+  .get("/profiles/:username/services", async ({ params, profileService }) => {
+    const guestCtx = {
+      userId: "",
+      email: "",
+      role: "guest",
+    };
 
-      const profile = await profileService.getProfileByUsername(
-        guestCtx,
-        params.username,
-      );
+    const profile = await profileService.getProfileByUsername(
+      guestCtx,
+      params.username,
+    );
 
-      const medicalServiceRepository = new MedicalServiceRepository();
-      const allServices = await medicalServiceRepository.findActiveByProfileId(profile.id);
+    const medicalServiceRepository = new MedicalServiceRepository();
+    const allServices = await medicalServiceRepository.findActiveByProfileId(
+      profile.id,
+    );
 
-      return {
-        services: allServices,
-      };
-    },
-  )
-  .get(
-    "/profiles/:username/slots/:serviceId",
-    async ({ params, query, profileService }) => {
-      const guestCtx = {
-        userId: "",
-        email: "",
-        role: "guest",
-      };
-
-      const profile = await profileService.getProfileByUsername(
-        guestCtx,
-        params.username,
-      );
-
-      const timeSlotRepository = new TimeSlotRepository();
-
-      const startDate = query.date
-        ? new Date(query.date)
-        : new Date();
-      startDate.setHours(0, 0, 0, 0);
-
-      const endDate = new Date(startDate);
-      endDate.setHours(23, 59, 59, 999);
-
-      const slots = await timeSlotRepository.findAvailableSlots(
-        profile.id,
-        params.serviceId,
-        startDate,
-      );
-
-      return {
-        slots: slots.filter(slot => {
-          const slotDate = new Date(slot.startTime);
-          return slotDate >= startDate && slotDate <= endDate;
-        }),
-        serviceId: params.serviceId,
-        date: query.date || startDate.toISOString(),
-      };
-    },
-  )
+    return {
+      services: allServices,
+    };
+  })
   .post(
     "/:username/booking",
     async ({
@@ -207,16 +177,17 @@ export const publicRoutes = new Elysia({ prefix: "/public" })
       };
 
       try {
-        // Validate profile exists
         const profile = await profileService.getProfileByUsername(
           guestCtx,
           params.username,
         );
 
-        // Create reservation request
         const result = await reservationRequestService.createRequest({
-          slotId: body.slotId,
+          profileId: profile.id,
           serviceId: body.serviceId,
+          preferredDate: body.preferredDate,
+          preferredTime: body.preferredTime,
+          timezone: body.timezone,
           patientName: body.patientName,
           patientPhone: body.patientPhone,
           patientEmail: body.patientEmail,
@@ -233,17 +204,13 @@ export const publicRoutes = new Elysia({ prefix: "/public" })
         set.status = 201;
         return {
           success: true,
-          message: "Solicitud de cita creada exitosamente. El profesional confirmará tu cita pronto.",
+          message:
+            "Solicitud de cita creada exitosamente. El profesional confirmará tu cita pronto.",
           requestId: result.request.id,
           expiresAt: result.request.expiresAt,
-          slot: {
-            startTime: result.slot.startTime,
-            endTime: result.slot.endTime,
-          },
           service: {
             name: result.service.name,
             duration: result.service.duration,
-            price: result.service.price,
           },
         };
       } catch (error: any) {
@@ -256,8 +223,10 @@ export const publicRoutes = new Elysia({ prefix: "/public" })
     },
     {
       body: t.Object({
-        slotId: t.String({ minLength: 1 }),
         serviceId: t.String({ minLength: 1 }),
+        preferredDate: t.String({ minLength: 1 }),
+        preferredTime: t.String({ minLength: 1 }),
+        timezone: t.String({ minLength: 1 }),
         patientName: t.String({ minLength: 2 }),
         patientPhone: t.String({ minLength: 8 }),
         patientEmail: t.Optional(t.String()),
@@ -268,12 +237,14 @@ export const publicRoutes = new Elysia({ prefix: "/public" })
         medicalHistory: t.Optional(t.String()),
         currentMedications: t.Optional(t.String()),
         allergies: t.Optional(t.String()),
-        urgencyLevel: t.Optional(t.Union([
-          t.Literal("low"),
-          t.Literal("normal"),
-          t.Literal("high"),
-          t.Literal("urgent"),
-        ])),
+        urgencyLevel: t.Optional(
+          t.Union([
+            t.Literal("low"),
+            t.Literal("normal"),
+            t.Literal("high"),
+            t.Literal("urgent"),
+          ]),
+        ),
       }),
     },
   );

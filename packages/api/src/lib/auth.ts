@@ -49,12 +49,12 @@ export const auth = betterAuth({
   advanced: {
     cookiePrefix: "better-auth",
     useSecureCookies: isProduction,
-    // Default cookie attributes - for cross-site requests in production
+    // Default cookie attributes - cross-site (API + frontend on different domains)
     defaultCookieAttributes: {
-      sameSite: isProduction ? "none" : "lax", // "none" for cross-site in production
-      secure: isProduction, // Required when sameSite is "none"
+      sameSite: isProduction ? "none" : undefined, // undefined for dev (allows different ports), none for prod
+      secure: isProduction, // false in dev (HTTP), true in prod (HTTPS required)
       httpOnly: true,
-      partitioned: isProduction, // Required for third-party cookies (CHIPS)
+      partitioned: isProduction, // only in prod (third-party cookies with CHIPS)
     },
     crossSubDomainCookies: {
       enabled: false, // Not needed for cross-origin (different domains)

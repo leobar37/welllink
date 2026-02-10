@@ -21,7 +21,7 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
     .toUpperCase();
 
   // Construir URL absoluta del avatar
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5300";
+  const API_URL = import.meta.env.VITE_API_URL || "";
   const avatarUrl = profile.avatarUrl
     ? `${API_URL}${profile.avatarUrl}`
     : undefined;

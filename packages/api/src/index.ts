@@ -41,8 +41,7 @@ import { reservationRoutes } from "./api/routes/reservations";
 import { whatsappRoutes } from "./api/routes/whatsapp";
 import { clientRoutes } from "./api/routes/client";
 import { medicalServiceRoutes } from "./api/routes/medical-services";
-import { availabilityRoutes } from "./api/routes/availability";
-import { slotsRoutes } from "./api/routes/slots";
+// availabilityRoutes: REMOVED - availability now configured in profile settings
 import { agentRoutes } from "./api/routes/agent";
 import { agentConfigRoutes } from "./api/routes/agent-config";
 import { paymentMethodRoutes } from "./api/routes/payment-methods";
@@ -159,8 +158,7 @@ const app = new Elysia()
       .use(whatsappRoutes)
       .use(clientRoutes)
       .use(medicalServiceRoutes)
-      .use(availabilityRoutes)
-      .use(slotsRoutes)
+      // availabilityRoutes: REMOVED - availability now configured in profile settings
       .use(agentRoutes)
       .use(agentConfigRoutes)
       .use(conversationsRoutes)

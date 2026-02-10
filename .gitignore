@@ -43,3 +43,6 @@ packages/*/.eslintcache
 
 # Finder (MacOS) folder config
 .DS_Store
+
+# QA Manual testing artifacts
+.qamanual/

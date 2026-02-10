@@ -2,7 +2,6 @@ import { createSeederContext } from "./helpers";
 import { ReservationRepository } from "../../services/repository/reservation";
 import { createdProfileIds } from "./profiles.seeder";
 import { createdMedicalServiceIds } from "./medical-services.seeder";
-import { createdTimeSlotIds } from "./time-slots.seeder";
 import { createdClientIds } from "./clients.seeder";
 import { getTestUserId } from "./users.seeder";
 import { eq } from "drizzle-orm";
@@ -11,22 +10,14 @@ import { db } from "../index";
 
 export const createdReservationIds: Record<string, string> = {};
 
-// Helper to generate the same slot key format as time-slots.seeder.ts
-function getSlotKey(
-  profileKey: string,
-  serviceKey: string,
-  dayOffset: number,
-  slotIndex: number,
-): string {
-  return `slot_${profileKey}_${serviceKey}_day${dayOffset}_${slotIndex}`;
-}
-
 const RESERVATION_DATA = [
   {
     key: "reservation_confirmed",
     profileKey: "maria",
     serviceKey: "consultation",
-    slotKey: getSlotKey("maria", "consultation", 1, 0), // First slot on day 1, 9:00 UTC (14:00 Lima)
+    scheduledDate: "2026-02-15",
+    scheduledTime: "10:00",
+    timezone: "America/Lima",
     patientName: "Laura Gómez",
     patientPhone: "+51912345678",
     patientEmail: "laura.gomez@example.com",
@@ -40,7 +31,9 @@ const RESERVATION_DATA = [
     key: "reservation_completed",
     profileKey: "maria",
     serviceKey: "followUp",
-    slotKey: getSlotKey("maria", "followUp", 2, 0), // First followUp slot on day 2
+    scheduledDate: "2026-02-10",
+    scheduledTime: "14:00",
+    timezone: "America/Lima",
     patientName: "Roberto Pérez",
     patientPhone: "+51923456789",
     patientEmail: "roberto.p@example.com",
@@ -55,7 +48,9 @@ const RESERVATION_DATA = [
     key: "reservation_cancelled",
     profileKey: "maria",
     serviceKey: "consultation",
-    slotKey: getSlotKey("maria", "consultation", 2, 6), // 7th consultation slot on day 2
+    scheduledDate: "2026-02-08",
+    scheduledTime: "09:00",
+    timezone: "America/Lima",
     patientName: "Sofía Ramírez",
     patientPhone: "+51934567890",
     patientEmail: null,
@@ -70,7 +65,9 @@ const RESERVATION_DATA = [
     key: "reservation_no_show",
     profileKey: "maria",
     serviceKey: "consultation",
-    slotKey: getSlotKey("maria", "consultation", 3, 2), // 3rd consultation slot on day 3
+    scheduledDate: "2026-02-05",
+    scheduledTime: "11:00",
+    timezone: "America/Lima",
     patientName: "Diego Torres",
     patientPhone: "+51945678901",
     patientEmail: "diego.t@example.com",
@@ -83,10 +80,18 @@ const RESERVATION_DATA = [
   },
 ];
 
+function getScheduledAtUtc(
+  dateStr: string,
+  timeStr: string,
+  timezone: string,
+): Date {
+  const dateTimeStr = `${dateStr}T${timeStr}:00`;
+  return new Date(dateTimeStr);
+}
+
 export async function seedReservations() {
   console.log("📅 Seeding reservations...");
 
-  const reservationRepository = new ReservationRepository();
   const userId = await getTestUserId();
 
   // CLEANUP: Remove existing reservations for this user's profiles
@@ -102,11 +107,18 @@ export async function seedReservations() {
   console.log(`  ✓ Removed ${deletedCount} reservation(s)`);
 
   for (const reservationData of RESERVATION_DATA) {
-    const { key, profileKey, serviceKey, slotKey, ...data } = reservationData;
+    const {
+      key,
+      profileKey,
+      serviceKey,
+      scheduledDate,
+      scheduledTime,
+      timezone,
+      ...data
+    } = reservationData;
+
     const profileId = createdProfileIds[profileKey];
     const serviceId = createdMedicalServiceIds[serviceKey];
-    const slotId = createdTimeSlotIds[slotKey];
-    const ctx = createSeederContext(userId);
 
     if (!profileId) {
       console.log(
@@ -122,22 +134,53 @@ export async function seedReservations() {
       continue;
     }
 
-    if (!slotId) {
-      console.log(`  ⚠️  Slot ${slotKey} not found, skipping reservation`);
-      continue;
-    }
+    const scheduledAtUtc = getScheduledAtUtc(
+      scheduledDate,
+      scheduledTime,
+      timezone,
+    );
 
-    const created = await reservationRepository.create({
-      ...data,
+    const insertData: any = {
       profileId,
       serviceId,
-      slotId,
-    });
+      patientName: data.patientName,
+      patientPhone: data.patientPhone,
+      patientEmail: data.patientEmail || null,
+      status: data.status,
+      source: data.source || "web",
+      notes: data.notes || null,
+      scheduledAtUtc,
+      scheduledTimezone: timezone,
+      reminder24hSent: false,
+      reminder2hSent: false,
+      reminder24hScheduled: false,
+      reminder2hScheduled: false,
+      noShow: data.noShow || false,
+      paymentStatus: data.paymentStatus || "pending",
+      priceAtBooking: data.priceAtBooking
+        ? parseFloat(data.priceAtBooking)
+        : null,
+    };
 
-    createdReservationIds[key] = created.id;
-    console.log(
-      `  ✓ Created reservation: ${data.patientName} (${data.status}) - ID: ${created.id}`,
-    );
+    if (data.completedAt) {
+      insertData.completedAt = data.completedAt;
+    }
+
+    if (data.cancelledAt) {
+      insertData.cancelledAt = data.cancelledAt;
+    }
+
+    const [created] = await db
+      .insert(reservation)
+      .values(insertData)
+      .returning({ id: reservation.id });
+
+    if (created) {
+      createdReservationIds[key] = created.id;
+      console.log(
+        `  ✓ Created reservation: ${data.patientName} (${data.status}) - ID: ${created.id}`,
+      );
+    }
   }
 
   console.log("✅ Reservations seeded successfully\n");

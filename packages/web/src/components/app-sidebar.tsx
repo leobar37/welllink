@@ -10,8 +10,6 @@ import {
   Stethoscope,
   Folder,
   Calendar,
-  Clock,
-  CalendarDays,
   Bot,
   MessageCircle,
 } from "lucide-react";
@@ -42,16 +40,7 @@ const items = [
     url: "/dashboard/reservations",
     icon: Calendar,
   },
-  {
-    title: "Disponibilidad",
-    url: "/dashboard/availability",
-    icon: Clock,
-  },
-  {
-    title: "Slots",
-    url: "/dashboard/slots",
-    icon: CalendarDays,
-  },
+  // Availability: REMOVED - now configured in profile settings
   {
     title: "Perfil",
     url: "/dashboard/profile",

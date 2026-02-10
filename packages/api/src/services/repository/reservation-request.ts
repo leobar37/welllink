@@ -129,4 +129,47 @@ export class ReservationRequestRepository {
       .where(eq(reservationRequest.status, status))
       .orderBy(desc(reservationRequest.createdAt));
   }
+
+  async updateProposalDetails(
+    id: string,
+    proposedAtUtc: Date,
+    proposalReason: string,
+    proposalExpiresAt: Date,
+  ): Promise<ReservationRequest> {
+    const [request] = await db
+      .update(reservationRequest)
+      .set({
+        proposedAtUtc,
+        proposalReason,
+        proposalExpiresAt,
+        updatedAt: new Date(),
+      })
+      .where(eq(reservationRequest.id, id))
+      .returning();
+
+    if (!request) {
+      throw new Error("Request not found");
+    }
+
+    return request;
+  }
+
+  async clearProposal(id: string): Promise<ReservationRequest> {
+    const [request] = await db
+      .update(reservationRequest)
+      .set({
+        proposedAtUtc: null,
+        proposalReason: null,
+        proposalExpiresAt: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(reservationRequest.id, id))
+      .returning();
+
+    if (!request) {
+      throw new Error("Request not found");
+    }
+
+    return request;
+  }
 }

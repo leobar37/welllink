@@ -29,6 +29,12 @@ const PROFILE_DATA = [
         buttonText: "Mi historia",
       },
     },
+    // Simple availability settings (replaces availability_rule table)
+    workDays: [1, 2, 3, 4, 5], // Monday to Friday
+    workStartTime: "09:00",
+    workEndTime: "18:00",
+    appointmentDuration: 30,
+    isAcceptingAppointments: true,
   },
   {
     key: "clinic",
@@ -56,6 +62,12 @@ const PROFILE_DATA = [
         enabled: true,
       },
     },
+    // Simple availability settings (replaces availability_rule table)
+    workDays: [1, 2, 3, 4, 5], // Monday to Friday
+    workStartTime: "08:00",
+    workEndTime: "17:00",
+    appointmentDuration: 30,
+    isAcceptingAppointments: true,
   },
 ];
 

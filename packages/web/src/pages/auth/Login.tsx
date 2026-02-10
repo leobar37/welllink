@@ -68,11 +68,8 @@ export function Login() {
       }
 
       toast.success("Sesión iniciada correctamente");
-      if (data?.redirect && data.url) {
-        window.location.href = data.url;
-        return;
-      }
-      navigate("/dashboard", { replace: true });
+      // Force full page reload to refresh session state
+      window.location.href = "/dashboard";
     } catch (err) {
       console.error(err);
       toast.error("Error al iniciar sesión");

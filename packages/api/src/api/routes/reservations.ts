@@ -5,20 +5,19 @@ import { ReservationRequestService } from "../../services/business/reservation-r
 import { ApprovalService } from "../../services/business/approval";
 import { NotificationService } from "../../services/business/notification";
 import { ReservationRequestRepository } from "../../services/repository/reservation-request";
-import { TimeSlotRepository } from "../../services/repository/time-slot";
 import { MedicalServiceRepository } from "../../services/repository/medical-service";
 import { ReservationRepository } from "../../services/repository/reservation";
 import { WhatsAppConfigRepository } from "../../services/repository/whatsapp-config";
 import { ProfileRepository } from "../../services/repository/profile";
+import { AvailabilityValidationService } from "../../services/business/availability-validation";
 
 export const reservationRoutes = new Elysia({ prefix: "/reservations" })
   .use(errorMiddleware)
   .use(servicesPlugin)
   .derive({ as: "global" }, ({ services }) => {
-    const { evolutionService } = services;
+    const { evolutionService, availabilityValidationService } = services;
 
     const reservationRequestRepository = new ReservationRequestRepository();
-    const timeSlotRepository = new TimeSlotRepository();
     const medicalServiceRepository = new MedicalServiceRepository();
     const reservationRepository = new ReservationRepository();
     const whatsappConfigRepository = new WhatsAppConfigRepository();
@@ -26,27 +25,23 @@ export const reservationRoutes = new Elysia({ prefix: "/reservations" })
 
     const reservationRequestService = new ReservationRequestService(
       reservationRequestRepository,
-      timeSlotRepository,
       medicalServiceRepository,
+      availabilityValidationService,
     );
 
     const approvalService = new ApprovalService(
       reservationRequestRepository,
-      timeSlotRepository,
       reservationRepository,
+      profileRepository,
     );
 
-    const notificationService = new NotificationService(
-      whatsappConfigRepository,
-      profileRepository,
-      medicalServiceRepository,
-      evolutionService,
-    );
+    const notificationService = new NotificationService();
 
     return {
       reservationRequestService,
       approvalService,
       notificationService,
+      availabilityValidationService,
     };
   })
   .post(
@@ -54,16 +49,15 @@ export const reservationRoutes = new Elysia({ prefix: "/reservations" })
     async ({ body, set, reservationRequestService, notificationService }) => {
       const result = await reservationRequestService.createRequest(body);
 
-      if (result.slot && result.slot.profileId) {
+      if (result.request) {
         await notificationService.notifyDoctorNewRequest({
           requestId: result.request.id,
-          profileId: result.slot.profileId,
-          slotId: result.request.slotId,
+          profileId: result.request.profileId,
           serviceId: result.request.serviceId,
           patientName: result.request.patientName,
           patientPhone: result.request.patientPhone,
-          appointmentDate: result.slot.startTime,
-          appointmentTime: result.slot.startTime,
+          preferredAtUtc: result.request.preferredAtUtc,
+          requestedTimezone: result.request.requestedTimezone,
           urgencyLevel: result.request.urgencyLevel || "normal",
           chiefComplaint: result.request.chiefComplaint || "",
         });
@@ -74,8 +68,11 @@ export const reservationRoutes = new Elysia({ prefix: "/reservations" })
     },
     {
       body: t.Object({
-        slotId: t.String(),
+        profileId: t.String(),
         serviceId: t.String(),
+        preferredDate: t.String(),
+        preferredTime: t.String(),
+        timezone: t.String(),
         patientName: t.String({ minLength: 1 }),
         patientPhone: t.String({ minLength: 10 }),
         patientEmail: t.Optional(t.String()),
@@ -93,6 +90,22 @@ export const reservationRoutes = new Elysia({ prefix: "/reservations" })
             t.Literal("high"),
             t.Literal("urgent"),
           ]),
+        ),
+        metadata: t.Optional(
+          t.Object({
+            symptoms: t.Optional(t.Array(t.String())),
+            urgencyLevel: t.Optional(
+              t.Union([
+                t.Literal("low"),
+                t.Literal("normal"),
+                t.Literal("high"),
+                t.Literal("urgent"),
+              ]),
+            ),
+            isNewPatient: t.Optional(t.Boolean()),
+            insuranceProvider: t.Optional(t.String()),
+            notes: t.Optional(t.String()),
+          }),
         ),
       }),
     },
@@ -112,39 +125,18 @@ export const reservationRoutes = new Elysia({ prefix: "/reservations" })
   .post(
     "/approve",
     async ({ body, set, approvalService, notificationService }) => {
-      // Transform changes from notification format to approval service format
-      const approvalChanges = body.changes ? {
-        // If the doctor selected a different time slot, they would provide timeSlotId
-        // For now, we'll pass empty changes as the time slot selection is done elsewhere
-      } : undefined;
+      const result = await approvalService.approveRequest(body);
 
-      const result = await approvalService.approveRequest({
-        requestId: body.requestId,
-        approvedBy: body.approvedBy,
-        notes: body.notes,
-        changes: approvalChanges,
-      });
-
-      if (result.reservation && result.slot && result.request) {
-        const changes = body.changes ? {
-          newDate: body.changes.newDate ? new Date(body.changes.newDate) : undefined,
-          newTime: body.changes.newTime,
-          newService: body.changes.newService,
-        } : undefined;
-
+      if (result.reservation && result.request) {
         await notificationService.notifyPatientApproval({
           requestId: body.requestId,
           profileId: result.request.profileId,
           serviceId: result.request.serviceId,
-          slotId: result.slot.id,
           patientPhone: result.request.patientPhone,
           patientName: result.request.patientName,
-          appointmentDate: result.slot.startTime,
-          appointmentTime: result.slot.startTime.toLocaleTimeString("es-ES", {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          changes,
+          scheduledAtUtc: result.reservation.scheduledAtUtc,
+          scheduledTimezone: result.reservation.scheduledTimezone,
+          notes: body.notes,
         });
       }
 
@@ -155,14 +147,10 @@ export const reservationRoutes = new Elysia({ prefix: "/reservations" })
       body: t.Object({
         requestId: t.String(),
         approvedBy: t.String(),
+        scheduledDate: t.String(),
+        scheduledTime: t.String(),
+        timezone: t.String(),
         notes: t.Optional(t.String()),
-        changes: t.Optional(
-          t.Object({
-            newDate: t.Optional(t.String()), // ISO date string
-            newTime: t.Optional(t.String()), // Time string "HH:MM"
-            newService: t.Optional(t.String()), // Service name
-          }),
-        ),
       }),
     },
   )
@@ -171,7 +159,6 @@ export const reservationRoutes = new Elysia({ prefix: "/reservations" })
     async ({ body, set, approvalService, notificationService }) => {
       const result = await approvalService.rejectRequest(body);
 
-      // Notify patient about rejection
       if (result.request) {
         await notificationService.notifyPatientRejection({
           requestId: body.requestId,

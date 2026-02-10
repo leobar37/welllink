@@ -1,17 +1,34 @@
 import { useState } from "react";
-import { CheckCircle, XCircle, AlertTriangle, Inbox, RefreshCw, Calendar } from "lucide-react";
+import {
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Inbox,
+  Calendar,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from "@/components/ui/empty";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyMedia,
+} from "@/components/ui/empty";
 import { RequestCard } from "./request-card";
 import { ApprovalDialog } from "./approval-dialog";
 import { RejectionDialog } from "./rejection-dialog";
-import { usePendingRequests, useReservationStats } from "@/hooks/use-reservation-requests";
+import {
+  usePendingRequests,
+  useReservationStats,
+} from "@/hooks/use-reservation-requests";
 import type { PendingRequest } from "@/hooks/use-reservation-requests";
+import { cn } from "@/lib/utils";
 
 export function PendingRequests() {
-  const [selectedRequest, setSelectedRequest] = useState<PendingRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<PendingRequest | null>(
+    null,
+  );
   const [isApprovalOpen, setIsApprovalOpen] = useState(false);
   const [isRejectionOpen, setIsRejectionOpen] = useState(false);
 
@@ -63,7 +80,7 @@ export function PendingRequests() {
   return (
     <div className="space-y-6">
       {/* Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="Pendientes"
           value={stats?.pending || 0}
@@ -101,10 +118,6 @@ export function PendingRequests() {
                 <Badge variant="secondary">{requests.length}</Badge>
               )}
             </CardTitle>
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Actualizar
-            </Button>
           </div>
         </CardHeader>
       </Card>
@@ -118,7 +131,8 @@ export function PendingRequests() {
             </EmptyMedia>
             <EmptyTitle>No hay solicitudes pendientes</EmptyTitle>
             <EmptyDescription>
-              ¡Excelente! No tienes solicitudes de citas pendientes de revisar en este momento.
+              ¡Excelente! No tienes solicitudes de citas pendientes de revisar
+              en este momento.
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
@@ -164,14 +178,25 @@ interface StatCardProps {
 
 function StatCard({ title, value, icon, color }: StatCardProps) {
   return (
-    <Card>
-      <CardContent className="flex items-center gap-4 p-6">
-        <div className={cn("flex shrink-0 items-center justify-center rounded-lg p-3", getColorClasses(color))}>
+    <Card className="py-0 transition-shadow hover:shadow-md">
+      <CardContent className="flex items-center gap-3 p-4 sm:gap-4 sm:p-5">
+        <div
+          className={cn(
+            "flex size-10 shrink-0 items-center justify-center rounded-md border",
+            getColorClasses(color),
+          )}
+          aria-hidden="true"
+        >
           {icon}
         </div>
-        <div className="space-y-1">
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="text-3xl font-bold">{value}</p>
+
+        <div className="min-w-0 space-y-1">
+          <p className="truncate text-xs font-medium uppercase tracking-wide text-muted-foreground sm:text-sm">
+            {title}
+          </p>
+          <p className="text-2xl font-semibold leading-none tabular-nums sm:text-3xl">
+            {value}
+          </p>
         </div>
       </CardContent>
     </Card>
@@ -181,16 +206,12 @@ function StatCard({ title, value, icon, color }: StatCardProps) {
 function getColorClasses(color: StatCardProps["color"]) {
   switch (color) {
     case "default":
-      return "bg-primary text-primary-foreground";
+      return "bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:text-emerald-300";
     case "secondary":
-      return "bg-secondary text-secondary-foreground";
+      return "bg-muted/70 text-foreground border-border";
     case "destructive":
-      return "bg-destructive text-destructive-foreground";
+      return "bg-rose-500/10 text-rose-700 border-rose-500/20 dark:text-rose-300";
     case "outline":
-      return "bg-muted text-muted-foreground";
+      return "bg-amber-500/10 text-amber-700 border-amber-500/20 dark:text-amber-300";
   }
-}
-
-function cn(...classes: (string | undefined | null | false)[]) {
-  return classes.filter(Boolean).join(" ");
 }

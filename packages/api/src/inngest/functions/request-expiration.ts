@@ -1,6 +1,5 @@
 import { inngest } from "../../lib/inngest-client";
 import { ReservationRequestRepository } from "../../services/repository/reservation-request";
-import { TimeSlotRepository } from "../../services/repository/time-slot";
 import { ReservationRepository } from "../../services/repository/reservation";
 import { ApprovalService } from "../../services/business/approval";
 import { NotificationService } from "../../services/business/notification";
@@ -20,11 +19,9 @@ export const expirePendingRequests = inngest.createFunction(
     logger.info("Starting expiration check for pending requests");
 
     const reservationRequestRepository = new ReservationRequestRepository();
-    const timeSlotRepository = new TimeSlotRepository();
     const reservationRepository = new ReservationRepository();
     const approvalService = new ApprovalService(
       reservationRequestRepository,
-      timeSlotRepository,
       reservationRepository,
     );
     const whatsappConfigRepository = new WhatsAppConfigRepository();
@@ -49,13 +46,12 @@ export const expirePendingRequests = inngest.createFunction(
         const result = await approvalService.expireRequest(request.id);
 
         if (result.success) {
-          const slot = await timeSlotRepository.findById(request.slotId);
           const service = await medicalServiceRepository.findById(
             request.serviceId,
           );
           const profile = await profileRepository.findById(request.profileId);
 
-          if (profile && slot && service) {
+          if (profile && service) {
             await notificationService.notifyPatientExpiration(
               request.profileId,
               request.patientPhone,
@@ -68,7 +64,8 @@ export const expirePendingRequests = inngest.createFunction(
                 request.profileId,
                 profile.whatsappNumber,
                 request.patientName,
-                request.requestedTime,
+                request.preferredAtUtc,
+                request.requestedTimezone,
               );
             }
           }
