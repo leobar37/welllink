@@ -368,13 +368,14 @@ export class AnalyticsService {
       platform: click.socialLink.platform,
       metadata: {
         socialLinkId: click.socialLinkId,
-        url: `${click.socialLink.platform === "whatsapp" 
-          ? `https://wa.me/${click.socialLink.username.replace(/\D/g, "")}`
-          : click.socialLink.platform === "youtube"
-          ? `https://youtube.com/@${click.socialLink.username}`
-          : click.socialLink.platform === "tiktok"
-          ? `https://tiktok.com/@${click.socialLink.username}`
-          : `https://${click.socialLink.platform}.com/${click.socialLink.username}`
+        url: `${
+          click.socialLink.platform === "whatsapp"
+            ? `https://wa.me/${click.socialLink.username.replace(/\D/g, "")}`
+            : click.socialLink.platform === "youtube"
+              ? `https://youtube.com/@${click.socialLink.username}`
+              : click.socialLink.platform === "tiktok"
+                ? `https://tiktok.com/@${click.socialLink.username}`
+                : `https://${click.socialLink.platform}.com/${click.socialLink.username}`
         }`,
       },
     }));

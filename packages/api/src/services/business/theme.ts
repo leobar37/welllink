@@ -42,7 +42,7 @@ export class ThemeService {
    */
   async getProfileTheme(
     ctx: RequestContext,
-    profileId: string
+    profileId: string,
   ): Promise<{ themeId: string; theme: ThemeDefinition }> {
     // Verify the user owns this profile
     const profile = await this.profileRepository.findOne(ctx, profileId);
@@ -50,7 +50,8 @@ export class ThemeService {
       throw new NotFoundException("Profile not found");
     }
 
-    const customization = await this.customizationRepository.findByProfileId(profileId);
+    const customization =
+      await this.customizationRepository.findByProfileId(profileId);
     const themeId = customization?.themeId ?? DEFAULT_THEME_ID;
     const theme = getThemeById(themeId) ?? getThemeById(DEFAULT_THEME_ID)!;
 
@@ -63,7 +64,7 @@ export class ThemeService {
   async updateProfileTheme(
     ctx: RequestContext,
     profileId: string,
-    themeId: string
+    themeId: string,
   ): Promise<{ themeId: string; theme: ThemeDefinition }> {
     // Verify the user owns this profile
     const profile = await this.profileRepository.findOne(ctx, profileId);
@@ -87,9 +88,10 @@ export class ThemeService {
    * Get theme for a public profile (no auth required)
    */
   async getPublicProfileTheme(
-    profileId: string
+    profileId: string,
   ): Promise<{ themeId: string; theme: ThemeDefinition }> {
-    const customization = await this.customizationRepository.findByProfileId(profileId);
+    const customization =
+      await this.customizationRepository.findByProfileId(profileId);
     const themeId = customization?.themeId ?? DEFAULT_THEME_ID;
     const theme = getThemeById(themeId) ?? getThemeById(DEFAULT_THEME_ID)!;
 

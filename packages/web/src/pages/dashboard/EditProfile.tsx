@@ -17,13 +17,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useProfile } from "@/hooks/use-profile";
 import { useAssetUrl } from "@/hooks/use-asset-url";
@@ -115,43 +108,37 @@ export function EditProfile() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Profile Info Section */}
-          <div className="grid gap-6 md:grid-cols-[250px_1fr]">
-            <Card>
-              <CardHeader>
-                <CardTitle>Avatar</CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col items-center gap-4">
-                <Avatar className="h-32 w-32">
-                  <AvatarImage src={avatarUrl || ""} />
-                  <AvatarFallback>?</AvatarFallback>
-                </Avatar>
-                <div className="w-full">
-                  <label htmlFor="avatar-upload" className="cursor-pointer w-full">
-                    <div className="flex items-center justify-center w-full py-2 px-4 border rounded-md hover:bg-muted transition-colors text-sm font-medium">
-                      <Upload className="w-4 h-4 mr-2" />
-                      {uploadAvatar.isPending ? "Subiendo..." : "Cambiar Foto"}
-                    </div>
-                    <input
-                      id="avatar-upload"
-                      type="file"
-                      className="hidden"
-                      accept="image/*"
-                      onChange={handleAvatarUpload}
-                      disabled={uploadAvatar.isPending}
-                    />
-                  </label>
+          <div className="grid gap-6 md:grid-cols-[280px_1fr]">
+            <div className="bg-muted/40 rounded-2xl p-6 flex flex-col items-center gap-4">
+              <h3 className="text-lg font-medium self-start">Avatar</h3>
+              <Avatar className="h-32 w-32">
+                <AvatarImage src={avatarUrl || ""} />
+                <AvatarFallback>?</AvatarFallback>
+              </Avatar>
+              <label htmlFor="avatar-upload" className="cursor-pointer w-full">
+                <div className="flex items-center justify-center w-full py-2.5 px-4 bg-background rounded-xl hover:bg-muted transition-colors text-sm font-medium">
+                  <Upload className="w-4 h-4 mr-2" />
+                  {uploadAvatar.isPending ? "Subiendo..." : "Cambiar Foto"}
                 </div>
-              </CardContent>
-            </Card>
+                <input
+                  id="avatar-upload"
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                  disabled={uploadAvatar.isPending}
+                />
+              </label>
+            </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Información del Perfil</CardTitle>
-                <CardDescription>
+            <div className="bg-muted/40 rounded-2xl p-6 space-y-5">
+              <div>
+                <h3 className="text-lg font-medium">Información del Perfil</h3>
+                <p className="text-sm text-muted-foreground mt-1">
                   Actualiza la información de tu perfil visible para los visitantes.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+                </p>
+              </div>
+              <div className="space-y-4">
                 <FormField
                   control={form.control}
                   name="displayName"
@@ -231,37 +218,35 @@ export function EditProfile() {
                     </FormItem>
                   )}
                 />
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
 
           {/* Clinic/Organization Section */}
-          <div className="grid gap-6 md:grid-cols-[250px_1fr]">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5" />
-                  Clínica
-                </CardTitle>
-                <CardDescription>
-                  Información de tu consultorio o clínica
-                </CardDescription>
-              </CardHeader>
-            </Card>
+          <div className="grid gap-6 md:grid-cols-[280px_1fr]">
+            <div className="bg-muted/40 rounded-2xl p-6">
+              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                <Building2 className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-lg font-medium">Clínica</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Información de tu consultorio o clínica
+              </p>
+            </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Información de la Clínica</CardTitle>
-                <CardDescription>
+            <div className="bg-muted/40 rounded-2xl p-6 space-y-5">
+              <div>
+                <h3 className="text-lg font-medium">Información de la Clínica</h3>
+                <p className="text-sm text-muted-foreground mt-1">
                   Completa esta sección si eres una clínica u organización.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+                </p>
+              </div>
+              <div className="space-y-4">
                 <FormField
                   control={form.control}
                   name="isOrganization"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <FormItem className="flex flex-row items-center justify-between rounded-xl bg-background p-4">
                       <div className="space-y-0.5">
                         <FormLabel className="text-base">
                           ¿Eres una clínica u organización?
@@ -376,8 +361,8 @@ export function EditProfile() {
                     />
                   </>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
 
           {/* Single Save Button */}

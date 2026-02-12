@@ -12,6 +12,7 @@ import {
   Calendar,
   Bot,
   MessageCircle,
+  Smartphone,
 } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
 import {
@@ -60,6 +61,11 @@ const items = [
     title: "Agente IA",
     url: "/dashboard/agent-config",
     icon: Bot,
+  },
+  {
+    title: "WhatsApp",
+    url: "/dashboard/whatsapp",
+    icon: Smartphone,
   },
   {
     title: "Conversaciones",

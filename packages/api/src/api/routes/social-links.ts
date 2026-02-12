@@ -50,11 +50,7 @@ export const socialLinkRoutes = new Elysia({ prefix: "/social-links" })
   .put(
     "/:id",
     async ({ params, body, services, ctx }) => {
-      return services.socialLinkService.updateSocialLink(
-        ctx!,
-        params.id,
-        body,
-      );
+      return services.socialLinkService.updateSocialLink(ctx!, params.id, body);
     },
     {
       body: t.Object({

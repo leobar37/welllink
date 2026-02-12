@@ -1,5 +1,4 @@
 import { Link } from "react-router";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -64,84 +63,83 @@ export function DashboardOverview() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+        <div className="bg-muted/40 rounded-2xl p-5 transition-colors hover:bg-muted/50">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-muted-foreground">
               Visualizaciones Totales
-            </CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.views || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              +0% desde el mes pasado
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            </span>
+            <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center">
+              <Eye className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            </div>
+          </div>
+          <div className="text-3xl font-semibold tracking-tight">{stats?.views || 0}</div>
+          <p className="text-xs text-muted-foreground mt-1">
+            +0% desde el mes pasado
+          </p>
+        </div>
+
+        <div className="bg-muted/40 rounded-2xl p-5 transition-colors hover:bg-muted/50">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-muted-foreground">
               Clics en Redes
-            </CardTitle>
-            <MousePointerClick className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.socialClicks || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              +0% desde el mes pasado
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            </span>
+            <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center">
+              <MousePointerClick className="h-4 w-4 text-green-600 dark:text-green-400" />
+            </div>
+          </div>
+          <div className="text-3xl font-semibold tracking-tight">{stats?.socialClicks || 0}</div>
+          <p className="text-xs text-muted-foreground mt-1">
+            +0% desde el mes pasado
+          </p>
+        </div>
+
+        <div className="bg-muted/40 rounded-2xl p-5 transition-colors hover:bg-muted/50">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-muted-foreground">
               Respuestas de Encuestas
-            </CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">Próximamente</p>
-          </CardContent>
-        </Card>
+            </span>
+            <div className="h-8 w-8 rounded-full bg-amber-500/10 flex items-center justify-center">
+              <FileText className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            </div>
+          </div>
+          <div className="text-3xl font-semibold tracking-tight">0</div>
+          <p className="text-xs text-muted-foreground mt-1">Próximamente</p>
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        {/* Placeholder for Chart or Activity Feed */}
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Actividad Reciente</CardTitle>
-          </CardHeader>
-          <CardContent>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+        <div className="col-span-4">
+          <h3 className="text-lg font-medium mb-4">Actividad Reciente</h3>
+          <div className="bg-muted/40 rounded-2xl p-5">
             <RecentActivity profileId={profile.id} />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle>Acciones Rápidas</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-2">
-            <Button variant="outline" className="justify-start" asChild>
-              <Link to="/dashboard/profile">
-                <PenSquare className="mr-2 h-4 w-4" />
-                Editar Perfil
-              </Link>
-            </Button>
-            <Button variant="outline" className="justify-start" asChild>
-              <Link to="/dashboard/features">
-                <FileText className="mr-2 h-4 w-4" />
-                Gestionar Funciones
-              </Link>
-            </Button>
-            <Button variant="outline" className="justify-start" asChild>
-              <Link to="/dashboard/settings">
-                <Share2 className="mr-2 h-4 w-4" />
-                Configuración de Cuenta
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="col-span-3">
+          <h3 className="text-lg font-medium mb-4">Acciones Rápidas</h3>
+          <div className="bg-muted/40 rounded-2xl p-5">
+            <div className="grid gap-2">
+              <Button variant="ghost" className="justify-start hover:bg-background" asChild>
+                <Link to="/dashboard/profile">
+                  <PenSquare className="mr-2 h-4 w-4" />
+                  Editar Perfil
+                </Link>
+              </Button>
+              <Button variant="ghost" className="justify-start hover:bg-background" asChild>
+                <Link to="/dashboard/features">
+                  <FileText className="mr-2 h-4 w-4" />
+                  Gestionar Funciones
+                </Link>
+              </Button>
+              <Button variant="ghost" className="justify-start hover:bg-background" asChild>
+                <Link to="/dashboard/settings">
+                  <Share2 className="mr-2 h-4 w-4" />
+                  Configuración de Cuenta
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

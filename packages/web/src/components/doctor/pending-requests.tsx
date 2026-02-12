@@ -6,7 +6,6 @@ import {
   Inbox,
   Calendar,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Empty,
@@ -108,19 +107,22 @@ export function PendingRequests() {
       </div>
 
       {/* Header with actions */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Solicitudes Pendientes
-              {requests && requests.length > 0 && (
-                <Badge variant="secondary">{requests.length}</Badge>
-              )}
-            </CardTitle>
-          </div>
-        </CardHeader>
-      </Card>
+      <div className="flex items-center gap-3">
+        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+          <Calendar className="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <h2 className="text-lg font-medium flex items-center gap-2">
+            Solicitudes Pendientes
+            {requests && requests.length > 0 && (
+              <Badge variant="secondary">{requests.length}</Badge>
+            )}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Revisa y gestiona las solicitudes de tus pacientes
+          </p>
+        </div>
+      </div>
 
       {/* Requests List */}
       {!requests || requests.length === 0 ? (
@@ -178,40 +180,38 @@ interface StatCardProps {
 
 function StatCard({ title, value, icon, color }: StatCardProps) {
   return (
-    <Card className="py-0 transition-shadow hover:shadow-md">
-      <CardContent className="flex items-center gap-3 p-4 sm:gap-4 sm:p-5">
-        <div
-          className={cn(
-            "flex size-10 shrink-0 items-center justify-center rounded-md border",
-            getColorClasses(color),
-          )}
-          aria-hidden="true"
-        >
-          {icon}
-        </div>
+    <div className="bg-muted/40 rounded-2xl p-4 sm:p-5 flex items-center gap-3 sm:gap-4 transition-colors hover:bg-muted/50">
+      <div
+        className={cn(
+          "flex size-10 shrink-0 items-center justify-center rounded-xl",
+          getColorClasses(color),
+        )}
+        aria-hidden="true"
+      >
+        {icon}
+      </div>
 
-        <div className="min-w-0 space-y-1">
-          <p className="truncate text-xs font-medium uppercase tracking-wide text-muted-foreground sm:text-sm">
-            {title}
-          </p>
-          <p className="text-2xl font-semibold leading-none tabular-nums sm:text-3xl">
-            {value}
-          </p>
-        </div>
-      </CardContent>
-    </Card>
+      <div className="min-w-0 space-y-1">
+        <p className="truncate text-xs font-medium uppercase tracking-wide text-muted-foreground sm:text-sm">
+          {title}
+        </p>
+        <p className="text-2xl font-semibold leading-none tabular-nums sm:text-3xl">
+          {value}
+        </p>
+      </div>
+    </div>
   );
 }
 
 function getColorClasses(color: StatCardProps["color"]) {
   switch (color) {
     case "default":
-      return "bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:text-emerald-300";
+      return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300";
     case "secondary":
-      return "bg-muted/70 text-foreground border-border";
+      return "bg-primary/10 text-primary dark:text-primary-foreground";
     case "destructive":
-      return "bg-rose-500/10 text-rose-700 border-rose-500/20 dark:text-rose-300";
+      return "bg-rose-500/10 text-rose-700 dark:text-rose-300";
     case "outline":
-      return "bg-amber-500/10 text-amber-700 border-amber-500/20 dark:text-amber-300";
+      return "bg-amber-500/10 text-amber-700 dark:text-amber-300";
   }
 }

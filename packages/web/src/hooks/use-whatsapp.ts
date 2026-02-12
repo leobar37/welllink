@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 
+const API_URL = import.meta.env.VITE_API_URL || "";
+
 interface WhatsAppConfig {
   isConnected: boolean;
   instanceId?: string;
@@ -64,21 +66,27 @@ export function useWhatsApp(): WhatsAppConnectionState {
 
       // If no configs exist, call get-or-create endpoint
       if (configsList.length === 0) {
-        const createResponse = await api.api.whatsapp.configs["get-or-create"].get();
+        const createResponse =
+          await api.api.whatsapp.configs["get-or-create"].get();
         if (createResponse.error) {
-          console.error("Error creating WhatsApp config:", createResponse.error);
+          console.error(
+            "Error creating WhatsApp config:",
+            createResponse.error,
+          );
           setConfigs([]);
           return;
         }
 
         // Add the newly created config to the list
         const newConfig = createResponse.data as any;
-        setConfigs([{
-          id: newConfig.id,
-          instanceName: newConfig.instanceName,
-          isConnected: newConfig.isConnected,
-          isEnabled: newConfig.isEnabled,
-        }]);
+        setConfigs([
+          {
+            id: newConfig.id,
+            instanceName: newConfig.instanceName,
+            isConnected: newConfig.isConnected,
+            isEnabled: newConfig.isEnabled,
+          },
+        ]);
 
         // Set it as the active config
         setConfig({
@@ -129,15 +137,19 @@ export function useWhatsApp(): WhatsAppConnectionState {
           pollIntervalRef.current = null;
         }
 
-        const response = await api.api.whatsapp
-          .configs({ id: configId })
-          .connect.post();
+        // Use fetch directly for routes with dynamic parameters (edenTreaty type issues)
+        const response = await fetch(
+          `${API_URL}/api/whatsapp/configs/${configId}/connect`,
+          {
+            method: "POST",
+            credentials: "include",
+          },
+        );
 
-        if (response.error) {
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
           const errorMessage =
-            typeof response.error === "object" && "message" in response.error
-              ? (response.error as any).message
-              : "Error al conectar WhatsApp";
+            errorData.message || "Error al conectar WhatsApp";
           toast.error(errorMessage);
           setConfig((prev) => ({
             ...prev,
@@ -146,12 +158,10 @@ export function useWhatsApp(): WhatsAppConnectionState {
           return;
         }
 
-        if (
-          response.data &&
-          typeof response.data === "object" &&
-          "qrcode" in response.data
-        ) {
-          const qrCodeData = (response.data as any).qrcode;
+        const data = await response.json();
+
+        if (data && typeof data === "object" && "qrcode" in data) {
+          const qrCodeData = data.qrcode;
 
           // The API returns base64 QR code
           const qrCodeDataUrl = qrCodeData.startsWith("data:")
@@ -160,7 +170,7 @@ export function useWhatsApp(): WhatsAppConnectionState {
 
           setConfig({
             isConnected: false,
-            instanceId: (response.data as any).instanceName,
+            instanceId: data.instanceName,
             qrCode: qrCodeDataUrl,
             error: undefined,
             configId,
@@ -171,15 +181,18 @@ export function useWhatsApp(): WhatsAppConnectionState {
           // Poll for connection status every 3 seconds
           pollIntervalRef.current = setInterval(async () => {
             try {
-              const statusResponse = await api.api.whatsapp
-                .configs({ id: configId })
-                .status.get();
+              const statusResponse = await fetch(
+                `${API_URL}/api/whatsapp/configs/${configId}/status`,
+                {
+                  credentials: "include",
+                },
+              );
 
-              if (statusResponse.error) {
+              if (!statusResponse.ok) {
                 return;
               }
 
-              const statusData = statusResponse.data as any;
+              const statusData = await statusResponse.json();
               if (statusData?.isConnected) {
                 // Clear polling
                 if (pollIntervalRef.current) {
@@ -242,15 +255,19 @@ export function useWhatsApp(): WhatsAppConnectionState {
           pollIntervalRef.current = null;
         }
 
-        const response = await api.api.whatsapp
-          .configs({ id: configId })
-          .disconnect.post();
+        // Use fetch directly for routes with dynamic parameters (edenTreaty type issues)
+        const response = await fetch(
+          `${API_URL}/api/whatsapp/configs/${configId}/disconnect`,
+          {
+            method: "POST",
+            credentials: "include",
+          },
+        );
 
-        if (response.error) {
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
           const errorMessage =
-            typeof response.error === "object" && "message" in response.error
-              ? (response.error as any).message
-              : "Error al desconectar WhatsApp";
+            errorData.message || "Error al desconectar WhatsApp";
           toast.error(errorMessage);
           return;
         }
@@ -280,16 +297,20 @@ export function useWhatsApp(): WhatsAppConnectionState {
   const refreshStatus = useCallback(async (configId: string) => {
     try {
       setIsLoading(true);
-      const response = await api.api.whatsapp
-        .configs({ id: configId })
-        .status.get();
+      // Use fetch directly for routes with dynamic parameters (edenTreaty type issues)
+      const response = await fetch(
+        `${API_URL}/api/whatsapp/configs/${configId}/status`,
+        {
+          credentials: "include",
+        },
+      );
 
-      if (response.error) {
-        console.error("Error refreshing status:", response.error);
+      if (!response.ok) {
+        console.error("Error refreshing status:", response.statusText);
         return;
       }
 
-      const statusData = response.data as any;
+      const statusData = await response.json();
       setConfig((prev) => ({
         ...prev,
         isConnected: statusData?.isConnected ?? false,

@@ -35,7 +35,12 @@ export const reservationRoutes = new Elysia({ prefix: "/reservations" })
       profileRepository,
     );
 
-    const notificationService = new NotificationService();
+    const notificationService = new NotificationService(
+      whatsappConfigRepository,
+      profileRepository,
+      medicalServiceRepository,
+      evolutionService,
+    );
 
     return {
       reservationRequestService,

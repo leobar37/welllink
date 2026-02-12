@@ -5,17 +5,23 @@ import {
 } from "../../services/business/agent-config";
 import type { TonePreset, AgentConfigData } from "../../db/schema/agent-config";
 import { AgentConfigRepository } from "../../services/repository/agent-config";
-
-const agentConfigRepository = new AgentConfigRepository();
-const agentConfigService = new AgentConfigService(agentConfigRepository);
+import { authGuard } from "../../middleware/auth-guard";
+import { errorMiddleware } from "../../middleware/error";
 
 /**
  * Agent Config API routes
  */
 export const agentConfigRoutes = new Elysia({ prefix: "/agent" })
+  .use(errorMiddleware)
+  .use(authGuard)
+  .derive(() => {
+    const agentConfigRepository = new AgentConfigRepository();
+    const agentConfigService = new AgentConfigService(agentConfigRepository);
+    return { agentConfigService };
+  })
   .get(
     "/config",
-    async ({ query, set }) => {
+    async ({ query, ctx, agentConfigService, set }) => {
       try {
         const { profileId } = query;
 
@@ -24,17 +30,11 @@ export const agentConfigRoutes = new Elysia({ prefix: "/agent" })
           return { error: "profileId is required" };
         }
 
-        let config = await agentConfigService.getConfig(
-          { userId: "" } as any,
-          profileId,
-        );
+        let config = await agentConfigService.getConfig(ctx, profileId);
 
         // Auto-create config if it doesn't exist
         if (!config) {
-          config = await agentConfigService.createConfig(
-            { userId: "" } as any,
-            profileId,
-          );
+          config = await agentConfigService.createConfig(ctx, profileId);
         }
 
         return {
@@ -72,7 +72,7 @@ export const agentConfigRoutes = new Elysia({ prefix: "/agent" })
   )
   .put(
     "/config",
-    async ({ body, set }) => {
+    async ({ body, ctx, agentConfigService, set }) => {
       try {
         const { profileId, ...data } = body as AgentConfigData & {
           profileId: string;
@@ -84,7 +84,7 @@ export const agentConfigRoutes = new Elysia({ prefix: "/agent" })
         }
 
         const config = await agentConfigService.updateConfig(
-          { userId: "" } as any,
+          ctx,
           profileId,
           data,
         );
@@ -155,7 +155,7 @@ export const agentConfigRoutes = new Elysia({ prefix: "/agent" })
   })
   .get(
     "/suggestions",
-    async ({ query, set }) => {
+    async ({ query, ctx, agentConfigService, set }) => {
       try {
         const { profileId } = query;
 
@@ -165,7 +165,7 @@ export const agentConfigRoutes = new Elysia({ prefix: "/agent" })
         }
 
         const suggestions = await agentConfigService.getSuggestions(
-          { userId: "" } as any,
+          ctx,
           profileId,
         );
 

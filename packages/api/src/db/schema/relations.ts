@@ -8,6 +8,10 @@ import { socialLink } from "./social-link";
 import { profileView, socialClick, qrDownload } from "./analytics";
 // ai-recommendation: REMOVED - legacy wellness feature
 import { medicalService } from "./medical-service";
+import { whatsappConfig } from "./whatsapp-config";
+import { whatsappMessage } from "./whatsapp-message";
+import { whatsappTemplate } from "./whatsapp-template";
+import { whatsappContext } from "./whatsapp-context";
 
 // User relations
 export const userRelations = relations(user, ({ many }) => ({
@@ -64,6 +68,8 @@ export const profileRelations = relations(profile, ({ one, many }) => ({
   views: many(profileView),
   qrDownloads: many(qrDownload),
   medicalServices: many(medicalService),
+  whatsappConfigs: many(whatsappConfig),
+  whatsappContexts: many(whatsappContext),
 }));
 
 // Profile Customization relations
@@ -124,3 +130,49 @@ export const medicalServiceRelations = relations(medicalService, ({ one }) => ({
   //   references: [asset.id],
   // }),
 }));
+
+// WhatsApp Config relations
+export const whatsappConfigRelations = relations(
+  whatsappConfig,
+  ({ one, many }) => ({
+    profile: one(profile, {
+      fields: [whatsappConfig.profileId],
+      references: [profile.id],
+    }),
+    messages: many(whatsappMessage),
+    templates: many(whatsappTemplate),
+  }),
+);
+
+// WhatsApp Message relations
+export const whatsappMessageRelations = relations(
+  whatsappMessage,
+  ({ one }) => ({
+    config: one(whatsappConfig, {
+      fields: [whatsappMessage.configId],
+      references: [whatsappConfig.id],
+    }),
+  }),
+);
+
+// WhatsApp Template relations
+export const whatsappTemplateRelations = relations(
+  whatsappTemplate,
+  ({ one }) => ({
+    config: one(whatsappConfig, {
+      fields: [whatsappTemplate.configId],
+      references: [whatsappConfig.id],
+    }),
+  }),
+);
+
+// WhatsApp Context relations
+export const whatsappContextRelations = relations(
+  whatsappContext,
+  ({ one }) => ({
+    profile: one(profile, {
+      fields: [whatsappContext.profileId],
+      references: [profile.id],
+    }),
+  }),
+);

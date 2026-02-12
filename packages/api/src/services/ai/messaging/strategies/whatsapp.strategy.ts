@@ -84,7 +84,9 @@ export class WhatsAppMessageStrategy implements MessageStrategy {
 
       case "availability": {
         const lines: string[] = [];
-        const serviceName = part.serviceName ? ` para *${part.serviceName}*` : "";
+        const serviceName = part.serviceName
+          ? ` para *${part.serviceName}*`
+          : "";
         lines.push(`📅 Horarios disponibles${serviceName}`);
         lines.push(`Fecha: ${this.formatDate(part.date)}`);
         lines.push("");
@@ -126,7 +128,9 @@ export class WhatsAppMessageStrategy implements MessageStrategy {
 
       case "calendar": {
         const lines: string[] = [];
-        const serviceName = part.serviceName ? ` para *${part.serviceName}*` : "";
+        const serviceName = part.serviceName
+          ? ` para *${part.serviceName}*`
+          : "";
         lines.push(`📅 ${part.title}${serviceName}`);
         lines.push("");
         lines.push("Por favor indícame qué fecha prefieres.");
@@ -161,7 +165,9 @@ export class WhatsAppMessageStrategy implements MessageStrategy {
         lines.push("");
         lines.push(part.message);
         lines.push("");
-        lines.push(`Responde *${part.confirmLabel}* para confirmar o *${part.cancelLabel}* para cancelar.`);
+        lines.push(
+          `Responde *${part.confirmLabel}* para confirmar o *${part.cancelLabel}* para cancelar.`,
+        );
         return lines.join("\n");
       }
 

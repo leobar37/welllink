@@ -48,6 +48,12 @@ interface EnvConfig {
 
   // Test routes (only for local development)
   ENABLE_TEST_ROUTES: string;
+
+  // Message Aggregator (for debouncing sequential WhatsApp messages)
+  INBOUND_DEBOUNCE_MS: string;
+  INBOUND_MAX_BUFFER_AGE_MS: string;
+  INBOUND_MAX_MESSAGES: string;
+  INBOUND_MAX_CHARS: string;
 }
 
 const env: EnvConfig = {
@@ -88,6 +94,12 @@ const env: EnvConfig = {
 
   // Test routes (only for local development)
   ENABLE_TEST_ROUTES: process.env.ENABLE_TEST_ROUTES || "false",
+
+  // Message Aggregator configuration
+  INBOUND_DEBOUNCE_MS: process.env.INBOUND_DEBOUNCE_MS || "8000",
+  INBOUND_MAX_BUFFER_AGE_MS: process.env.INBOUND_MAX_BUFFER_AGE_MS || "45000",
+  INBOUND_MAX_MESSAGES: process.env.INBOUND_MAX_MESSAGES || "10",
+  INBOUND_MAX_CHARS: process.env.INBOUND_MAX_CHARS || "2000",
 };
 
 export { env };

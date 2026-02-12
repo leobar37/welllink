@@ -28,12 +28,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { useSocialLinks } from "@/hooks/use-social-links";
 
 const socialLinkSchema = z
   .object({
-    platform: z.enum(["whatsapp", "instagram", "tiktok", "facebook", "youtube"]),
+    platform: z.enum([
+      "whatsapp",
+      "instagram",
+      "tiktok",
+      "facebook",
+      "youtube",
+    ]),
     username: z.string().min(1, "El usuario es requerido"),
   })
   .superRefine((data, ctx) => {
@@ -154,17 +160,19 @@ export function SocialLinks() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Enlaces Sociales</h1>
-        <Button onClick={() => setAdding(!adding)} disabled={adding}>
+        <Button
+          variant="outline"
+          onClick={() => setAdding(!adding)}
+          disabled={adding}
+        >
           <Plus className="mr-2 h-4 w-4" /> Agregar Enlace
         </Button>
       </div>
 
       {adding && (
-        <Card className="border-primary/20 bg-primary/5">
-          <CardHeader>
-            <CardTitle className="text-base">Nuevo Enlace</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="rounded-2xl p-5 border border-primary/20 bg-primary/5">
+          <h3 className="text-base font-medium mb-4">Nuevo Enlace</h3>
+          <div>
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
@@ -206,8 +214,8 @@ export function SocialLinks() {
                         {form.watch("platform") === "whatsapp"
                           ? "Número de WhatsApp"
                           : form.watch("platform") === "youtube"
-                          ? "Handle de YouTube"
-                          : "Usuario"}
+                            ? "Handle de YouTube"
+                            : "Usuario"}
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -215,8 +223,8 @@ export function SocialLinks() {
                             form.watch("platform") === "whatsapp"
                               ? "1234567890"
                               : form.watch("platform") === "youtube"
-                              ? "@usuario"
-                              : "usuario"
+                                ? "@usuario"
+                                : "usuario"
                           }
                           {...field}
                         />
@@ -242,20 +250,20 @@ export function SocialLinks() {
                 </div>
               </form>
             </Form>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       <div className="grid gap-3">
         {links && links.length > 0
           ? links.map((link, index) => (
-              <Card
+              <div
                 key={link.id}
-                className="p-4 hover:bg-muted/5 transition-colors"
+                className="bg-muted/40 rounded-2xl p-4 hover:bg-muted/50 transition-colors"
               >
                 <div className="flex items-center gap-3">
                   {/* Platform badge */}
-                  <div className="shrink-0 px-3 py-1.5 bg-primary/10 text-primary border border-primary/20 rounded-md capitalize font-medium text-sm">
+                  <div className="shrink-0 px-3 py-1.5 bg-primary/10 text-primary rounded-md capitalize font-medium text-sm">
                     {link.platform}
                   </div>
 
@@ -304,11 +312,12 @@ export function SocialLinks() {
                     </Button>
                   </div>
                 </div>
-              </Card>
+              </div>
             ))
           : !adding && (
               <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">
-                No hay enlaces sociales agregados aún. Haz clic en "Agregar Enlace" para empezar.
+                No hay enlaces sociales agregados aún. Haz clic en "Agregar
+                Enlace" para empezar.
               </div>
             )}
       </div>

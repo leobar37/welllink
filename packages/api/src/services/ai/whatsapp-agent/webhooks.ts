@@ -7,6 +7,7 @@ import { eq } from "drizzle-orm";
 import { WhatsAppContextRepository } from "../../../services/repository/whatsapp-context";
 import { getMedicalChatAgent } from "../chat/agent";
 import { getMessageStrategy } from "../messaging";
+import { getMessageAggregator } from "../../../services/business/message-aggregator";
 
 interface EvolutionWebhookPayload {
   event: string;
@@ -163,108 +164,127 @@ export const whatsappAgentWebhook = new Elysia({
         });
       }
 
-      // Check if should transfer based on keywords
-      if (shouldTransferToWebChat(text)) {
-        const transferMessage =
-          "Para ayudarte con esto, te invito a continuar en nuestro chat web donde podré mostrarte opciones interactivas y agendar tu cita fácilmente.";
+      // Use message aggregator to handle sequential messages
+      const aggregator = getMessageAggregator();
 
-        await contextRepository.addMessage(phone, "assistant", transferMessage);
-        await contextRepository.markTransferredToWidget(phone);
+      const processAggregatedMessage = async (
+        aggregatedText: string,
+        messageCount: number,
+      ) => {
+        console.log(
+          `[WhatsApp Agent] Processing ${messageCount} aggregated messages from ${phone}`,
+        );
 
-        const webUrl = env.WEB_URL;
-        const transferUrl = `${webUrl}/${profileData.username}/chat?from=whatsapp&phone=${encodeURIComponent(phone)}`;
+        // Check if should transfer based on keywords
+        if (shouldTransferToWebChat(aggregatedText)) {
+          const transferMessage =
+            "Para ayudarte con esto, te invito a continuar en nuestro chat web donde podré mostrarte opciones interactivas y agendar tu cita fácilmente.";
 
-        await evolutionService.sendText(instance, {
-          number: phone,
-          text: `${transferMessage}\n\n${transferUrl}`,
-        });
+          await contextRepository.addMessage(
+            phone,
+            "assistant",
+            transferMessage,
+          );
+          await contextRepository.markTransferredToWidget(phone);
 
-        return {
-          success: true,
-          transferred: true,
-          messageId: data.key.id,
-        };
-      }
+          const webUrl = env.WEB_URL;
+          const transferUrl = `${webUrl}/${profileData.username}/chat?from=whatsapp&phone=${encodeURIComponent(phone)}`;
 
-      // Use AI Agent for response
-      try {
-        const agent = getMedicalChatAgent();
-        const strategy = getMessageStrategy("whatsapp");
+          await evolutionService.sendText(instance, {
+            number: phone,
+            text: `${transferMessage}\n\n${transferUrl}`,
+          });
 
-        // Build conversation ID based on phone
-        const conversationId = `whatsapp:${profileData.id}:${phone}`;
+          return;
+        }
 
-        // Get profile info for context
-        const profileInfo = {
-          displayName: profileData.displayName || profileData.username,
-          title: profileData.title || "",
-          bio: profileData.bio || "",
-        };
+        // Use AI Agent for response
+        try {
+          const agent = getMedicalChatAgent();
+          const strategy = getMessageStrategy("whatsapp");
 
-        // Build profile context
-        const profileContext = `Información del profesional:
+          // Build conversation ID based on phone
+          const conversationId = `whatsapp:${profileData.id}:${phone}`;
+
+          // Get profile info for context
+          const profileInfo = {
+            displayName: profileData.displayName || profileData.username,
+            title: profileData.title || "",
+            bio: profileData.bio || "",
+          };
+
+          // Build profile context
+          const profileContext = `Información del profesional:
 Nombre: ${profileInfo.displayName}
 Título: ${profileInfo.title || "No especificado"}
 Biografía: ${profileInfo.bio || "No especificada"}
 ---
 `;
 
-        const fullMessage = `${profileContext}${text}`;
+          const fullMessage = `${profileContext}${aggregatedText}`;
 
-        // Generate AI response
-        const result = await agent.generateText(fullMessage, {
-          conversationId,
-          context: new Map([
-            ["userPhone", phone],
-            ["channel", "whatsapp"],
-            ["profileId", profileData.id],
-            ["profileDisplayName", profileInfo.displayName],
-            ["profileTitle", profileInfo.title],
-            ["supportsRichComponents", "false"],
-          ]),
-        });
+          // Generate AI response
+          const result = await agent.generateText(fullMessage, {
+            conversationId,
+            context: new Map([
+              ["userPhone", phone],
+              ["channel", "whatsapp"],
+              ["profileId", profileData.id],
+              ["profileDisplayName", profileInfo.displayName],
+              ["profileTitle", profileInfo.title],
+              ["supportsRichComponents", "false"],
+            ]),
+          });
 
-        // Format response for WhatsApp (convert to plain text)
-        const formatted = strategy.formatResponse(result.text);
+          // Format response for WhatsApp (convert to plain text)
+          const formatted = strategy.formatResponse(result.text);
 
-        // Save to context
-        await contextRepository.addMessage(
-          phone,
-          "assistant",
-          formatted.text,
-        );
+          // Save to context
+          await contextRepository.addMessage(
+            phone,
+            "assistant",
+            formatted.text,
+          );
 
-        // Send response
-        await evolutionService.sendText(instance, {
-          number: phone,
-          text: formatted.text,
-        });
+          // Send response
+          await evolutionService.sendText(instance, {
+            number: phone,
+            text: formatted.text,
+          });
+        } catch (aiError) {
+          console.error("AI Agent error:", aiError);
 
-        return {
-          success: true,
-          answered: true,
-          messageId: data.key.id,
-          aiGenerated: true,
-        };
-      } catch (aiError) {
-        console.error("AI Agent error:", aiError);
+          // Fallback to default message on AI error
+          const fallbackMessage = FALLBACK_MESSAGES.error;
+          await contextRepository.addMessage(
+            phone,
+            "assistant",
+            fallbackMessage,
+          );
 
-        // Fallback to default message on AI error
-        const fallbackMessage = FALLBACK_MESSAGES.error;
-        await contextRepository.addMessage(phone, "assistant", fallbackMessage);
+          await evolutionService.sendText(instance, {
+            number: phone,
+            text: fallbackMessage,
+          });
+        }
+      };
 
-        await evolutionService.sendText(instance, {
-          number: phone,
-          text: fallbackMessage,
-        });
+      // Add message to aggregator - it will call processAggregatedMessage when ready
+      const result = await aggregator.addMessage(
+        phone,
+        profileData.id,
+        text,
+        processAggregatedMessage,
+      );
 
-        return {
-          success: true,
-          answered: true,
-          fallback: true,
-          messageId: data.key.id,
-        };
-      }
+      return {
+        success: true,
+        messageId: data.key.id,
+        aggregated: !result.shouldProcess,
+        messageCount: result.messageCount,
+        waitTime: result.waitTime,
+        processed: result.shouldProcess,
+      };
     } catch (err) {
       console.error("WhatsApp agent webhook error:", err);
       return { success: false, error: "Internal processing error" };

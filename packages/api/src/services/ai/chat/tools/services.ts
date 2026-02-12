@@ -17,7 +17,7 @@ const GetServiceDetailsInput = z.object({
 export const listServicesTool = createTool({
   name: "list_services",
   description:
-    "List all available medical services. Use this to show patients what services are offered. Returns service name, description, price, and duration. Optionally filter by category.",
+    "List all available medical services. Use this to show patients what services are offered. Returns service name, description, price, and duration. Optionally filter by category. When using this tool, present the results concisely - the service cards will show all details visually.",
   parameters: ListServicesInput,
   execute: async ({ profileId, category }) => {
     try {
@@ -53,7 +53,7 @@ export const listServicesTool = createTool({
 export const getServiceDetailsTool = createTool({
   name: "get_service_details",
   description:
-    "Get detailed information about a specific service. Use this when a patient asks about a particular service. Returns full details including requirements and preparation instructions.",
+    "Get detailed information about a specific service. Use this when a patient asks about a particular service. Returns full details including requirements and preparation instructions. Do NOT use this after the user has already selected a service from the carousel - proceed directly to scheduling.",
   parameters: GetServiceDetailsInput,
   execute: async ({ profileId, serviceId }) => {
     try {

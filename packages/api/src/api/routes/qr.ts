@@ -32,7 +32,6 @@ export const qrRoutes = new Elysia({ prefix: "/qr" })
     const assetRepository = new AssetRepository();
     const socialLinkRepository = new SocialLinkRepository();
     const analyticsRepository = new AnalyticsRepository();
-
     const qrService = new QRService(profileRepository);
     const cardService = new CardService(
       profileRepository,
@@ -48,72 +47,56 @@ export const qrRoutes = new Elysia({ prefix: "/qr" })
     };
   })
   // Public routes - generate QR by username
-  .get(
-    "/public/:username",
-    async ({ params, query, qrService }) => {
-      const options = qrOptionsSchema.parse(query);
-      const result = await qrService.generateQRByUsername(params.username, {
-        format: options.format,
-        width: options.width,
-        margin: options.margin,
-        color: {
-          dark: options.darkColor,
-          light: options.lightColor,
-        },
-      });
+  .get("/public/:username", async ({ params, query, qrService }) => {
+    const options = qrOptionsSchema.parse(query);
+    const result = await qrService.generateQRByUsername(params.username, {
+      format: options.format,
+      width: options.width,
+      margin: options.margin,
+      color: {
+        dark: options.darkColor,
+        light: options.lightColor,
+      },
+    });
 
-      return {
-        qrCode: result.data,
-        format: result.format,
-        mimeType: result.mimeType,
-        profileUrl: result.profileUrl,
-      };
-    },
-  )
+    return {
+      qrCode: result.data,
+      format: result.format,
+      mimeType: result.mimeType,
+      profileUrl: result.profileUrl,
+    };
+  })
   // Public card data by username
-  .get(
-    "/public/:username/card",
-    async ({ params, query, cardService }) => {
-      const options = cardOptionsSchema.parse(query);
-      return cardService.generateCardDataByUsername(params.username, options);
-    },
-  )
+  .get("/public/:username/card", async ({ params, query, cardService }) => {
+    const options = cardOptionsSchema.parse(query);
+    return cardService.generateCardDataByUsername(params.username, options);
+  })
   // Protected routes
   .use(authGuard)
   // Generate QR for profile (returns data URL)
-  .get(
-    "/profiles/:profileId",
-    async ({ params, query, ctx, qrService }) => {
-      const options = qrOptionsSchema.parse(query);
-      const result = await qrService.generateQR(ctx!, params.profileId, {
-        format: options.format,
-        width: options.width,
-        margin: options.margin,
-        color: {
-          dark: options.darkColor,
-          light: options.lightColor,
-        },
-      });
+  .get("/profiles/:profileId", async ({ params, query, ctx, qrService }) => {
+    const options = qrOptionsSchema.parse(query);
+    const result = await qrService.generateQR(ctx!, params.profileId, {
+      format: options.format,
+      width: options.width,
+      margin: options.margin,
+      color: {
+        dark: options.darkColor,
+        light: options.lightColor,
+      },
+    });
 
-      return {
-        qrCode: result.data,
-        format: result.format,
-        mimeType: result.mimeType,
-        profileUrl: result.profileUrl,
-      };
-    },
-  )
+    return {
+      qrCode: result.data,
+      format: result.format,
+      mimeType: result.mimeType,
+      profileUrl: result.profileUrl,
+    };
+  })
   // Download QR as file
   .get(
     "/profiles/:profileId/download",
-    async ({
-      params,
-      query,
-      ctx,
-      qrService,
-      analyticsRepository,
-      set,
-    }) => {
+    async ({ params, query, ctx, qrService, analyticsRepository, set }) => {
       const options = qrOptionsSchema.parse(query);
       const result = await qrService.generateQRBuffer(ctx!, params.profileId, {
         format: options.format,

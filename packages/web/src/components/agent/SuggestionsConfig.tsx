@@ -6,7 +6,7 @@ import { X, Plus, Loader2 } from "lucide-react";
 import { useSuggestions } from "@/hooks/use-agent-config";
 
 interface SuggestionsConfigProps {
-  profileId: string;
+  profileId: string | undefined;
   initialSuggestions: string[];
 }
 
@@ -14,8 +14,9 @@ export function SuggestionsConfig({
   profileId,
   initialSuggestions,
 }: SuggestionsConfigProps) {
-  const { suggestions, isLoading, updateSuggestions } =
-    useSuggestions(profileId);
+  const { suggestions, isLoading, updateSuggestions } = useSuggestions(
+    profileId ?? "",
+  );
   const [newSuggestion, setNewSuggestion] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
@@ -23,7 +24,7 @@ export function SuggestionsConfig({
     suggestions.length > 0 ? suggestions : initialSuggestions;
 
   const handleAdd = async () => {
-    if (!newSuggestion.trim()) return;
+    if (!newSuggestion.trim() || !profileId) return;
 
     const updated = [...currentSuggestions, newSuggestion.trim()];
     setIsSaving(true);
@@ -33,6 +34,8 @@ export function SuggestionsConfig({
   };
 
   const handleRemove = async (index: number) => {
+    if (!profileId) return;
+
     const updated = currentSuggestions.filter((_, i) => i !== index);
     setIsSaving(true);
     await updateSuggestions(profileId, updated);
@@ -65,11 +68,11 @@ export function SuggestionsConfig({
             onChange={(e) => setNewSuggestion(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ej: ¿Tienen estacionamiento?"
-            disabled={isSaving}
+            disabled={isSaving || !profileId}
           />
           <Button
             onClick={handleAdd}
-            disabled={!newSuggestion.trim() || isSaving}
+            disabled={!newSuggestion.trim() || isSaving || !profileId}
           >
             {isSaving ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -98,7 +101,7 @@ export function SuggestionsConfig({
                   variant="ghost"
                   size="icon"
                   onClick={() => handleRemove(index)}
-                  disabled={isSaving}
+                  disabled={isSaving || !profileId}
                   className="h-8 w-8 text-muted-foreground hover:text-destructive"
                 >
                   <X className="h-4 w-4" />

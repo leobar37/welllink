@@ -45,8 +45,12 @@ export function RecentActivity({ profileId }: RecentActivityProps) {
 
   if (!activities || activities.length === 0) {
     return (
-      <div className="flex items-center justify-center h-[200px] text-muted-foreground bg-muted/20 rounded-md border border-dashed">
-        No hay actividad reciente
+      <div className="flex flex-col items-center justify-center h-[200px] text-muted-foreground">
+        <div className="h-12 w-12 rounded-full bg-muted/60 flex items-center justify-center mb-3">
+          <Eye className="h-5 w-5 opacity-50" />
+        </div>
+        <p className="text-sm">No hay actividad reciente</p>
+        <p className="text-xs opacity-60 mt-1">Los visitantes aparecerán aquí</p>
       </div>
     );
   }

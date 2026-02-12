@@ -24,7 +24,7 @@ export interface StorageStrategy {
     userId: string,
     file: File,
     type: "file" | "asset",
-    options?: UploadOptions
+    options?: UploadOptions,
   ): Promise<UploadResult>;
 
   /**

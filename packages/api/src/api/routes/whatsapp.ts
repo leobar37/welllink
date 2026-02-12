@@ -1,21 +1,17 @@
 import { Elysia, t } from "elysia";
-import { servicesPlugin } from "../../plugins/services";
+import { env } from "../../config/env";
+import { TemplateCategory } from "../../db/schema";
 import { authGuard } from "../../middleware/auth-guard";
 import { errorMiddleware } from "../../middleware/error";
-import { WhatsAppConfigService } from "../../services/business/whatsapp-config";
+import { servicesPlugin } from "../../plugins/services";
+import { EvolutionService } from "../../services/business/evolution-api";
 import { WhatsAppService } from "../../services/business/whatsapp";
+import { WhatsAppConfigService } from "../../services/business/whatsapp-config";
 import { WhatsAppTemplateService } from "../../services/business/whatsapp-template";
+import { ProfileRepository } from "../../services/repository/profile";
 import { WhatsAppConfigRepository } from "../../services/repository/whatsapp-config";
 import { WhatsAppMessageRepository } from "../../services/repository/whatsapp-message";
 import { WhatsAppTemplateRepository } from "../../services/repository/whatsapp-template";
-import { ProfileRepository } from "../../services/repository/profile";
-import { EvolutionService } from "../../services/business/evolution-api";
-import {
-  MessageStatus,
-  TemplateCategory,
-  TemplateStatus,
-} from "../../db/schema";
-import { env } from "../../config/env";
 
 export const whatsappRoutes = new Elysia({ prefix: "/whatsapp" })
   .use(errorMiddleware)

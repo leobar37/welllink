@@ -268,15 +268,21 @@ export class ApprovalService {
     );
   }
 
-  async expireRequest(requestId: string): Promise<{ success: boolean; message?: string }> {
+  async expireRequest(
+    requestId: string,
+  ): Promise<{ success: boolean; message?: string }> {
     try {
-      const request = await this.reservationRequestRepository.findById(requestId);
+      const request =
+        await this.reservationRequestRepository.findById(requestId);
       if (!request) {
         return { success: false, message: "Request not found" };
       }
 
       if (request.status !== "pending") {
-        return { success: false, message: `Request is ${request.status}, cannot expire` };
+        return {
+          success: false,
+          message: `Request is ${request.status}, cannot expire`,
+        };
       }
 
       await this.reservationRequestRepository.updateStatus(

@@ -4,6 +4,8 @@ import {
   GetObjectCommand,
   DeleteObjectCommand,
   HeadObjectCommand,
+  CreateBucketCommand,
+  HeadBucketCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type {
@@ -50,17 +52,42 @@ export class R2StorageStrategy implements StorageStrategy {
     try {
       // Check if bucket exists
       await this.s3.send(
-        new HeadObjectCommand({
+        new HeadBucketCommand({
           Bucket: this.bucket,
-          Key: ".bucket-check",
         }),
       );
+      console.log(`R2 storage initialized. Bucket "${this.bucket}" exists.`);
     } catch (error: any) {
-      // If bucket doesn't exist or is not accessible, that's okay
-      // We don't create it automatically per requirements
-      console.log(
-        `R2 storage initialized for bucket "${this.bucket}". Note: Bucket must exist manually.`,
-      );
+      // Bucket doesn't exist, try to create it
+      if (
+        error.name === "NotFound" ||
+        error.name === "NoSuchBucket" ||
+        error.$metadata?.httpStatusCode === 404
+      ) {
+        try {
+          await this.s3.send(
+            new CreateBucketCommand({
+              Bucket: this.bucket,
+            }),
+          );
+          console.log(
+            `R2 storage initialized. Bucket "${this.bucket}" created.`,
+          );
+        } catch (createError: any) {
+          console.error(
+            `Failed to create bucket "${this.bucket}":`,
+            createError.message,
+          );
+          throw new Error(
+            `Failed to create storage bucket: ${createError.message}`,
+          );
+        }
+      } else {
+        // Other error (permissions, etc.)
+        console.warn(
+          `R2 storage initialized for bucket "${this.bucket}". Warning: ${error.message}`,
+        );
+      }
     }
 
     this.initialized = true;

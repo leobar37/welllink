@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { authClient } from "@/lib/auth-client";
+import { useState } from "react";
+import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,71 +9,68 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Bot, MessageCircle, Settings, Layout } from "lucide-react";
-import { useAgentConfig, type TonePreset } from "@/hooks/use-agent-config";
+import {
+  useAgentConfig,
+  type TonePreset,
+  useTonePresets,
+} from "@/hooks/use-agent-config";
+import { useProfile } from "@/hooks/use-profile";
 import { ToneSettingsForm } from "@/components/agent/ToneSettingsForm";
 import { SuggestionsConfig } from "@/components/agent/SuggestionsConfig";
 
 export function AgentConfig() {
-  const { data: session } = authClient.useSession();
-  const profileId = session?.user?.profileId || "";
+  const { profile, isLoading: isProfileLoading } = useProfile();
+  const profileId = profile?.id;
 
   const {
     config,
-    tonePresets,
-    isLoading,
-    isSaving,
-    fetchConfig,
+    isLoading: isConfigLoading,
     updateConfig,
-    fetchTonePresets,
-  } = useAgentConfig();
+  } = useAgentConfig(profileId);
+
+  const { tonePresets } = useTonePresets();
 
   const [activeTab, setActiveTab] = useState("tone");
 
-  useEffect(() => {
-    if (profileId) {
-      fetchConfig(profileId);
-      fetchTonePresets();
-    }
-  }, [profileId, fetchConfig, fetchTonePresets]);
+  const isLoading = isProfileLoading || isConfigLoading;
+  const isSaving = updateConfig.isPending;
 
   const handleToneChange = async (tone: TonePreset) => {
     if (profileId) {
-      await updateConfig(profileId, { tonePreset: tone });
+      updateConfig.mutate({ tonePreset: tone });
     }
   };
 
   const handleCustomInstructionsChange = async (value: string) => {
     if (profileId) {
-      await updateConfig(profileId, { customInstructions: value });
+      updateConfig.mutate({ customInstructions: value });
     }
   };
 
   const handleWelcomeMessageChange = async (value: string) => {
     if (profileId) {
-      await updateConfig(profileId, { welcomeMessage: value });
+      updateConfig.mutate({ welcomeMessage: value });
     }
   };
 
   const handleWidgetEnabledChange = async (enabled: boolean) => {
     if (profileId) {
-      await updateConfig(profileId, { widgetEnabled: enabled });
+      updateConfig.mutate({ widgetEnabled: enabled });
     }
   };
 
   const handleWhatsAppEnabledChange = async (enabled: boolean) => {
     if (profileId) {
-      await updateConfig(profileId, { whatsappEnabled: enabled });
+      updateConfig.mutate({ whatsappEnabled: enabled });
     }
   };
 
   const handleWhatsAppAutoTransferChange = async (enabled: boolean) => {
     if (profileId) {
-      await updateConfig(profileId, { whatsappAutoTransfer: enabled });
+      updateConfig.mutate({ whatsappAutoTransfer: enabled });
     }
   };
 
@@ -81,6 +78,30 @@ export function AgentConfig() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!profileId) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Configuración del Agente IA
+          </h1>
+          <p className="text-muted-foreground">
+            Personaliza el comportamiento de tu asistente virtual
+          </p>
+        </div>
+        <div className="text-center py-12">
+          <h2 className="text-xl font-semibold">No se encontró perfil</h2>
+          <p className="text-muted-foreground mb-4">
+            Completa el proceso de configuración para personalizar tu agente.
+          </p>
+          <Button asChild>
+            <Link to="/onboarding">Ir a Configuración</Link>
+          </Button>
+        </div>
       </div>
     );
   }
@@ -200,9 +221,9 @@ export function AgentConfig() {
                 </div>
                 <Switch
                   id="widget-enabled"
-                  checked={config?.widgetEnabled || false}
+                  checked={config?.widgetEnabled ?? true}
                   onCheckedChange={handleWidgetEnabledChange}
-                  disabled={isSaving}
+                  disabled={isSaving || !profileId}
                 />
               </div>
 
@@ -214,13 +235,15 @@ export function AgentConfig() {
                       id="widget-color"
                       type="color"
                       value={config.widgetPrimaryColor || "#0066cc"}
-                      onChange={(e) =>
-                        updateConfig(profileId, {
-                          widgetPrimaryColor: e.target.value,
-                        })
-                      }
+                      onChange={(e) => {
+                        if (profileId) {
+                          updateConfig(profileId, {
+                            widgetPrimaryColor: e.target.value,
+                          });
+                        }
+                      }}
                       className="h-10 w-32"
-                      disabled={isSaving}
+                      disabled={isSaving || !profileId}
                     />
                   </div>
                 </div>
@@ -251,9 +274,9 @@ export function AgentConfig() {
                 </div>
                 <Switch
                   id="whatsapp-enabled"
-                  checked={config?.whatsappEnabled || false}
+                  checked={config?.whatsappEnabled ?? true}
                   onCheckedChange={handleWhatsAppEnabledChange}
-                  disabled={isSaving}
+                  disabled={isSaving || !profileId}
                 />
               </div>
 
@@ -270,9 +293,9 @@ export function AgentConfig() {
                   </div>
                   <Switch
                     id="whatsapp-transfer"
-                    checked={config?.whatsappAutoTransfer || false}
+                    checked={config?.whatsappAutoTransfer ?? true}
                     onCheckedChange={handleWhatsAppAutoTransferChange}
-                    disabled={isSaving}
+                    disabled={isSaving || !profileId}
                   />
                 </div>
               )}

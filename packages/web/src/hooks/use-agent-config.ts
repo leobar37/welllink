@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
+import { extractErrorMessage } from "@/lib/error-handler";
 
 export const TonePresetValues = ["formal", "professional", "friendly"] as const;
 export type TonePreset = (typeof TonePresetValues)[number];
@@ -26,167 +27,165 @@ interface TonePresetOption {
   description: string;
 }
 
-interface AgentConfigState {
-  config: AgentConfigData | null;
-  tonePresets: TonePresetOption[];
-  isLoading: boolean;
-  isSaving: boolean;
-  fetchConfig: (profileId: string) => Promise<void>;
-  updateConfig: (
-    profileId: string,
-    data: Partial<AgentConfigData>,
-  ) => Promise<void>;
-  fetchTonePresets: () => Promise<void>;
+// Query Keys
+const agentConfigKeys = {
+  all: ["agent-config"] as const,
+  byProfile: (profileId: string) =>
+    [...agentConfigKeys.all, profileId] as const,
+};
+
+const tonePresetsKeys = {
+  all: ["tone-presets"] as const,
+};
+
+const suggestionsKeys = {
+  all: ["suggestions"] as const,
+  byProfile: (profileId: string) =>
+    [...suggestionsKeys.all, profileId] as const,
+};
+
+// Fetcher Functions
+async function fetchAgentConfig(profileId: string): Promise<AgentConfigData> {
+  const { data, error } = await api.api.agent.config.get({
+    $query: { profileId },
+  });
+  if (error) throw error;
+  return data as unknown as AgentConfigData;
 }
 
-export function useAgentConfig(): AgentConfigState {
-  const [config, setConfig] = useState<AgentConfigData | null>(null);
-  const [tonePresets, setTonePresets] = useState<TonePresetOption[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+async function fetchTonePresets(): Promise<TonePresetOption[]> {
+  const { data, error } = await api.api.agent["tone-presets"].get();
+  if (error) throw error;
 
-  const fetchTonePresets = useCallback(async () => {
-    try {
-      const response = await api.api.agent["tone-presets"].get();
-      if (response.data && !response.error) {
-        setTonePresets(response.data as TonePresetOption[]);
-      }
-    } catch (error) {
-      console.error("Error fetching tone presets:", error);
-    }
-  }, []);
+  // Handle both { data: [...] } and [...] response formats
+  const presetsData = Array.isArray(data)
+    ? data
+    : (data as { data?: TonePresetOption[] }).data || [];
+  return presetsData as TonePresetOption[];
+}
 
-  const fetchConfig = useCallback(async (profileId: string) => {
-    try {
-      setIsLoading(true);
-      const response = await api.api.agent.config.get({ profileId });
+async function fetchSuggestions(profileId: string): Promise<string[]> {
+  const { data, error } = await api.api.agent.suggestions.get({
+    $query: { profileId },
+  });
+  if (error) throw error;
+  return data as unknown as string[];
+}
 
-      if (response.error) {
-        console.error("Error fetching agent config:", response.error);
-        toast.error("Error al cargar configuración del agente");
-        return;
-      }
+async function updateAgentConfig(
+  profileId: string,
+  configData: Partial<AgentConfigData>,
+): Promise<AgentConfigData> {
+  const { data, error } = await api.api.agent.config.put({
+    profileId,
+    ...configData,
+  });
+  if (error) throw error;
+  return data as unknown as AgentConfigData;
+}
 
-      if (response.data) {
-        setConfig(response.data as AgentConfigData);
-      }
-    } catch (error) {
-      console.error("Error fetching agent config:", error);
-      toast.error("Error al cargar configuración del agente");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+async function updateSuggestions(
+  profileId: string,
+  suggestions: string[],
+): Promise<void> {
+  const { error } = await api.api.agent.config.put({
+    profileId,
+    suggestions,
+  });
+  if (error) throw error;
+}
 
-  const updateConfig = useCallback(
-    async (profileId: string, data: Partial<AgentConfigData>) => {
-      try {
-        setIsSaving(true);
-        const response = await api.api.agent.config.put({
-          profileId,
-          ...data,
-        } as any);
+// Hooks
+export function useAgentConfig(profileId: string | undefined) {
+  const queryClient = useQueryClient();
 
-        if (response.error) {
-          const errorMessage =
-            typeof response.error === "object" && "message" in response.error
-              ? (response.error as any).message
-              : "Error al guardar configuración";
-          toast.error(errorMessage);
-          return;
-        }
+  const {
+    data: config,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: agentConfigKeys.byProfile(profileId || ""),
+    queryFn: () => fetchAgentConfig(profileId!),
+    enabled: !!profileId,
+  });
 
-        if (response.data) {
-          setConfig(response.data as AgentConfigData);
-          toast.success("Configuración guardada correctamente");
-        }
-      } catch (error) {
-        console.error("Error updating agent config:", error);
-        toast.error("Error al guardar configuración");
-      } finally {
-        setIsSaving(false);
-      }
+  const updateConfig = useMutation({
+    mutationFn: (data: Partial<AgentConfigData>) =>
+      updateAgentConfig(profileId!, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: agentConfigKeys.all });
+      toast.success("Configuración guardada correctamente");
     },
-    [],
-  );
-
-  // Fetch tone presets on mount
-  useEffect(() => {
-    fetchTonePresets();
-  }, [fetchTonePresets]);
+    onError: (err: unknown) => {
+      const errorMessage = extractErrorMessage(
+        err,
+        "Error al guardar configuración",
+      );
+      toast.error(errorMessage);
+    },
+  });
 
   return {
     config,
-    tonePresets,
     isLoading,
-    isSaving,
-    fetchConfig,
+    error,
     updateConfig,
-    fetchTonePresets,
   };
 }
 
-// Hook for suggestions specifically
-interface UseSuggestionsReturn {
-  suggestions: string[];
-  isLoading: boolean;
-  updateSuggestions: (
-    profileId: string,
-    suggestions: string[],
-  ) => Promise<void>;
+export function useTonePresets() {
+  const {
+    data: tonePresets = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: tonePresetsKeys.all,
+    queryFn: fetchTonePresets,
+  });
+
+  return {
+    tonePresets,
+    isLoading,
+    error,
+  };
 }
 
-export function useSuggestions(profileId: string): UseSuggestionsReturn {
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+export function useSuggestions(profileId: string | undefined) {
+  const queryClient = useQueryClient();
 
-  const fetchSuggestions = useCallback(async () => {
-    if (!profileId) return;
+  const {
+    data: suggestions = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: suggestionsKeys.byProfile(profileId || ""),
+    queryFn: () => fetchSuggestions(profileId!),
+    enabled: !!profileId,
+  });
 
-    try {
-      setIsLoading(true);
-      const response = await api.api.agent.suggestions.get({ profileId });
-
-      if (response.data && !response.error) {
-        setSuggestions(response.data as string[]);
-      }
-    } catch (error) {
-      console.error("Error fetching suggestions:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [profileId]);
-
-  const updateSuggestions = useCallback(
-    async (profileId: string, newSuggestions: string[]) => {
-      try {
-        setIsLoading(true);
-        const response = await api.api.agent.config.put({
-          profileId,
-          suggestions: newSuggestions,
-        } as any);
-
-        if (response.data && !response.error) {
-          setSuggestions(newSuggestions);
-          toast.success("Sugerencias actualizadas");
-        }
-      } catch (error) {
-        console.error("Error updating suggestions:", error);
-        toast.error("Error al actualizar sugerencias");
-      } finally {
-        setIsLoading(false);
-      }
+  const updateSuggestionsMutation = useMutation({
+    mutationFn: (newSuggestions: string[]) =>
+      updateSuggestions(profileId!, newSuggestions),
+    onSuccess: (_, newSuggestions) => {
+      queryClient.setQueryData(
+        suggestionsKeys.byProfile(profileId!),
+        newSuggestions,
+      );
+      toast.success("Sugerencias actualizadas");
     },
-    [],
-  );
-
-  useEffect(() => {
-    fetchSuggestions();
-  }, [fetchSuggestions]);
+    onError: (err: unknown) => {
+      const errorMessage = extractErrorMessage(
+        err,
+        "Error al actualizar sugerencias",
+      );
+      toast.error(errorMessage);
+    },
+  });
 
   return {
     suggestions,
     isLoading,
-    updateSuggestions,
+    error,
+    updateSuggestions: updateSuggestionsMutation.mutate,
   };
 }

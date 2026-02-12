@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useNavigate } from "react-router";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
@@ -14,18 +13,14 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import {
   LogOut,
-  Smartphone,
-  QrCode,
   CreditCard,
   Bot,
   Settings as SettingsIcon,
 } from "lucide-react";
-import { WhatsAppConfigModal } from "@/components/dashboard/WhatsAppConfigModal";
 
 export function Settings() {
   const navigate = useNavigate();
   const { data: session } = authClient.useSession();
-  const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
 
   const handleSignOut = async () => {
     await authClient.signOut();
@@ -99,39 +94,6 @@ export function Settings() {
           </CardContent>
         </Card>
 
-        {/* WhatsApp Configuration Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>WhatsApp Business</CardTitle>
-            <CardDescription>
-              Conecta tu cuenta de WhatsApp Business para enviar mensajes a tus
-              clientes
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <Smartphone className="h-5 w-5 text-gray-400" />
-                <div>
-                  <p className="font-medium text-gray-900">
-                    Conexión de WhatsApp
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Gestiona la conexión de tu cuenta de WhatsApp Business
-                  </p>
-                </div>
-              </div>
-              <Button
-                onClick={() => setWhatsappModalOpen(true)}
-                variant="outline"
-              >
-                <QrCode className="mr-2 h-4 w-4" />
-                Configurar
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* AI Agent Configuration Section */}
         <Card>
           <CardHeader>
@@ -194,15 +156,6 @@ export function Settings() {
           </CardContent>
         </Card>
       </div>
-
-      {/* WhatsApp Config Modal */}
-      <WhatsAppConfigModal
-        open={whatsappModalOpen}
-        onOpenChange={setWhatsappModalOpen}
-        onSave={async () => {
-          toast.success("Configuración de WhatsApp guardada");
-        }}
-      />
     </div>
   );
 }

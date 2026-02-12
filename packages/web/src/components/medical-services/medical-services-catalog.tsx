@@ -121,21 +121,27 @@ export function MedicalServicesCatalog({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-1">
           <h2 className="text-2xl font-semibold">Servicios Médicos</h2>
           <p className="text-muted-foreground">
             Gestiona los servicios que ofreces a tus pacientes
           </p>
+          {hasServices && (
+            <p className="text-sm text-muted-foreground">
+              {services.length} servicio{services.length === 1 ? "" : "s"}{" "}
+              registrado{services.length === 1 ? "" : "s"}
+            </p>
+          )}
         </div>
-        <Button onClick={() => setIsCreateModalOpen(true)}>
+        <Button onClick={() => setIsCreateModalOpen(true)} className="w-full md:w-auto">
           <Plus className="mr-2 h-4 w-4" />
           Nuevo Servicio
         </Button>
       </div>
 
       {hasServices ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid items-stretch gap-6 md:grid-cols-2 xl:grid-cols-3">
           {services.map((service) => (
             <ServiceCard
               key={service.id}

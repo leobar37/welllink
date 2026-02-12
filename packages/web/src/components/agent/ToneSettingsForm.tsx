@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import type { AgentConfigData, TonePreset } from "@/hooks/use-agent-config";
 
@@ -59,31 +58,36 @@ export function ToneSettingsForm({
           value={localTone}
           onValueChange={handleToneChange}
           className="grid grid-cols-1 md:grid-cols-3 gap-4"
-          disabled={isSaving}
         >
-          {tonePresets.map((preset) => (
-            <div
-              key={preset.id}
-              className={`flex items-center space-x-2 p-4 border rounded-lg cursor-pointer transition-colors ${
-                localTone === preset.id
-                  ? "border-primary bg-primary/5"
-                  : "hover:bg-muted"
-              }`}
-            >
-              <RadioGroupItem value={preset.id} id={`tone-${preset.id}`} />
-              <div className="flex-1">
-                <Label
-                  htmlFor={`tone-${preset.id}`}
-                  className="font-medium capitalize cursor-pointer"
-                >
-                  {preset.id}
-                </Label>
-                <p className="text-sm text-muted-foreground">
-                  {preset.description}
-                </p>
+          {Array.isArray(tonePresets) &&
+            tonePresets.map((preset) => (
+              <div
+                key={preset.id}
+                onClick={() => handleToneChange(preset.id)}
+                className={`flex items-center space-x-2 p-4 border rounded-lg cursor-pointer transition-colors ${
+                  localTone === preset.id
+                    ? "border-primary bg-primary/5"
+                    : "hover:bg-muted"
+                }`}
+              >
+                <RadioGroupItem
+                  value={preset.id}
+                  id={`tone-${preset.id}`}
+                  disabled={isSaving}
+                />
+                <div className="flex-1">
+                  <Label
+                    htmlFor={`tone-${preset.id}`}
+                    className="font-medium capitalize cursor-pointer"
+                  >
+                    {preset.id}
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    {preset.description}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </RadioGroup>
       </div>
 
