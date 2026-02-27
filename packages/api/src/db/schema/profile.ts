@@ -22,13 +22,23 @@ export interface FeaturesConfig {
   };
 }
 
+// FAQ item type
+export interface FAQItem {
+  /** Unique identifier for the FAQ */
+  id: string;
+  /** Keywords for matching user queries */
+  keywords: string[];
+  /** Question text displayed to users */
+  question: string;
+  /** Answer text */
+  answer: string;
+  /** Whether this FAQ is active */
+  enabled: boolean;
+}
+
 // FAQ configuration type
 export interface FAQConfig {
-  faqs: Array<{
-    keywords: string[];
-    question: string;
-    answer: string;
-  }>;
+  faqs: FAQItem[];
 }
 import { user } from "./auth";
 import { asset } from "./asset";
@@ -81,7 +91,9 @@ export const profile = pgTable(
     workStartTime: varchar("work_start_time", { length: 5 }).default("09:00"), // "HH:MM" format
     workEndTime: varchar("work_end_time", { length: 5 }).default("18:00"), // "HH:MM" format
     appointmentDuration: integer("appointment_duration").default(30), // minutes
-    isAcceptingAppointments: boolean("is_accepting_appointments").notNull().default(true),
+    isAcceptingAppointments: boolean("is_accepting_appointments")
+      .notNull()
+      .default(true),
   },
   (table) => [
     index("profile_user_id_idx").on(table.userId),

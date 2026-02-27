@@ -210,6 +210,25 @@ export class WhatsAppConfigService {
         state: connectionStatus.state,
       };
     } catch (error) {
+      // If instance doesn't exist in Evolution API, create it
+      if (error instanceof Error && error.message.includes("404")) {
+        try {
+          await this.evolutionService.createInstance(
+            config.instanceName,
+            config.config
+          );
+
+          // After creating, return disconnected state
+          return {
+            isConnected: false,
+            state: "created",
+            message: "Instancia creada. Por favor, conecta tu WhatsApp.",
+          };
+        } catch (createError) {
+          throw new BadRequestException(`Failed to create WhatsApp instance: ${createError instanceof Error ? createError.message : "Unknown error"}`);
+        }
+      }
+
       throw new BadRequestException(`Failed to check connection status: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
   }

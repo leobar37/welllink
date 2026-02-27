@@ -195,8 +195,8 @@ export class EvolutionService {
   async createInstance(instanceName: string, config: Partial<WhatsAppConfig["config"]> = {}): Promise<EvolutionInstance> {
     const body = {
       instanceName,
+      integration: "WHATSAPP-BAILEYS",
       qrcode: true,
-      number: null,
       token: config.token || "",
       mobile: false,
       webhook: {

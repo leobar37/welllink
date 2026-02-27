@@ -5,7 +5,11 @@ import {
 } from "../../utils/http-exceptions";
 import type { RequestContext } from "../../types/context";
 import type { CreateProfileData, UpdateProfileData } from "../../types/dto";
-import type { FeaturesConfig } from "../../db/schema/profile";
+import type {
+  FeaturesConfig,
+  FAQConfig,
+  FAQItem,
+} from "../../db/schema/profile";
 import { ProfileRepository } from "../repository/profile";
 import { AssetRepository } from "../repository/asset";
 import { AnalyticsRepository } from "../repository/analytics";
@@ -171,5 +175,76 @@ export class ProfileService {
     return this.profileRepository.update(ctx, profileId, {
       featuresConfig: mergedConfig,
     });
+  }
+
+  async getFAQConfig(
+    ctx: RequestContext,
+    profileId: string,
+  ): Promise<FAQConfig> {
+    // Check if profile exists and user owns it
+    const profile = await this.profileRepository.findOne(ctx, profileId);
+    if (!profile) {
+      throw new NotFoundException("Profile not found");
+    }
+
+    // Return existing config or empty default
+    return profile.faqConfig || { faqs: [] };
+  }
+
+  async updateFAQConfig(
+    ctx: RequestContext,
+    profileId: string,
+    faqs: FAQItem[],
+  ): Promise<FAQConfig> {
+    // Check if profile exists and user owns it
+    const profile = await this.profileRepository.findOne(ctx, profileId);
+    if (!profile) {
+      throw new NotFoundException("Profile not found");
+    }
+
+    // Validate FAQs array
+    if (!Array.isArray(faqs)) {
+      throw new BadRequestException("FAQs must be an array");
+    }
+
+    // Validate each FAQ item
+    for (const faq of faqs) {
+      if (!faq.id || typeof faq.id !== "string") {
+        throw new BadRequestException("Each FAQ must have a valid id");
+      }
+      if (!faq.question || faq.question.trim().length < 5) {
+        throw new BadRequestException(
+          "FAQ question must be at least 5 characters",
+        );
+      }
+      if (!faq.answer || faq.answer.trim().length < 10) {
+        throw new BadRequestException(
+          "FAQ answer must be at least 10 characters",
+        );
+      }
+      if (!Array.isArray(faq.keywords) || faq.keywords.length === 0) {
+        throw new BadRequestException("FAQ must have at least one keyword");
+      }
+      if (
+        faq.keywords.some((k: string) => typeof k !== "string" || k.length < 2)
+      ) {
+        throw new BadRequestException(
+          "Keywords must be strings with at least 2 characters",
+        );
+      }
+    }
+
+    // Check limits
+    if (faqs.length > 50) {
+      throw new BadRequestException("Maximum 50 FAQs allowed");
+    }
+
+    const config: FAQConfig = { faqs };
+
+    await this.profileRepository.update(ctx, profileId, {
+      faqConfig: config,
+    });
+
+    return config;
   }
 }

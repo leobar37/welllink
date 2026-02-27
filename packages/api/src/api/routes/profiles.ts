@@ -113,4 +113,32 @@ export const profileRoutes = new Elysia({ prefix: "/profiles" })
         ),
       }),
     },
+  )
+  .get("/:id/faq-config", async ({ params, ctx, profileService }) => {
+    const config = await profileService.getFAQConfig(ctx!, params.id);
+    return config;
+  })
+  .put(
+    "/:id/faq-config",
+    async ({ params, body, ctx, profileService }) => {
+      const config = await profileService.updateFAQConfig(
+        ctx!,
+        params.id,
+        body.faqs,
+      );
+      return config;
+    },
+    {
+      body: t.Object({
+        faqs: t.Array(
+          t.Object({
+            id: t.String(),
+            question: t.String({ minLength: 5 }),
+            answer: t.String({ minLength: 10 }),
+            keywords: t.Array(t.String({ minLength: 2 })),
+            enabled: t.Boolean(),
+          }),
+        ),
+      }),
+    },
   );

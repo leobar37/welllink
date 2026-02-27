@@ -16,18 +16,22 @@ import { useClients } from "@/hooks/use-clients";
 import type { Client } from "@/hooks/use-clients";
 
 export function ClientList() {
-  const { clients, isLoading, createClient, updateClient, deleteClient } = useClients();
+  const { clients, isLoading, createClient, updateClient, deleteClient } =
+    useClients();
   const [showForm, setShowForm] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | undefined>();
   const [viewingClient, setViewingClient] = useState<Client | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [labelFilter, setLabelFilter] = useState<"all" | "consumidor" | "prospecto" | "afiliado">("all");
+  const [labelFilter, setLabelFilter] = useState<
+    "all" | "consumidor" | "prospecto" | "afiliado"
+  >("all");
 
   const filteredClients = clients?.filter((client) => {
     const matchesSearch =
       client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       client.phone.includes(searchQuery) ||
-      (client.email?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+      (client.email?.toLowerCase().includes(searchQuery.toLowerCase()) ??
+        false);
 
     const matchesLabel = labelFilter === "all" || client.label === labelFilter;
 
@@ -96,7 +100,10 @@ export function ClientList() {
           </div>
         </div>
 
-        <Select value={labelFilter} onValueChange={(value) => setLabelFilter(value as any)}>
+        <Select
+          value={labelFilter}
+          onValueChange={(value) => setLabelFilter(value as any)}
+        >
           <SelectTrigger className="w-full sm:w-48">
             <SelectValue placeholder="Filtrar por etiqueta" />
           </SelectTrigger>
@@ -127,9 +134,9 @@ export function ClientList() {
             />
           ))
         ) : (
-          <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">
+          <div className="text-center py-12 text-muted-foreground bg-muted/30 rounded-lg">
             {clients?.length === 0
-              ? "No hay clientes agregados aún. Haz clic en \"Agregar Cliente\" para empezar."
+              ? 'No hay clientes agregados aún. Haz clic en "Agregar Cliente" para empezar.'
               : "No se encontraron clientes con los filtros aplicados."}
           </div>
         )}
