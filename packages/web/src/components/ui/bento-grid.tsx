@@ -48,7 +48,7 @@ const BentoCard = ({
   <div
     key={name}
     className={cn(
-      "group relative col-span-1 sm:col-span-1 flex flex-col justify-between overflow-hidden rounded-2xl",
+      "group relative col-span-1 sm:col-span-1 flex flex-col justify-between overflow-hidden rounded-lg",
       // light styles
       "bg-card border border-border/50",
       "shadow-sm hover:shadow-xl hover:shadow-primary/5",
@@ -72,7 +72,7 @@ const BentoCard = ({
         <div
           className={cn(
             "inline-flex items-center justify-center",
-            "w-12 h-12 sm:w-14 sm:h-14 rounded-xl",
+            "w-12 h-12 sm:w-14 sm:h-14 rounded-lg",
             "bg-gradient-to-br from-primary/10 to-primary/5",
             "border border-primary/10",
             "transform-gpu transition-all duration-300 ease-out",
@@ -155,7 +155,7 @@ const BentoCard = ({
 
     {/* Featured indicator glow */}
     {featured && (
-      <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-primary/20 via-transparent to-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 blur-sm" />
+      <div className="absolute -inset-px rounded-lg bg-gradient-to-br from-primary/20 via-transparent to-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 blur-sm" />
     )}
   </div>
 );

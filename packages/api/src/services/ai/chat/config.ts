@@ -1,23 +1,31 @@
 import { minimaxAnthropic } from "vercel-minimax-ai-provider";
 
 /**
- * Generate dynamic system instructions based on profile data
+ * Generate dynamic system instructions based on profile data and tone configuration
  */
 export function getChatInstructions(profileInfo: {
   displayName: string;
   title: string;
   bio: string;
+  toneInstructions?: string;
 }): string {
-  return `Eres un assistente virtual amable y profesional de ${profileInfo.displayName}.
+  const baseInstructions = `Eres un asistente virtual amable y profesional de ${profileInfo.displayName}.
 
 ${profileInfo.title ? `- Título: ${profileInfo.title}` : ""}
 ${profileInfo.bio ? `- Bio: ${profileInfo.bio}` : ""}
 
 Tu rol es:
 1. Responder preguntas sobre servicios, precios, horarios y ubicación
-2. Ayudar a pacientes a agendar citas
-3. Proporcionar información básica (no diagnóstica)
-4. Derivar al médico cuando sea necesario
+2. Ayudar a clientes a agendar citas
+3. Proporcionar información clara y útil
+4. Derivar a un humano cuando sea necesario`;
+
+  // Add tone-specific instructions if provided
+  const toneSection = profileInfo.toneInstructions
+    ? `\n\n${profileInfo.toneInstructions}`
+    : "";
+
+  const responseFormatInstructions = `
 
 **INSTRUCCIONES IMPORTANTES PARA RESPUESTAS ESTRUCTURADAS:**
 
@@ -122,17 +130,17 @@ Cuando muestres información estructurada (servicios, horarios, citas, FAQs), DE
     }
     \`\`\`
 
-6. Para pedir datos del paciente:
+6. Para pedir datos del cliente:
     \`\`\`json
     {
       "parts": [
         { "type": "text", "text": "Para confirmar tu cita, necesito algunos datos:" },
         {
-          "type": "patient-form",
-          "title": "Datos del Paciente",
+          "type": "customer-form",
+          "title": "Datos del Cliente",
           "serviceId": "service-1",
           "slotId": "slot-123",
-          "serviceName": "Consulta General",
+          "serviceName": "Corte de Cabello",
           "date": "2024-01-20",
           "time": "10:00"
         }
@@ -190,32 +198,42 @@ Cuando muestres información estructurada (servicios, horarios, citas, FAQs), DE
 **Directrices generales:**
 - Siempre sé amable, empático y profesional
 - Usa un tono cercano pero formal
-- No proporciones diagnósticos médicos - deriva al médico
-- Para emergencias, recomienda llamar a emergencias (911)
+- Sé claro y directo en tus respuestas
 - Las respuestas deben ser CONCISAS (máximo 1-2 frases antes del JSON)
 - Usa los tools disponibles para obtener información actualizada`;
+
+  return baseInstructions + toneSection + responseFormatInstructions;
 }
 
 /**
- * Agent configuration for the medical chat assistant
+ * Create agent configuration with dynamic instructions
  */
-export const chatAgentConfig = {
-  name: "medical-chat-assistant",
-  instructions: getChatInstructions({
+export function createChatAgentConfig(instructions: string) {
+  return {
+    name: "medical-chat-assistant",
+    instructions,
+
+    // Use MiniMax provider with Anthropic-compatible API
+    model: minimaxAnthropic("MiniMax-M2.1"),
+
+    // Maximum iterations for tool use
+    maxSteps: 10,
+
+    // Temperature for balanced responses
+    temperature: 0.7,
+
+    // Enable markdown formatting
+    markdown: true,
+  };
+}
+
+/**
+ * Create the chat agent config
+ */
+export const chatAgentConfig = createChatAgentConfig(
+  getChatInstructions({
     displayName: "el profesional",
     title: "",
     bio: "",
-  }),
-
-  // Use MiniMax provider with Anthropic-compatible API
-  model: minimaxAnthropic("MiniMax-M2.1"),
-
-  // Maximum iterations for tool use
-  maxSteps: 10,
-
-  // Temperature for balanced responses
-  temperature: 0.7,
-
-  // Enable markdown formatting
-  markdown: true,
-};
+  })
+);

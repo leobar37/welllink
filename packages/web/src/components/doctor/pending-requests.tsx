@@ -180,7 +180,7 @@ interface StatCardProps {
 
 function StatCard({ title, value, icon, color }: StatCardProps) {
   return (
-    <div className="bg-muted/40 rounded-2xl p-4 sm:p-5 flex items-center gap-3 sm:gap-4 transition-colors hover:bg-muted/50">
+    <div className="bg-muted/40 rounded-xl p-4 sm:p-5 flex items-center gap-3 sm:gap-4 transition-colors hover:bg-muted/50">
       <div
         className={cn(
           "flex size-10 shrink-0 items-center justify-center rounded-xl",
@@ -210,7 +210,7 @@ function getColorClasses(color: StatCardProps["color"]) {
     case "secondary":
       return "bg-primary/10 text-primary dark:text-primary-foreground";
     case "destructive":
-      return "bg-rose-500/10 text-rose-700 dark:text-rose-300";
+      return "bg-destructive/10 text-destructive dark:text-destructive/80";
     case "outline":
       return "bg-amber-500/10 text-amber-700 dark:text-amber-300";
   }

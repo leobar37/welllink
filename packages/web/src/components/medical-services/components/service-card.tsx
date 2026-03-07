@@ -1,10 +1,5 @@
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Clock3, Edit, Tag, Trash2, WalletCards } from "lucide-react";
@@ -31,8 +26,8 @@ export function ServiceCard({ service, onEdit, onDelete }: ServiceCardProps) {
   const hasCategory = Boolean(service.category?.trim());
 
   return (
-    <Card className="group relative h-full overflow-hidden border-border/70 py-0 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-md">
-      <div className="h-1 w-full bg-gradient-to-r from-primary/80 via-primary/60 to-primary/35" />
+    <Card className="group relative h-full overflow-hidden border-border/70 py-0 transition-all duration-200 hover:border-primary/30">
+      <div className="h-1 w-full bg-primary/80" />
       <CardHeader className="pb-4 pt-5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1">
@@ -97,7 +92,12 @@ export function ServiceCard({ service, onEdit, onDelete }: ServiceCardProps) {
         </div>
 
         <div className="mt-auto flex gap-2 pt-1">
-          <Button variant="secondary" size="sm" className="flex-1" onClick={onEdit}>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="flex-1"
+            onClick={onEdit}
+          >
             <Edit className="h-4 w-4" />
             Editar
           </Button>

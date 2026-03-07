@@ -85,10 +85,10 @@ export function StepAvatar({
 
         <div className="w-full max-w-xs">
           <label htmlFor="avatar-upload" className="cursor-pointer w-full">
-            <div className="flex items-center justify-center w-full h-12 px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none hover:border-gray-400 focus:outline-none">
+            <div className="flex items-center justify-center w-full h-12 px-4 transition bg-background border-2 border-border border-dashed rounded-md appearance-none hover:border-primary/50 focus:outline-none">
               <span className="flex items-center space-x-2">
-                <Upload className="w-5 h-5 text-gray-600" />
-                <span className="font-medium text-gray-600">
+                <Upload className="w-5 h-5 text-muted-foreground" />
+                <span className="font-medium text-muted-foreground">
                   {uploading ? "Subiendo..." : "Clic para subir"}
                 </span>
               </span>

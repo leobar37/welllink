@@ -10,14 +10,20 @@ interface SurveyCardProps {
   isConverting?: boolean;
 }
 
-export function SurveyCard({ survey, onConvert, isConverting }: SurveyCardProps) {
+export function SurveyCard({
+  survey,
+  onConvert,
+  isConverting,
+}: SurveyCardProps) {
   return (
     <Card className="hover:bg-muted/5 transition-colors">
       <CardContent className="p-4">
         <div className="space-y-3">
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="font-semibold text-foreground">{survey.visitorName}</h3>
+              <h3 className="font-semibold text-foreground">
+                {survey.visitorName}
+              </h3>
               <p className="text-sm text-muted-foreground">
                 {new Date(survey.createdAt).toLocaleDateString("es-ES", {
                   year: "numeric",
@@ -26,7 +32,10 @@ export function SurveyCard({ survey, onConvert, isConverting }: SurveyCardProps)
                 })}
               </p>
             </div>
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+            <Badge
+              variant="outline"
+              className="bg-primary/10 text-primary border-primary/30"
+            >
               Encuesta
             </Badge>
           </div>
@@ -48,7 +57,9 @@ export function SurveyCard({ survey, onConvert, isConverting }: SurveyCardProps)
 
           {survey.referredBy && (
             <div className="text-sm">
-              <span className="font-medium text-muted-foreground">Referido por: </span>
+              <span className="font-medium text-muted-foreground">
+                Referido por:{" "}
+              </span>
               <span className="text-muted-foreground">{survey.referredBy}</span>
             </div>
           )}

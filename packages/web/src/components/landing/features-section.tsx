@@ -14,7 +14,7 @@ const features = [
     Icon: Bot,
     name: "Agente de IA",
     description:
-      "Conversa con pacientes por WhatsApp 24/7. Responde preguntas, recomienda horarios y cierra citas automáticamente.",
+      "Conversa con clientes por WhatsApp 24/7. Responde preguntas, recomienda horarios y agenda citas automáticamente.",
     href: "#",
     cta: "Ver más",
     className: "lg:col-span-2 lg:row-span-1",
@@ -70,7 +70,7 @@ const features = [
     Icon: ListOrdered,
     name: "Servicios",
     description:
-      "Catálogo de tratamientos con precios. Los pacientes pueden ver y seleccionar servicios directamente.",
+      "Catálogo de servicios con precios. Tus clientes pueden ver y seleccionar servicios directamente.",
     href: "#",
     cta: "Ver servicios",
     className: "lg:col-span-1 lg:row-span-1",
@@ -106,11 +106,11 @@ export function FeaturesSection() {
 
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
             Todo lo que necesitas para{" "}
-            <span className="text-primary">automatizar</span> tu consultorio
+            <span className="text-primary">automatizar</span> tu negocio
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Desde la primera impresión hasta la confirmación de cita.
-            Una plataforma completa para profesionales de la salud.
+            Una plataforma completa para salones, spas y negocios de servicios.
           </p>
         </div>
 

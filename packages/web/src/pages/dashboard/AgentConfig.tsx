@@ -11,6 +11,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Loader2, Bot, MessageCircle, Settings, Layout } from "lucide-react";
 import {
   useAgentConfig,
@@ -228,7 +229,7 @@ export function AgentConfig() {
               </div>
 
               {config?.widgetEnabled && (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div>
                     <Label htmlFor="widget-color">Color del widget</Label>
                     <Input
@@ -237,7 +238,7 @@ export function AgentConfig() {
                       value={config.widgetPrimaryColor || "#0066cc"}
                       onChange={(e) => {
                         if (profileId) {
-                          updateConfig(profileId, {
+                          updateConfig.mutate({
                             widgetPrimaryColor: e.target.value,
                           });
                         }
@@ -245,6 +246,33 @@ export function AgentConfig() {
                       className="h-10 w-32"
                       disabled={isSaving || !profileId}
                     />
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label>Posición del widget</Label>
+                    <RadioGroup
+                      value={config.widgetPosition || "bottom-right"}
+                      onValueChange={(value: "bottom-right" | "bottom-left") => {
+                        if (profileId) {
+                          updateConfig.mutate({ widgetPosition: value });
+                        }
+                      }}
+                      disabled={isSaving || !profileId}
+                      className="flex gap-4"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="bottom-right" id="bottom-right" />
+                        <Label htmlFor="bottom-right" className="cursor-pointer">
+                          Abajo derecha
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="bottom-left" id="bottom-left" />
+                        <Label htmlFor="bottom-left" className="cursor-pointer">
+                          Abajo izquierda
+                        </Label>
+                      </div>
+                    </RadioGroup>
                   </div>
                 </div>
               )}

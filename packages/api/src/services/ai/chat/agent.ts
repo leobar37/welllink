@@ -1,6 +1,6 @@
 import { Agent } from "@voltagent/core";
 
-import { chatAgentConfig } from "./config";
+import { chatAgentConfig, createChatAgentConfig } from "./config";
 import { createChatMemory } from "./memory/config";
 import {
   getPatientTool,
@@ -9,6 +9,7 @@ import {
   listServicesTool,
   getServiceDetailsTool,
   createReservationTool,
+  checkAvailabilityTool,
   searchFAQTool,
   listPaymentMethodsTool,
   getPaymentMethodDetailsTool,
@@ -18,14 +19,20 @@ import {
 
 /**
  * Create the medical chat agent with all tools and memory
+ * @param instructions - Optional custom instructions (uses default if not provided)
  */
-export function createMedicalChatAgent(): Agent {
+export function createMedicalChatAgent(instructions?: string): Agent {
   // Create persistent memory for conversation history
   const memory = createChatMemory();
 
+  // Use custom instructions if provided, otherwise use default config
+  const config = instructions
+    ? createChatAgentConfig(instructions)
+    : chatAgentConfig;
+
   // Create the agent with all tools
   const agent = new Agent({
-    ...chatAgentConfig,
+    ...config,
     tools: [
       // Patient management tools
       getPatientTool,
@@ -37,6 +44,7 @@ export function createMedicalChatAgent(): Agent {
       getServiceDetailsTool,
 
       // Appointment scheduling tools
+      checkAvailabilityTool,
       createReservationTool,
 
       // FAQ and information tools

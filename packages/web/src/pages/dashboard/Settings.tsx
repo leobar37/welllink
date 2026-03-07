@@ -105,10 +105,12 @@ export function Settings() {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <Bot className="h-5 w-5 text-gray-400" />
+                <Bot className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="font-medium text-gray-900">Configurar Agente</p>
-                  <p className="text-sm text-gray-600">
+                  <p className="font-medium text-foreground">
+                    Configurar Agente
+                  </p>
+                  <p className="text-sm text-muted-foreground">
                     Personaliza el tono, mensajes y comportamiento del asistente
                   </p>
                 </div>
@@ -135,12 +137,12 @@ export function Settings() {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <CreditCard className="h-5 w-5 text-gray-400" />
+                <CreditCard className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="font-medium text-gray-900">
+                  <p className="font-medium text-foreground">
                     Gestionar Métodos de Pago
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     Configura efectivo, tarjetas, transferencias y más
                   </p>
                 </div>

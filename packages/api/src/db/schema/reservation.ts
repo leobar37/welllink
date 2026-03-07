@@ -11,7 +11,7 @@ import {
   foreignKey,
 } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
-import { medicalService } from "./medical-service";
+import { service } from "./service";
 import { reservationRequest } from "./reservation-request";
 
 export const reservationStatus = [
@@ -34,14 +34,14 @@ export const reservation = pgTable(
       .references(() => profile.id, { onDelete: "cascade" }),
     serviceId: uuid("service_id")
       .notNull()
-      .references(() => medicalService.id, { onDelete: "cascade" }),
+      .references(() => service.id, { onDelete: "cascade" }),
     requestId: uuid("request_id").references(() => reservationRequest.id, {
       onDelete: "set null",
     }),
 
-    patientName: varchar("patient_name", { length: 255 }).notNull(),
-    patientPhone: varchar("patient_phone", { length: 50 }).notNull(),
-    patientEmail: varchar("patient_email", { length: 255 }),
+    customerName: varchar("customer_name", { length: 255 }).notNull(),
+    customerPhone: varchar("customer_phone", { length: 50 }).notNull(),
+    customerEmail: varchar("customer_email", { length: 255 }),
 
     status: varchar("status", { length: 50 })
       .$type<ReservationStatus>()
@@ -81,7 +81,7 @@ export const reservation = pgTable(
   (table) => ({
     profileIdIdx: index("idx_reservation_profile_id").on(table.profileId),
     statusIdx: index("idx_reservation_status").on(table.status),
-    phoneIdx: index("idx_reservation_patient_phone").on(table.patientPhone),
+    phoneIdx: index("idx_reservation_customer_phone").on(table.customerPhone),
     createdIdx: index("idx_reservation_created").on(table.createdAt),
     scheduledAtUtcIdx: index("idx_reservation_scheduled_at_utc").on(
       table.scheduledAtUtc,

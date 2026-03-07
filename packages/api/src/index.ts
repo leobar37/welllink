@@ -40,7 +40,7 @@ import { reservationRoutes } from "./api/routes/reservations";
 // ai-recommendation routes: REMOVED - legacy wellness feature
 import { whatsappRoutes } from "./api/routes/whatsapp";
 import { clientRoutes } from "./api/routes/client";
-import { medicalServiceRoutes } from "./api/routes/medical-services";
+import { serviceRoutes } from "./api/routes/services";
 // availabilityRoutes: REMOVED - availability now configured in profile settings
 import { agentRoutes } from "./api/routes/agent";
 import { agentConfigRoutes } from "./api/routes/agent-config";
@@ -157,7 +157,7 @@ const app = new Elysia()
       // aiRecommendationRoutes: REMOVED
       .use(whatsappRoutes)
       .use(clientRoutes)
-      .use(medicalServiceRoutes)
+      .use(serviceRoutes)
       // availabilityRoutes: REMOVED - availability now configured in profile settings
       .use(agentRoutes)
       .use(agentConfigRoutes)
@@ -184,5 +184,5 @@ export type App = typeof app;
 export * from "./db/schema";
 
 console.log(
-  `🦊 Wellness API ready on http://${app.server?.hostname}:${app.server?.port}`,
+  `🤖 CitaBot API ready on http://${app.server?.hostname}:${app.server?.port}`,
 );

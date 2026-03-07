@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DataCard } from "@/components/ui/cards";
 import {
   Eye,
   MousePointerClick,
@@ -63,75 +64,63 @@ export function DashboardOverview() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="bg-muted/40 rounded-2xl p-5 transition-colors hover:bg-muted/50">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-muted-foreground">
-              Visualizaciones Totales
-            </span>
-            <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center">
-              <Eye className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-            </div>
-          </div>
-          <div className="text-3xl font-semibold tracking-tight">{stats?.views || 0}</div>
-          <p className="text-xs text-muted-foreground mt-1">
-            +0% desde el mes pasado
-          </p>
-        </div>
-
-        <div className="bg-muted/40 rounded-2xl p-5 transition-colors hover:bg-muted/50">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-muted-foreground">
-              Clics en Redes
-            </span>
-            <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center">
-              <MousePointerClick className="h-4 w-4 text-green-600 dark:text-green-400" />
-            </div>
-          </div>
-          <div className="text-3xl font-semibold tracking-tight">{stats?.socialClicks || 0}</div>
-          <p className="text-xs text-muted-foreground mt-1">
-            +0% desde el mes pasado
-          </p>
-        </div>
-
-        <div className="bg-muted/40 rounded-2xl p-5 transition-colors hover:bg-muted/50">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-muted-foreground">
-              Respuestas de Encuestas
-            </span>
-            <div className="h-8 w-8 rounded-full bg-amber-500/10 flex items-center justify-center">
-              <FileText className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-            </div>
-          </div>
-          <div className="text-3xl font-semibold tracking-tight">0</div>
-          <p className="text-xs text-muted-foreground mt-1">Próximamente</p>
-        </div>
+        <DataCard
+          title="Visualizaciones Totales"
+          value={stats?.views || 0}
+          description="+0% desde el mes pasado"
+          icon={<Eye className="h-4 w-4 text-primary" />}
+        />
+        <DataCard
+          title="Clics en Redes"
+          value={stats?.socialClicks || 0}
+          description="+0% desde el mes pasado"
+          icon={<MousePointerClick className="h-4 w-4 text-primary" />}
+        />
+        <DataCard
+          title="Respuestas de Encuestas"
+          value={0}
+          description="Próximamente"
+          icon={<FileText className="h-4 w-4 text-primary" />}
+        />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
         <div className="col-span-4">
           <h3 className="text-lg font-medium mb-4">Actividad Reciente</h3>
-          <div className="bg-muted/40 rounded-2xl p-5">
+          <div className="bg-muted/40 rounded-xl p-5">
             <RecentActivity profileId={profile.id} />
           </div>
         </div>
 
         <div className="col-span-3">
           <h3 className="text-lg font-medium mb-4">Acciones Rápidas</h3>
-          <div className="bg-muted/40 rounded-2xl p-5">
+          <div className="bg-muted/40 rounded-xl p-5">
             <div className="grid gap-2">
-              <Button variant="ghost" className="justify-start hover:bg-background" asChild>
+              <Button
+                variant="ghost"
+                className="justify-start hover:bg-background"
+                asChild
+              >
                 <Link to="/dashboard/profile">
                   <PenSquare className="mr-2 h-4 w-4" />
                   Editar Perfil
                 </Link>
               </Button>
-              <Button variant="ghost" className="justify-start hover:bg-background" asChild>
+              <Button
+                variant="ghost"
+                className="justify-start hover:bg-background"
+                asChild
+              >
                 <Link to="/dashboard/features">
                   <FileText className="mr-2 h-4 w-4" />
                   Gestionar Funciones
                 </Link>
               </Button>
-              <Button variant="ghost" className="justify-start hover:bg-background" asChild>
+              <Button
+                variant="ghost"
+                className="justify-start hover:bg-background"
+                asChild
+              >
                 <Link to="/dashboard/settings">
                   <Share2 className="mr-2 h-4 w-4" />
                   Configuración de Cuenta

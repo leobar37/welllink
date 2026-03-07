@@ -76,14 +76,14 @@ export const profile = pgTable(
       .notNull()
       .defaultNow()
       .$onUpdate(() => new Date()),
-    // Clinic/Organization fields
+    // Business/Organization fields
     isOrganization: boolean("is_organization").notNull().default(false),
-    clinicName: varchar("clinic_name", { length: 100 }),
-    clinicAddress: text("clinic_address"),
-    clinicPhone: varchar("clinic_phone", { length: 20 }),
-    clinicEmail: varchar("clinic_email", { length: 255 }),
-    clinicWebsite: varchar("clinic_website", { length: 255 }),
-    clinicRuc: varchar("clinic_ruc", { length: 20 }),
+    businessName: varchar("business_name", { length: 100 }),
+    businessAddress: text("business_address"),
+    businessPhone: varchar("business_phone", { length: 20 }),
+    businessEmail: varchar("business_email", { length: 255 }),
+    businessWebsite: varchar("business_website", { length: 255 }),
+    businessTaxId: varchar("business_tax_id", { length: 20 }),
     metadata: jsonb("metadata").$type<Record<string, unknown>>(),
     faqConfig: jsonb("faq_config").$type<FAQConfig>().default({ faqs: [] }),
     // Simple availability fields (replaces availability_rule table)

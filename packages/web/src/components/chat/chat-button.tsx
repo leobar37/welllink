@@ -8,7 +8,11 @@ interface ChatButtonProps {
   unreadCount?: number;
 }
 
-export function ChatButton({ isOpen, onClick, unreadCount = 0 }: ChatButtonProps) {
+export function ChatButton({
+  isOpen,
+  onClick,
+  unreadCount = 0,
+}: ChatButtonProps) {
   return (
     <motion.div
       className="fixed bottom-6 right-6 z-50"
@@ -57,7 +61,7 @@ export function ChatButton({ isOpen, onClick, unreadCount = 0 }: ChatButtonProps
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   exit={{ scale: 0 }}
-                  className="absolute -top-1 -right-1 flex items-center justify-center min-w-[20px] h-[20px] px-1.5 py-0.5 text-xs font-bold text-white bg-red-500 rounded-full"
+                  className="absolute -top-1 -right-1 flex items-center justify-center min-w-[20px] h-[20px] px-1.5 py-0.5 text-xs font-bold text-primary-foreground bg-destructive rounded-full"
                 >
                   {unreadCount > 99 ? "99+" : unreadCount}
                 </motion.span>

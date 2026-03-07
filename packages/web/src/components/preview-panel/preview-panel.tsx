@@ -84,7 +84,7 @@ export function PreviewPanel() {
           <div className="h-full p-4 flex justify-center">
             <div className="relative w-full max-w-[375px] h-full min-h-[500px]">
               {/* Phone bezel */}
-              <div className="absolute inset-0 rounded-[2.5rem] border-[8px] border-foreground/10 bg-background shadow-xl overflow-hidden">
+              <div className="absolute inset-0 rounded-xl border-4 border-foreground/10 bg-background shadow-lg overflow-hidden">
                 {/* Notch */}
                 <div className="absolute left-1/2 top-2 h-6 w-24 -translate-x-1/2 rounded-full bg-foreground/10 z-20" />
 

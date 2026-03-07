@@ -262,7 +262,7 @@ export function BookingFlow({
             {bookingSuccess && (
               <div
                 data-testid="booking-success"
-                className="bg-green-500/10 text-green-600 p-4 rounded-lg mb-4"
+                className="bg-primary/10 text-primary p-4 rounded-lg mb-4"
               >
                 <p data-testid="success-message" className="font-medium">
                   ¡Solicitud enviada exitosamente!

@@ -184,21 +184,21 @@ export function WhatsAppCtaConfigModal({
                   <img
                     src={config.qrCode}
                     alt="WhatsApp QR Code"
-                    className="w-64 h-64 border-2 border-gray-200 rounded-lg"
+                    className="w-64 h-64 border-2 border-border rounded-lg"
                   />
                 </div>
-                <p className="text-center text-sm text-gray-600">
+                <p className="text-center text-sm text-muted-foreground">
                   Escanea este código con la app de WhatsApp Business para
                   conectar tu cuenta
                 </p>
               </div>
             ) : (
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
                 <div className="flex items-center space-x-3">
-                  <MessageCircle className="h-5 w-5 text-gray-400" />
+                  <MessageCircle className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="font-medium text-gray-900">No conectado</p>
-                    <p className="text-sm text-gray-600">
+                    <p className="font-medium text-foreground">No conectado</p>
+                    <p className="text-sm text-muted-foreground">
                       Conecta tu cuenta de WhatsApp Business para empezar
                     </p>
                   </div>

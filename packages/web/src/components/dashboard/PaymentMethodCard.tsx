@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { PaymentMethodType } from "@/lib/types";
+import { semanticColors } from "@/lib/colors";
 
 interface TypeLabelConfig {
   label: string;
@@ -54,16 +55,20 @@ export function PaymentMethodCard({
 }: PaymentMethodCardProps) {
   const typeConfig = typeLabels[type as PaymentMethodType];
   const TypeIcon = typeConfig?.icon;
-  const typeColor = typeConfig?.color || "text-gray-600";
+  const typeColor = typeConfig?.color || semanticColors.labels.muted.text;
   const typeBgColor = typeConfig?.color
     ? `${typeConfig.color}/10`
-    : "bg-gray-100";
+    : semanticColors.labels.muted.bg;
 
   return (
     <Card
       className={cn(
         "p-4 transition-all",
-        isSelected && "border-green-500 bg-green-50/50",
+        isSelected &&
+          cn(
+            semanticColors.border.selected,
+            semanticColors.background.selected,
+          ),
         !isActive && "opacity-60",
       )}
     >
@@ -87,7 +92,13 @@ export function PaymentMethodCard({
           <div className="flex items-center gap-2">
             <p className="font-medium">{name}</p>
             {isActive && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+              <span
+                className={cn(
+                  "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium",
+                  semanticColors.status.success.bg,
+                  semanticColors.status.success.text,
+                )}
+              >
                 Activo
               </span>
             )}

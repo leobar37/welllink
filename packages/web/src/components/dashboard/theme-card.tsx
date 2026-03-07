@@ -14,11 +14,11 @@ export function ThemeCard({ theme, isSelected, onSelect }: ThemeCardProps) {
       type="button"
       onClick={() => onSelect(theme.id)}
       className={cn(
-        "relative flex flex-col rounded-xl border-2 p-4 text-left transition-all",
-        "hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+        "relative flex flex-col rounded-lg border p-4 text-left transition-all",
+        "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
         isSelected
           ? "border-primary bg-primary/5"
-          : "border-border hover:border-primary/50"
+          : "border-border hover:border-primary/50",
       )}
     >
       {/* Selected indicator */}

@@ -7,7 +7,7 @@ import { socialLink } from "./social-link";
 // health-survey: REMOVED - legacy wellness feature
 import { profileView, socialClick, qrDownload } from "./analytics";
 // ai-recommendation: REMOVED - legacy wellness feature
-import { medicalService } from "./medical-service";
+import { service } from "./service";
 import { whatsappConfig } from "./whatsapp-config";
 import { whatsappMessage } from "./whatsapp-message";
 import { whatsappTemplate } from "./whatsapp-template";
@@ -67,7 +67,7 @@ export const profileRelations = relations(profile, ({ one, many }) => ({
   // aiRecommendations: REMOVED
   views: many(profileView),
   qrDownloads: many(qrDownload),
-  medicalServices: many(medicalService),
+  services: many(service),
   whatsappConfigs: many(whatsappConfig),
   whatsappContexts: many(whatsappContext),
 }));
@@ -119,16 +119,16 @@ export const qrDownloadRelations = relations(qrDownload, ({ one }) => ({
   }),
 }));
 
-// Medical Service relations
-export const medicalServiceRelations = relations(medicalService, ({ one }) => ({
+// Service relations
+export const serviceRelations = relations(service, ({ one }) => ({
   profile: one(profile, {
-    fields: [medicalService.profileId],
+    fields: [service.profileId],
     references: [profile.id],
   }),
-  // imageAsset: one(asset, {
-  //   fields: [medicalService.imageAssetId],
-  //   references: [asset.id],
-  // }),
+  imageAsset: one(asset, {
+    fields: [service.imageAssetId],
+    references: [asset.id],
+  }),
 }));
 
 // WhatsApp Config relations

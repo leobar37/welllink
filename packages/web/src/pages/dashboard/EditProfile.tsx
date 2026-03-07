@@ -109,14 +109,14 @@ export function EditProfile() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Profile Info Section */}
           <div className="grid gap-6 md:grid-cols-[280px_1fr]">
-            <div className="bg-muted/40 rounded-2xl p-6 flex flex-col items-center gap-4">
+            <div className="bg-muted/40 rounded-lg p-6 flex flex-col items-center gap-4">
               <h3 className="text-lg font-medium self-start">Avatar</h3>
               <Avatar className="h-32 w-32">
                 <AvatarImage src={avatarUrl || ""} />
                 <AvatarFallback>?</AvatarFallback>
               </Avatar>
               <label htmlFor="avatar-upload" className="cursor-pointer w-full">
-                <div className="flex items-center justify-center w-full py-2.5 px-4 bg-background rounded-xl hover:bg-muted transition-colors text-sm font-medium">
+                <div className="flex items-center justify-center w-full py-2.5 px-4 bg-background rounded-lg hover:bg-muted transition-colors text-sm font-medium">
                   <Upload className="w-4 h-4 mr-2" />
                   {uploadAvatar.isPending ? "Subiendo..." : "Cambiar Foto"}
                 </div>
@@ -131,11 +131,12 @@ export function EditProfile() {
               </label>
             </div>
 
-            <div className="bg-muted/40 rounded-2xl p-6 space-y-5">
+            <div className="bg-muted/40 rounded-lg p-6 space-y-5">
               <div>
                 <h3 className="text-lg font-medium">Información del Perfil</h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Actualiza la información de tu perfil visible para los visitantes.
+                  Actualiza la información de tu perfil visible para los
+                  visitantes.
                 </p>
               </div>
               <div className="space-y-4">
@@ -224,8 +225,8 @@ export function EditProfile() {
 
           {/* Clinic/Organization Section */}
           <div className="grid gap-6 md:grid-cols-[280px_1fr]">
-            <div className="bg-muted/40 rounded-2xl p-6">
-              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+            <div className="bg-muted/40 rounded-lg p-6">
+              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Building2 className="h-6 w-6 text-primary" />
               </div>
               <h3 className="text-lg font-medium">Clínica</h3>
@@ -234,9 +235,11 @@ export function EditProfile() {
               </p>
             </div>
 
-            <div className="bg-muted/40 rounded-2xl p-6 space-y-5">
+            <div className="bg-muted/40 rounded-lg p-6 space-y-5">
               <div>
-                <h3 className="text-lg font-medium">Información de la Clínica</h3>
+                <h3 className="text-lg font-medium">
+                  Información de la Clínica
+                </h3>
                 <p className="text-sm text-muted-foreground mt-1">
                   Completa esta sección si eres una clínica u organización.
                 </p>
@@ -246,7 +249,7 @@ export function EditProfile() {
                   control={form.control}
                   name="isOrganization"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-xl bg-background p-4">
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg bg-background p-4">
                       <div className="space-y-0.5">
                         <FormLabel className="text-base">
                           ¿Eres una clínica u organización?

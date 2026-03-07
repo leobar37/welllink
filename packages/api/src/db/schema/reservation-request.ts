@@ -9,7 +9,7 @@ import {
   jsonb,
 } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
-import { medicalService } from "./medical-service";
+import { service } from "./service";
 
 export const requestStatus = [
   "pending",
@@ -27,10 +27,8 @@ export type ContactMethod = (typeof contactMethod)[number];
 
 // Metadata structure for reservation requests
 export interface ReservationRequestMetadata {
-  symptoms?: string[];
   urgencyLevel?: UrgencyLevel;
-  isNewPatient?: boolean;
-  insuranceProvider?: string;
+  isNewCustomer?: boolean;
   notes?: string;
 }
 
@@ -43,19 +41,15 @@ export const reservationRequest = pgTable(
       .references(() => profile.id, { onDelete: "cascade" }),
     serviceId: uuid("service_id")
       .notNull()
-      .references(() => medicalService.id, { onDelete: "cascade" }),
+      .references(() => service.id, { onDelete: "cascade" }),
 
-    patientName: varchar("patient_name", { length: 255 }).notNull(),
-    patientPhone: varchar("patient_phone", { length: 50 }).notNull(),
-    patientEmail: varchar("patient_email", { length: 255 }),
-    patientAge: integer("patient_age"),
-    patientGender: varchar("patient_gender", { length: 20 }),
+    customerName: varchar("customer_name", { length: 255 }).notNull(),
+    customerPhone: varchar("customer_phone", { length: 50 }).notNull(),
+    customerEmail: varchar("customer_email", { length: 255 }),
+    customerAge: integer("customer_age"),
+    customerGender: varchar("customer_gender", { length: 20 }),
 
-    chiefComplaint: text("chief_complaint"),
-    symptoms: text("symptoms"),
-    medicalHistory: text("medical_history"),
-    currentMedications: text("current_medications"),
-    allergies: text("allergies"),
+    reason: text("reason"),
     urgencyLevel: varchar("urgency_level", { length: 20 })
       .$type<UrgencyLevel>()
       .default("normal"),
@@ -97,7 +91,7 @@ export const reservationRequest = pgTable(
     profileIdIdx: index("idx_request_profile_id").on(table.profileId),
     statusIdx: index("idx_request_status").on(table.status),
     expiresIdx: index("idx_request_expires").on(table.expiresAt),
-    phoneIdx: index("idx_request_patient_phone").on(table.patientPhone),
+    phoneIdx: index("idx_request_customer_phone").on(table.customerPhone),
     preferredAtUtcIdx: index("idx_request_preferred_at_utc").on(
       table.preferredAtUtc,
     ),

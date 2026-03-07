@@ -395,7 +395,7 @@ export function AssetGallery({ profileId }: AssetGalleryProps) {
             className={cn(
               "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
               isDragActive && "border-primary bg-primary/5",
-              isDragAccept && "border-green-500 bg-green-500/5",
+              isDragAccept && "border-primary bg-primary/5",
               isDragReject && "border-destructive bg-destructive/5",
             )}
           >

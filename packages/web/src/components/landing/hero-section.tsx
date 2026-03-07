@@ -21,22 +21,24 @@ export function HeroSection() {
 
             {/* Heading */}
             <h1 className="mt-6 text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
-              Tu agente de IA <span className="text-primary">cierra citas</span>{" "}
-              mientras duermes
+              Tu recepcionista{" "}
+              <span className="text-primary">virtual con IA</span> agenda citas
+              24/7
             </h1>
 
             {/* Subtitle */}
             <p className="mt-4 text-lg text-muted-foreground max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
-              Convierte leads en pacientes 24/7. El agente conversa por
-              WhatsApp, responde preguntas y agenda citas automáticamente.
+              Convierte leads en clientes automáticamente. El agente conversa
+              por WhatsApp, responde preguntas y agenda citas mientras tú
+              trabajas.
             </p>
 
             {/* Key benefits */}
             <div className="mt-6 space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
               {[
                 "Sin perder nunca un lead",
-                "Pacientes reservan las 24 horas",
-                "Dashboard de ventas integrado",
+                "Clientes reservan las 24 horas",
+                "Reduce tus no-shows",
               ].map((benefit) => (
                 <div key={benefit} className="flex items-center gap-2 text-sm">
                   <CheckCircle className="w-4 h-4 text-primary" />
@@ -71,7 +73,7 @@ export function HeroSection() {
             {/* Simplified phone mockup showing agent conversation */}
             <div className="relative w-full max-w-sm">
               {/* Phone frame */}
-              <div className="relative bg-card rounded-[2.5rem] border-8 border-foreground/10 shadow-2xl overflow-hidden">
+              <div className="relative bg-card rounded-xl border-4 border-foreground/10 shadow-lg overflow-hidden">
                 {/* Phone header */}
                 <div className="bg-primary p-4 text-primary-foreground">
                   <div className="flex items-center gap-3">
@@ -79,7 +81,7 @@ export function HeroSection() {
                       <Bot className="w-5 h-5" />
                     </div>
                     <div>
-                      <div className="font-semibold text-sm">MediApp Agent</div>
+                      <div className="font-semibold text-sm">CitaBot</div>
                       <div className="text-xs opacity-80">En línea ahora</div>
                     </div>
                   </div>
@@ -87,14 +89,14 @@ export function HeroSection() {
 
                 {/* Chat content */}
                 <div className="p-4 space-y-4 bg-muted/20 min-h-[320px]">
-                  {/* Patient message */}
+                  {/* Customer message */}
                   <div className="flex gap-2">
                     <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
                       <span className="text-xs">👤</span>
                     </div>
                     <div className="flex-1">
-                      <div className="bg-white rounded-2xl rounded-tl-sm p-3 shadow-sm text-sm">
-                        Hola, tienes cita disponible?
+                      <div className="bg-card rounded-xl rounded-tl-sm p-3 shadow-sm text-sm">
+                        Hola, tienes horario para corte?
                       </div>
                     </div>
                   </div>
@@ -105,8 +107,8 @@ export function HeroSection() {
                       <Bot className="w-4 h-4 text-primary-foreground" />
                     </div>
                     <div className="flex-1">
-                      <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-sm p-3 shadow-sm text-sm">
-                        Hola! Tengo disponibilidad mañana a las 10:00 o 15:00.
+                      <div className="bg-primary text-primary-foreground rounded-xl rounded-tr-sm p-3 shadow-sm text-sm">
+                        Hola! Tengo mañana a las 10:00 o 15:00.
                         <span className="block mt-1 text-xs opacity-80">
                           Qué horario prefieres?
                         </span>
@@ -120,7 +122,7 @@ export function HeroSection() {
                       <span className="text-xs">👤</span>
                     </div>
                     <div className="flex-1">
-                      <div className="bg-white rounded-2xl rounded-tl-sm p-3 shadow-sm text-sm">
+                      <div className="bg-card rounded-xl rounded-tl-sm p-3 shadow-sm text-sm">
                         10:00 me viene bien!
                       </div>
                     </div>
@@ -132,7 +134,7 @@ export function HeroSection() {
                       <Bot className="w-4 h-4 text-primary-foreground" />
                     </div>
                     <div className="flex-1">
-                      <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-sm p-3 shadow-sm text-sm flex items-center gap-2">
+                      <div className="bg-primary text-primary-foreground rounded-xl rounded-tr-sm p-3 shadow-sm text-sm flex items-center gap-2">
                         <CheckCircle className="w-4 h-4" />
                         <span>Confirmado! Te espero mañana a las 10:00</span>
                       </div>

@@ -14,6 +14,9 @@ const sizeConfig: Record<LogotypeSize, string> = {
   xl: "text-4xl",
 };
 
+/**
+ * @deprecated Use LogoCitaBot from "./logo-citabot" instead
+ */
 export function Logotype({ size = "md", className }: LogotypeProps) {
   const textSize = sizeConfig[size];
 
@@ -25,8 +28,8 @@ export function Logotype({ size = "md", className }: LogotypeProps) {
         className,
       )}
     >
-      <span className="text-foreground">Medi</span>
-      <span className="text-primary">App</span>
+      <span className="text-foreground">Cita</span>
+      <span className="text-primary">Bot</span>
     </span>
   );
 }

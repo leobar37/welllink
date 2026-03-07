@@ -1,14 +1,19 @@
 import { Elysia, t } from "elysia";
-import { getMedicalChatAgent } from "../../services/ai/chat";
+import { createMedicalChatAgent } from "../../services/ai/chat";
 import { ProfileRepository } from "../../services/repository/profile";
+import { AgentConfigRepository } from "../../services/repository/agent-config";
+import { AgentConfigService } from "../../services/business/agent-config";
 import {
   parseStructuredResponse,
   extractStructuredParts,
 } from "../../services/ai/chat/parser";
 import type { AIMessagePart } from "../../services/ai/chat/schema";
 import { getMessageStrategy } from "../../services/ai/messaging";
+import { getChatInstructions } from "../../services/ai/chat/config";
 
 const profileRepository = new ProfileRepository();
+const agentConfigRepository = new AgentConfigRepository();
+const agentConfigService = new AgentConfigService(agentConfigRepository);
 
 /**
  * Agent API routes for AI chat functionality
@@ -33,6 +38,8 @@ export const agentRoutes = new Elysia({ prefix: "/agent" })
           bio: "",
         };
 
+        let toneInstructions: string | undefined;
+
         if (profileId) {
           const profile = await profileRepository.findById(profileId);
           if (profile) {
@@ -41,10 +48,24 @@ export const agentRoutes = new Elysia({ prefix: "/agent" })
               title: profile.title || "",
               bio: profile.bio || "",
             };
+
+            // Get tone instructions from agent config
+            toneInstructions =
+              await agentConfigService.getEffectiveInstructionsForAgent(
+                profileId,
+                profile.displayName || "el profesional",
+              );
           }
         }
 
-        const agent = getMedicalChatAgent();
+        // Create agent with dynamic instructions
+        const instructions = getChatInstructions({
+          displayName: profileInfo.displayName,
+          title: profileInfo.title,
+          bio: profileInfo.bio,
+          toneInstructions,
+        });
+        const agent = createMedicalChatAgent(instructions);
         const strategy = getMessageStrategy("webchat");
 
         // Build profile context message
@@ -117,6 +138,8 @@ ${profileInfo.bio ? `- Bio: ${profileInfo.bio}` : ""}
           bio: "",
         };
 
+        let toneInstructions: string | undefined;
+
         if (profileId) {
           const profile = await profileRepository.findById(profileId);
           if (profile) {
@@ -125,10 +148,24 @@ ${profileInfo.bio ? `- Bio: ${profileInfo.bio}` : ""}
               title: profile.title || "",
               bio: profile.bio || "",
             };
+
+            // Get tone instructions from agent config
+            toneInstructions =
+              await agentConfigService.getEffectiveInstructionsForAgent(
+                profileId,
+                profile.displayName || "el profesional",
+              );
           }
         }
 
-        const agent = getMedicalChatAgent();
+        // Create agent with dynamic instructions
+        const instructions = getChatInstructions({
+          displayName: profileInfo.displayName,
+          title: profileInfo.title,
+          bio: profileInfo.bio,
+          toneInstructions,
+        });
+        const agent = createMedicalChatAgent(instructions);
 
         // Build profile context message
         const profileContext = `Información del profesional que atienden:

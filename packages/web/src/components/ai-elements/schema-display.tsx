@@ -74,7 +74,7 @@ export const SchemaDisplay = ({
     <div
       className={cn(
         "overflow-hidden rounded-lg border bg-background",
-        className
+        className,
       )}
       {...props}
     >
@@ -115,6 +115,7 @@ export const SchemaDisplayHeader = ({
   </div>
 );
 
+// HTTP method colors - industry standard semantic colors (intentional)
 const methodStyles: Record<HttpMethod, string> = {
   GET: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
   POST: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
@@ -156,7 +157,7 @@ export const SchemaDisplayPath = ({
   // Highlight path parameters
   const highlightedPath = path.replace(
     /\{([^}]+)\}/g,
-    '<span class="text-blue-600 dark:text-blue-400">{$1}</span>'
+    '<span class="text-blue-600 dark:text-blue-400">{$1}</span>',
   );
 
   return (
@@ -183,7 +184,7 @@ export const SchemaDisplayDescription = ({
     <p
       className={cn(
         "border-b px-4 py-3 text-muted-foreground text-sm",
-        className
+        className,
       )}
       {...props}
     >
@@ -363,7 +364,7 @@ export const SchemaDisplayProperty = ({
         <CollapsibleTrigger
           className={cn(
             "group flex w-full items-center gap-2 py-3 text-left transition-colors hover:bg-muted/50",
-            className
+            className,
           )}
           style={{ paddingLeft }}
         >
@@ -449,7 +450,7 @@ export const SchemaDisplayExample = ({
   <pre
     className={cn(
       "mx-4 mb-4 overflow-auto rounded-md bg-muted p-4 font-mono text-sm",
-      className
+      className,
     )}
     {...props}
   >

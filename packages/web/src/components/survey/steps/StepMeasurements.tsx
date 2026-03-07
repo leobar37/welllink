@@ -45,6 +45,7 @@ function BMIInfoContent() {
         de un rango saludable.
       </p>
 
+      {/* BMI Categories - using semantic health indicator colors (intentional) */}
       <div className="space-y-3">
         <h4 className="font-medium text-sm">Categorías del IMC (adultos):</h4>
 

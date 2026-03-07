@@ -5,7 +5,7 @@ export function CTASection() {
   return (
     <section className="py-20 sm:py-32">
       <div className="container">
-        <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-primary via-primary/95 to-primary/90 px-6 py-20 sm:px-12 sm:py-28 text-center shadow-2xl shadow-primary/25">
+        <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary via-primary/95 to-primary/90 px-6 py-20 sm:px-12 sm:py-28 text-center shadow-lg shadow-primary/25">
           {/* Floating Gradient Blobs */}
           <div className="absolute -top-24 -left-24 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
           <div className="absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-white/8 blur-3xl" />
@@ -61,7 +61,7 @@ export function CTASection() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
               <Link
                 to="/auth/register"
-                className="group inline-flex items-center gap-2.5 h-14 sm:h-16 px-10 sm:px-12 rounded-full bg-white text-primary font-semibold text-lg shadow-lg shadow-black/10 hover:bg-white/95 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+                className="group inline-flex items-center gap-2.5 h-14 sm:h-16 px-10 sm:px-12 rounded-full bg-white text-primary font-semibold text-lg shadow-sm shadow-black/10 hover:bg-white/95 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
               >
                 Crear mi tarjeta gratis
                 <ArrowRight className="h-5 w-5 group-hover:translate-x-0.5 transition-transform" />

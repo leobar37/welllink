@@ -17,8 +17,8 @@ export * from "./whatsapp-message";
 export * from "./whatsapp-template";
 export * from "./whatsapp-context";
 
-// MEDICAL RESERVATION TABLES
-export * from "./medical-service";
+// SERVICE & RESERVATION TABLES
+export * from "./service";
 // time-slot: REMOVED - availability simplified, no pre-generated slots
 export * from "./reservation-request";
 export * from "./reservation";

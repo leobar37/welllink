@@ -18,6 +18,7 @@ import {
   Calendar,
 } from "lucide-react";
 import type { Client } from "@/hooks/use-clients";
+import { semanticColors } from "@/lib/colors";
 
 interface ClientCardProps {
   client: Client;
@@ -28,19 +29,19 @@ interface ClientCardProps {
 
 const labelConfig = {
   consumidor: {
-    bg: "bg-blue-50",
-    text: "text-blue-700",
-    icon: "bg-blue-100 text-blue-600",
+    bg: semanticColors.labels.primary.bg,
+    text: semanticColors.labels.primary.text,
+    icon: `${semanticColors.labels.primary.bg} ${semanticColors.labels.primary.text}`,
   },
   prospecto: {
-    bg: "bg-emerald-50",
-    text: "text-emerald-700",
-    icon: "bg-emerald-100 text-emerald-600",
+    bg: semanticColors.labels.secondary.bg,
+    text: semanticColors.labels.secondary.text,
+    icon: `${semanticColors.labels.secondary.bg} ${semanticColors.labels.secondary.text}`,
   },
   afiliado: {
-    bg: "bg-amber-50",
-    text: "text-amber-700",
-    icon: "bg-amber-100 text-amber-600",
+    bg: semanticColors.labels.accent.bg,
+    text: semanticColors.labels.accent.text,
+    icon: `${semanticColors.labels.accent.bg} ${semanticColors.labels.accent.text}`,
   },
 } as const;
 

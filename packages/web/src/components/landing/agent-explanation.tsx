@@ -48,7 +48,7 @@ export function AgentExplanation() {
 
         {/* Visual demo */}
         <div className="max-w-4xl mx-auto mb-12">
-          <div className="relative rounded-2xl overflow-hidden border border-border bg-card shadow-xl">
+          <div className="relative rounded-xl overflow-hidden border border-border bg-card shadow-xl">
             {/* Chat mockup */}
             <div className="grid md:grid-cols-2">
               {/* Doctor side */}
@@ -75,7 +75,7 @@ export function AgentExplanation() {
                 </div>
               </div>
 
-              {/* Patient side (simulated WhatsApp) */}
+              {/* Patient side (simulated WhatsApp - using WhatsApp brand color for chat bubbles) */}
               <div className="p-6 bg-[#DCF8C6]/50">
                 <div className="space-y-4">
                   {/* Chat messages */}
@@ -84,7 +84,7 @@ export function AgentExplanation() {
                       <span className="text-xs">👤</span>
                     </div>
                     <div className="flex-1">
-                      <div className="bg-white rounded-2xl rounded-tl-sm p-3 shadow-sm text-sm">
+                      <div className="bg-card rounded-xl rounded-tl-sm p-3 shadow-sm text-sm">
                         Hola, tienes disponibilidad para esta semana?
                       </div>
                       <div className="text-xs text-muted-foreground mt-1">
@@ -95,10 +95,12 @@ export function AgentExplanation() {
 
                   <div className="flex gap-2 flex-row-reverse">
                     <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                      <span className="text-xs text-white">🤖</span>
+                      <span className="text-xs text-primary-foreground">
+                        🤖
+                      </span>
                     </div>
                     <div className="flex-1">
-                      <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-sm p-3 shadow-sm text-sm">
+                      <div className="bg-primary text-primary-foreground rounded-xl rounded-tr-sm p-3 shadow-sm text-sm">
                         Hola! Tengo disponibles el martes a las 10:00 o 15:00, o
                         el viernes a las 11:00. Cuál te funciona mejor?
                       </div>
@@ -113,7 +115,7 @@ export function AgentExplanation() {
                       <span className="text-xs">👤</span>
                     </div>
                     <div className="flex-1">
-                      <div className="bg-white rounded-2xl rounded-tl-sm p-3 shadow-sm text-sm">
+                      <div className="bg-card rounded-xl rounded-tl-sm p-3 shadow-sm text-sm">
                         Me viene bien el martes a las 10:00!
                       </div>
                       <div className="text-xs text-muted-foreground mt-1">
@@ -124,10 +126,12 @@ export function AgentExplanation() {
 
                   <div className="flex gap-2 flex-row-reverse">
                     <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                      <span className="text-xs text-white">🤖</span>
+                      <span className="text-xs text-primary-foreground">
+                        🤖
+                      </span>
                     </div>
                     <div className="flex-1">
-                      <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-sm p-3 shadow-sm text-sm">
+                      <div className="bg-primary text-primary-foreground rounded-xl rounded-tr-sm p-3 shadow-sm text-sm">
                         Perfecto! Tu cita está confirmada para martes 10:00 AM.
                         Te enviaré un recordatorio mañana. Saludos!
                       </div>

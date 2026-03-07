@@ -196,6 +196,39 @@ export class AgentConfigService {
     return instructions;
   }
 
+  /**
+   * Get effective instructions for public/agent use (no auth required)
+   * Used by the AI chat agent to get tone configuration
+   */
+  async getEffectiveInstructionsForAgent(
+    profileId: string,
+    professionalName: string,
+  ): Promise<string> {
+    // Get config directly from repository without auth check
+    const config = await this.agentConfigRepository.findByProfileId(profileId);
+
+    if (!config) {
+      // Return default instructions
+      return getToneInstructions("professional", professionalName);
+    }
+
+    // Narrow type to ensure config is not null/undefined
+    const agentConfig = config;
+
+    // Start with preset instructions
+    let instructions = getToneInstructions(
+      agentConfig.tonePreset as TonePreset,
+      professionalName,
+    );
+
+    // Add custom instructions if present
+    if (agentConfig.customInstructions?.trim()) {
+      instructions += `\n\nInstrucciones personalizadas del profesional:\n${agentConfig.customInstructions.trim()}`;
+    }
+
+    return instructions;
+  }
+
   async getWelcomeMessage(
     ctx: RequestContext,
     profileId: string,

@@ -170,7 +170,7 @@ export function SocialLinks() {
       </div>
 
       {adding && (
-        <div className="rounded-2xl p-5 border border-primary/20 bg-primary/5">
+        <div className="rounded-lg p-5 border border-primary/20 bg-primary/5">
           <h3 className="text-base font-medium mb-4">Nuevo Enlace</h3>
           <div>
             <Form {...form}>
@@ -259,7 +259,7 @@ export function SocialLinks() {
           ? links.map((link, index) => (
               <div
                 key={link.id}
-                className="bg-muted/40 rounded-2xl p-4 hover:bg-muted/50 transition-colors"
+                className="bg-muted/40 rounded-lg p-4 hover:bg-muted/50 transition-colors"
               >
                 <div className="flex items-center gap-3">
                   {/* Platform badge */}

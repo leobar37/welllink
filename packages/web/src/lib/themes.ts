@@ -1,5 +1,5 @@
 /**
- * Theme Configuration for MediApp
+ * Theme Configuration for CitaBot
  *
  * Defines the available themes for public profile customization.
  * Colors use OKLCH format for consistency with the CSS system.
@@ -35,27 +35,27 @@ export interface ThemeDefinition {
 export const THEMES: ThemeDefinition[] = [
   {
     id: "default",
-    name: "Wellness Verde",
-    description: "Tema predeterminado con tonos verdes relajantes",
+    name: "Violeta Tech",
+    description: "Tema moderno con tonos violeta para un look profesional y tech",
     colors: {
-      primary: "oklch(0.696 0.17 162.48)",
+      primary: "oklch(0.55 0.22 295)",
       primaryForeground: "oklch(1 0 0)",
-      background: "oklch(0.995 0 0)",
-      foreground: "oklch(0.25 0.01 260)",
+      background: "oklch(0.99 0.003 295)",
+      foreground: "oklch(0.18 0.025 295)",
       card: "oklch(1 0 0)",
-      cardForeground: "oklch(0.25 0.01 260)",
-      secondary: "oklch(0.97 0.01 162)",
-      secondaryForeground: "oklch(0.3 0.05 162)",
-      muted: "oklch(0.97 0 0)",
-      mutedForeground: "oklch(0.5 0 0)",
-      accent: "oklch(0.96 0.02 162)",
-      accentForeground: "oklch(0.3 0.05 162)",
-      border: "oklch(0.94 0 0)",
-      ring: "oklch(0.696 0.17 162.48)",
+      cardForeground: "oklch(0.18 0.025 295)",
+      secondary: "oklch(0.94 0.04 295)",
+      secondaryForeground: "oklch(0.3 0.08 295)",
+      muted: "oklch(0.96 0.008 295)",
+      mutedForeground: "oklch(0.5 0.02 295)",
+      accent: "oklch(0.82 0.1 295)",
+      accentForeground: "oklch(0.25 0.08 295)",
+      border: "oklch(0.9 0.025 295)",
+      ring: "oklch(0.55 0.22 295)",
     },
     preview: {
       gradient:
-        "linear-gradient(135deg, oklch(0.696 0.17 162.48), oklch(0.76 0.14 162))",
+        "linear-gradient(135deg, oklch(0.55 0.22 295), oklch(0.65 0.18 285))",
     },
   },
   {
@@ -111,7 +111,7 @@ export const THEMES: ThemeDefinition[] = [
   {
     id: "lavender",
     name: "Lavanda",
-    description: "Purpura suave para relajacion y mindfulness",
+    description: "Purpura suave para un look elegante y relajado",
     colors: {
       primary: "oklch(0.60 0.15 290)",
       primaryForeground: "oklch(1 0 0)",
@@ -134,28 +134,28 @@ export const THEMES: ThemeDefinition[] = [
     },
   },
   {
-    id: "earth",
-    name: "Tierra",
-    description: "Tonos naturales y organicos para bienestar holistico",
+    id: "rose",
+    name: "Rosa",
+    description: "Tonos rosados perfectos para belleza y estetica",
     colors: {
-      primary: "oklch(0.55 0.10 70)",
+      primary: "oklch(0.65 0.18 355)",
       primaryForeground: "oklch(1 0 0)",
-      background: "oklch(0.97 0.02 70)",
-      foreground: "oklch(0.25 0.03 40)",
-      card: "oklch(0.99 0.01 70)",
-      cardForeground: "oklch(0.25 0.03 40)",
-      secondary: "oklch(0.90 0.04 70)",
-      secondaryForeground: "oklch(0.35 0.06 70)",
-      muted: "oklch(0.93 0.02 70)",
-      mutedForeground: "oklch(0.5 0.03 70)",
-      accent: "oklch(0.75 0.08 90)",
-      accentForeground: "oklch(0.3 0.05 90)",
-      border: "oklch(0.90 0.03 70)",
-      ring: "oklch(0.55 0.10 70)",
+      background: "oklch(0.99 0.01 355)",
+      foreground: "oklch(0.25 0.02 355)",
+      card: "oklch(1 0 0)",
+      cardForeground: "oklch(0.25 0.02 355)",
+      secondary: "oklch(0.95 0.03 355)",
+      secondaryForeground: "oklch(0.35 0.06 355)",
+      muted: "oklch(0.96 0.01 355)",
+      mutedForeground: "oklch(0.5 0.02 355)",
+      accent: "oklch(0.85 0.08 10)",
+      accentForeground: "oklch(0.25 0.05 10)",
+      border: "oklch(0.92 0.02 355)",
+      ring: "oklch(0.65 0.18 355)",
     },
     preview: {
       gradient:
-        "linear-gradient(135deg, oklch(0.55 0.10 70), oklch(0.65 0.08 90))",
+        "linear-gradient(135deg, oklch(0.65 0.18 355), oklch(0.75 0.15 10))",
     },
   },
 ];

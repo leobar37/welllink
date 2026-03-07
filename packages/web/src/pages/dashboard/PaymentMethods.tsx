@@ -73,7 +73,7 @@ const typeLabels: Record<
   bank_transfer: {
     label: "Transferencia Bancaria",
     icon: Building2,
-    color: "text-gray-600",
+    color: "text-muted-foreground",
   },
   digital_wallet: {
     label: "Billetera Digital",
@@ -213,13 +213,13 @@ export function PaymentMethodsPage() {
               <div
                 className={cn(
                   "p-2 rounded-full",
-                  activeCount > 0 ? "bg-green-100" : "bg-gray-100",
+                  activeCount > 0 ? "bg-green-100" : "bg-muted/50",
                 )}
               >
                 {activeCount > 0 ? (
                   <Check className="h-5 w-5 text-green-600" />
                 ) : (
-                  <div className="h-5 w-5 rounded-full border-2 border-gray-300" />
+                  <div className="h-5 w-5 rounded-full border-2 border-muted-foreground/30" />
                 )}
               </div>
               <div>

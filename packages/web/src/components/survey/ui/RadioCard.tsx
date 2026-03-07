@@ -1,16 +1,16 @@
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 interface RadioCardOption<T extends string> {
-  value: T
-  label: string
+  value: T;
+  label: string;
 }
 
 interface RadioCardGroupProps<T extends string> {
-  options: RadioCardOption<T>[]
-  value: T | undefined
-  onChange: (value: T) => void
-  name: string
-  className?: string
+  options: RadioCardOption<T>[];
+  value: T | undefined;
+  onChange: (value: T) => void;
+  name: string;
+  className?: string;
 }
 
 export function RadioCardGroup<T extends string>({
@@ -36,14 +36,14 @@ export function RadioCardGroup<T extends string>({
         />
       ))}
     </div>
-  )
+  );
 }
 
 interface RadioCardProps<T extends string> {
-  option: RadioCardOption<T>
-  isSelected: boolean
-  onSelect: () => void
-  name: string
+  option: RadioCardOption<T>;
+  isSelected: boolean;
+  onSelect: () => void;
+  name: string;
 }
 
 function RadioCard<T extends string>({
@@ -59,8 +59,8 @@ function RadioCard<T extends string>({
         "hover:border-primary/50 active:scale-[0.98]",
         "focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2",
         isSelected
-          ? "bg-primary/10 border-primary text-foreground"
-          : "bg-card border-border hover:bg-accent/50"
+          ? "bg-primary/5 border-primary/70 text-foreground"
+          : "bg-card border-border/60 hover:bg-accent/50",
       )}
     >
       <input
@@ -73,5 +73,5 @@ function RadioCard<T extends string>({
       />
       <span className="text-sm font-medium">{option.label}</span>
     </label>
-  )
+  );
 }

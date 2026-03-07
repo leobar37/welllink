@@ -92,7 +92,8 @@ const changeTypeStyles: Record<ChangeType, string> = {
     "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
   patch: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
   added: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-  removed: "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400",
+  removed:
+    "bg-muted text-muted-foreground dark:bg-muted/30 dark:text-muted-foreground/70",
 };
 
 const changeTypeIcons: Record<ChangeType, React.ReactNode> = {
@@ -121,7 +122,7 @@ export const PackageInfoChangeType = ({
       className={cn(
         "gap-1 text-xs capitalize",
         changeTypeStyles[changeType],
-        className
+        className,
       )}
       variant="secondary"
       {...props}
@@ -149,7 +150,7 @@ export const PackageInfoVersion = ({
     <div
       className={cn(
         "mt-2 flex items-center gap-2 font-mono text-muted-foreground text-sm",
-        className
+        className,
       )}
       {...props}
     >

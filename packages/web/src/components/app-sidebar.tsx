@@ -7,7 +7,7 @@ import {
   Link as LinkIcon,
   Palette,
   Users,
-  Stethoscope,
+  Scissors,
   Folder,
   Calendar,
   Bot,
@@ -15,7 +15,7 @@ import {
   Smartphone,
   HelpCircle,
 } from "lucide-react";
-import { Logo } from "@/components/ui/logo";
+import { LogoCitaBot } from "@/components/ui/logo-citabot";
 import {
   Sidebar,
   SidebarContent,
@@ -79,9 +79,9 @@ const items = [
     icon: MessageCircle,
   },
   {
-    title: "Servicios Médicos",
+    title: "Servicios",
     url: "/dashboard/services",
-    icon: Stethoscope,
+    icon: Scissors,
   },
   {
     title: "Funciones",
@@ -117,7 +117,7 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader>
         <div className="px-4 py-2">
-          <Logo size="md" />
+          <LogoCitaBot size="md" />
         </div>
       </SidebarHeader>
       <SidebarContent>

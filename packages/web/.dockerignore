@@ -1,48 +1,49 @@
 # Dependencies
 node_modules
-bun.lockb
-
-# Build outputs
-dist
-dist-ssr
-.react-router
-build
-
-# Logs
-logs
-*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+
+# Build outputs
+dist
+build
+*.tsbuildinfo
 
 # Environment files
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 
-# Testing
-coverage
-.nyc_output
-
-# Editor directories and files
-.vscode
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# Misc
+# Development files
 .git
 .gitignore
 README.md
-*.md
-.vercel
-.cache
+CHANGELOG.md
 
-# Local development
-*.local
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test files
+coverage
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+tests
+__tests__
+*.test.js
+*.test.jsx
+
+# Misc
+*.log
+.cache
+tmp
+temp
