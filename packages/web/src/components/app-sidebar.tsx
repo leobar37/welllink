@@ -14,6 +14,8 @@ import {
   MessageCircle,
   Smartphone,
   HelpCircle,
+  Package,
+  Truck,
 } from "lucide-react";
 import { LogoCitaBot } from "@/components/ui/logo-citabot";
 import {
@@ -82,6 +84,16 @@ const items = [
     title: "Servicios",
     url: "/dashboard/services",
     icon: Scissors,
+  },
+  {
+    title: "Inventario",
+    url: "/dashboard/inventory",
+    icon: Package,
+  },
+  {
+    title: "Proveedores",
+    url: "/dashboard/suppliers",
+    icon: Truck,
   },
   {
     title: "Funciones",
