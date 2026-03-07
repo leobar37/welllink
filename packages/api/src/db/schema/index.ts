@@ -39,3 +39,10 @@ export * from "./payment-method";
 
 // Agent Configuration
 export * from "./agent-config";
+
+// INVENTORY TABLES
+export * from "./supplier";
+export * from "./product-category";
+export * from "./product";
+export * from "./inventory-item";
+export * from "./stock-movement";
