@@ -56,6 +56,10 @@ import { InventoryRepository } from "../services/repository/inventory";
 import { SupplierRepository } from "../services/repository/supplier";
 import { ProductCategoryRepository } from "../services/repository/product-category";
 
+// NEW INVENTORY SERVICES
+import { ProductService } from "../services/business/product";
+import { InventoryService } from "../services/business/inventory";
+
 let storageInstance: StorageStrategy | null = null;
 let initialized = false;
 let storageInitializationFailed = false;
@@ -176,6 +180,10 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
       profileRepository,
     );
 
+    // INVENTORY SERVICES
+    const productService = new ProductService(productRepository, inventoryRepository);
+    const inventoryService = new InventoryService(inventoryRepository, productRepository);
+
     // Services
     const assetService = new AssetService(assetRepository, storage);
     const cdnService = new CDNService(assetRepository, storage);
@@ -275,6 +283,9 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         notificationService,
         paymentMethodService,
         availabilityValidationService,
+        // INVENTORY SERVICES
+        productService,
+        inventoryService,
         // AI Messaging Strategy
         getMessageStrategy,
       },
