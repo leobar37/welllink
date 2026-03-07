@@ -50,6 +50,12 @@ import { NotificationService } from "../services/business/notification";
 import { PaymentMethodService } from "../services/business/payment-method";
 import { AvailabilityValidationService } from "../services/business/availability-validation";
 
+// NEW INVENTORY REPOSITORIES
+import { ProductRepository } from "../services/repository/product";
+import { InventoryRepository } from "../services/repository/inventory";
+import { SupplierRepository } from "../services/repository/supplier";
+import { ProductCategoryRepository } from "../services/repository/product-category";
+
 let storageInstance: StorageStrategy | null = null;
 let initialized = false;
 let storageInitializationFailed = false;
@@ -129,6 +135,12 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     const reservationRepository = new ReservationRepository();
     // availabilityRuleRepository: REMOVED - availability now in profile table
     const paymentMethodRepository = new PaymentMethodRepository();
+
+    // INVENTORY REPOSITORIES
+    const productRepository = new ProductRepository();
+    const inventoryRepository = new InventoryRepository();
+    const supplierRepository = new SupplierRepository();
+    const productCategoryRepository = new ProductCategoryRepository();
 
     // Evolution API service
     const evolutionService = new EvolutionService({
@@ -236,6 +248,11 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         reservationRepository,
         // availabilityRuleRepository: REMOVED - availability now in profile table
         paymentMethodRepository,
+        // INVENTORY REPOSITORIES
+        productRepository,
+        inventoryRepository,
+        supplierRepository,
+        productCategoryRepository,
         // Services
         assetService,
         cdnService,
