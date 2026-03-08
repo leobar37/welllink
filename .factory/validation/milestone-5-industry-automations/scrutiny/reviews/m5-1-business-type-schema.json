@@ -1,0 +1,33 @@
+{
+  "featureId": "m5-1-business-type-schema",
+  "reviewedAt": "2026-03-08T10:00:00.000Z",
+  "commitId": "52f6003",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "Implementation fully covers the feature requirements. Created business_type table with 5 business types (beauty, health, fitness, professional, technical), added business_type_id foreign key to profile table, created seed data with Spanish names, and implemented API endpoints to retrieve business types. The build was verified successfully.",
+    "issues": [
+      {
+        "file": "packages/api/src/api/routes/business-types.ts",
+        "line": 20,
+        "severity": "non_blocking",
+        "description": "The /:id endpoint doesn't validate UUID format before querying. Invalid UUIDs will cause an unhandled error instead of returning a proper 404 response. Consider adding UUID validation or error handling."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "conventions",
+      "observation": "Worker did not create a repository/business service layer for business_type - direct db queries are used in the route handler. This appears acceptable for a simple global configuration table (read-only) and matches patterns used by similar endpoints like payment-methods and inventory in the codebase.",
+      "evidence": "packages/api/src/api/routes/business-types.ts:4 - uses db.query directly without service layer"
+    },
+    {
+      "area": "services",
+      "observation": "The system prompt referenced .factory/services.yaml but this file doesn't exist in the project. This may indicate incomplete setup or documentation drift.",
+      "evidence": "Glob search for services.yaml in project returned no results"
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Feature implementation passes review. All expected behaviors were implemented correctly: business_type table with schema fields (id, name, key, description, icon, isActive), seed data for 5 business types with Spanish names, profile.business_type_id foreign key with ON DELETE SET NULL, and API endpoints GET /api/business-types and GET /api/business-types/:id. The build verified successfully. One minor non-blocking issue noted: UUID validation missing in the /:id endpoint."
+}
