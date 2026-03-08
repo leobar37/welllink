@@ -50,3 +50,4 @@ export * from "./inventory-item";
 export * from "./stock-movement";
 export * from "./purchase-order";
 export * from "./purchase-order-item";
+export * from "./low-stock-alert-sent";

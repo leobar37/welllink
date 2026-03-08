@@ -22,6 +22,13 @@
       "when": 1772950250287,
       "tag": "0002_service_product",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1773100000000,
+      "tag": "0003_low_stock_alert_sent",
+      "breakpoints": true
     }
   ]
 }
