@@ -7,6 +7,7 @@ import { env } from "./config/env";
 
 import { Elysia, redirect } from "elysia";
 import { cors } from "@elysiajs/cors";
+import { swagger } from "@elysiajs/swagger";
 import { setDefaultResultOrder } from "node:dns";
 
 // Force IPv4 preference to avoid IPv6 connection issues in Docker/Cloud environments
@@ -76,6 +77,29 @@ const modules = [
 ];
 
 const app = new Elysia()
+  // Swagger documentation
+  .use(
+    swagger({
+      documentation: {
+        info: {
+          title: "CitaBot API",
+          version: "1.0.0",
+          description: "API de gestión de inventario, automatizaciones y personal para CitaBot",
+        },
+        tags: [
+          { name: "Inventory", description: "Gestión de inventario, productos y proveedores" },
+          { name: "Automation", description: "Motor de automatizaciones y plantillas" },
+          { name: "Staff", description: "Gestión de personal y disponibilidad" },
+          { name: "Auth", description: "Autenticación" },
+          { name: "Profiles", description: "Perfiles de negocio" },
+          { name: "Clients", description: "Gestión de clientes" },
+          { name: "Services", description: "Servicios" },
+          { name: "Reservations", description: "Reservas y citas" },
+        ],
+      },
+      path: "/api/docs",
+    }),
+  )
   // CORS - configurable via CORS_ORIGIN env variable
   .use(
     cors({

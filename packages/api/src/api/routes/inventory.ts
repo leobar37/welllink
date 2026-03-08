@@ -3,6 +3,15 @@ import { servicesPlugin } from "../../plugins/services";
 import { authGuard } from "../../middleware/auth-guard";
 import { errorMiddleware } from "../../middleware/error";
 
+// OpenAPI documentation helper types
+type OpenAPIDetail = {
+  tags?: string[];
+  summary?: string;
+  description?: string;
+  security?: Array<Record<string, string[]>>;
+  responses?: Record<string, { description: string; content?: Record<string, { schema?: unknown }> }>;
+};
+
 export const inventoryRoutes = new Elysia({ prefix: "/inventory" })
   .use(errorMiddleware)
   .use(servicesPlugin)
@@ -12,15 +21,28 @@ export const inventoryRoutes = new Elysia({ prefix: "/inventory" })
   // ========================================
   
   // List products with search and filters
-  .get("/products", async ({ query, services, ctx }) => {
-    const profileId = query.profileId as string;
-    if (!profileId) {
-      // Get user's primary profile
-      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
-      if (profiles.length === 0) {
-        return [];
+  .get(
+    "/products",
+    async ({ query, services, ctx }) => {
+      const profileId = query.profileId as string;
+      if (!profileId) {
+        // Get user's primary profile
+        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        if (profiles.length === 0) {
+          return [];
+        }
+        const primaryProfile = profiles[0];
+        
+        return services.productService.searchProducts(ctx!, {
+          searchTerm: query.searchTerm as string | undefined,
+          categoryId: query.categoryId as string | undefined,
+          supplierId: query.supplierId as string | undefined,
+          isActive: query.isActive === "true" ? true : query.isActive === "false" ? false : undefined,
+          limit: query.limit ? parseInt(query.limit as string) : undefined,
+          offset: query.offset ? parseInt(query.offset as string) : undefined,
+          profileId: primaryProfile.id,
+        });
       }
-      const primaryProfile = profiles[0];
       
       return services.productService.searchProducts(ctx!, {
         searchTerm: query.searchTerm as string | undefined,
@@ -29,33 +51,64 @@ export const inventoryRoutes = new Elysia({ prefix: "/inventory" })
         isActive: query.isActive === "true" ? true : query.isActive === "false" ? false : undefined,
         limit: query.limit ? parseInt(query.limit as string) : undefined,
         offset: query.offset ? parseInt(query.offset as string) : undefined,
-        profileId: primaryProfile.id,
+        profileId,
       });
-    }
-    
-    return services.productService.searchProducts(ctx!, {
-      searchTerm: query.searchTerm as string | undefined,
-      categoryId: query.categoryId as string | undefined,
-      supplierId: query.supplierId as string | undefined,
-      isActive: query.isActive === "true" ? true : query.isActive === "false" ? false : undefined,
-      limit: query.limit ? parseInt(query.limit as string) : undefined,
-      offset: query.offset ? parseInt(query.offset as string) : undefined,
-      profileId,
-    });
-  })
+    },
+    {
+      detail: {
+        tags: ["Inventory"],
+        summary: "Listar productos",
+        description: "Obtiene una lista de productos con soporte para búsqueda y filtros por categoría, proveedor, estado de stock y más.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Lista de productos" },
+        },
+      },
+      query: t.Object({
+        profileId: t.Optional(t.String()),
+        searchTerm: t.Optional(t.String()),
+        categoryId: t.Optional(t.String()),
+        supplierId: t.Optional(t.String()),
+        isActive: t.Optional(t.String()),
+        limit: t.Optional(t.String()),
+        offset: t.Optional(t.String()),
+      }),
+    },
+  )
   
   // Get single product
-  .get("/products/:id", async ({ params, query, services, ctx }) => {
-    const profileId = query.profileId as string;
-    if (!profileId) {
-      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
-      if (profiles.length === 0) {
-        throw new Error("Perfil no encontrado");
+  .get(
+    "/products/:id",
+    async ({ params, query, services, ctx }) => {
+      const profileId = query.profileId as string;
+      if (!profileId) {
+        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        if (profiles.length === 0) {
+          throw new Error("Perfil no encontrado");
+        }
+        return services.productService.getProduct(ctx!, params.id, profiles[0].id);
       }
-      return services.productService.getProduct(ctx!, params.id, profiles[0].id);
-    }
-    return services.productService.getProduct(ctx!, params.id, profileId);
-  })
+      return services.productService.getProduct(ctx!, params.id, profileId);
+    },
+    {
+      detail: {
+        tags: ["Inventory"],
+        summary: "Obtener producto por ID",
+        description: "Obtiene los detalles de un producto específico por su ID.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Producto encontrado" },
+          "404": { description: "Producto no encontrado" },
+        },
+      },
+      params: t.Object({
+        id: t.String(),
+      }),
+      query: t.Object({
+        profileId: t.Optional(t.String()),
+      }),
+    },
+  )
   
   // Create product
   .post(
@@ -79,6 +132,17 @@ export const inventoryRoutes = new Elysia({ prefix: "/inventory" })
       return product;
     },
     {
+      detail: {
+        tags: ["Inventory"],
+        summary: "Crear producto",
+        description: "Crea un nuevo producto en el inventario. Requiere SKU único y nombre.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "201": { description: "Producto creado exitosamente" },
+          "400": { description: "Datos inválidos" },
+          "409": { description: "SKU duplicado" },
+        },
+      },
       body: t.Object({
         profileId: t.Optional(t.String()),
         sku: t.String({ minLength: 1 }),
@@ -121,6 +185,16 @@ export const inventoryRoutes = new Elysia({ prefix: "/inventory" })
       return services.productService.updateProduct(ctx!, params.id, targetProfileId, body);
     },
     {
+      detail: {
+        tags: ["Inventory"],
+        summary: "Actualizar producto",
+        description: "Actualiza los datos de un producto existente.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Producto actualizado" },
+          "404": { description: "Producto no encontrado" },
+        },
+      },
       body: t.Object({
         sku: t.Optional(t.String({ minLength: 1 })),
         name: t.Optional(t.String({ minLength: 1 })),
@@ -141,41 +215,83 @@ export const inventoryRoutes = new Elysia({ prefix: "/inventory" })
   )
   
   // Delete product (soft delete)
-  .delete("/products/:id", async ({ params, query, services, ctx, set }) => {
-    const profileId = query.profileId as string;
-    let targetProfileId: string;
-    
-    if (!profileId) {
-      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
-      if (profiles.length === 0) {
-        throw new Error("Perfil no encontrado");
+  .delete(
+    "/products/:id",
+    async ({ params, query, services, ctx, set }) => {
+      const profileId = query.profileId as string;
+      let targetProfileId: string;
+      
+      if (!profileId) {
+        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        if (profiles.length === 0) {
+          throw new Error("Perfil no encontrado");
+        }
+        targetProfileId = profiles[0].id;
+      } else {
+        targetProfileId = profileId;
       }
-      targetProfileId = profiles[0].id;
-    } else {
-      targetProfileId = profileId;
-    }
-    
-    await services.productService.deleteProduct(ctx!, params.id, targetProfileId);
-    set.status = 204;
-  })
+      
+      await services.productService.deleteProduct(ctx!, params.id, targetProfileId);
+      set.status = 204;
+    },
+    {
+      detail: {
+        tags: ["Inventory"],
+        summary: "Eliminar producto",
+        description: "Elimina un producto mediante soft delete (marcado como inactivo).",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "204": { description: "Producto eliminado" },
+          "404": { description: "Producto no encontrado" },
+        },
+      },
+      params: t.Object({
+        id: t.String(),
+      }),
+      query: t.Object({
+        profileId: t.Optional(t.String()),
+      }),
+    },
+  )
   
   // Get product by SKU
-  .get("/products/sku/:sku", async ({ params, query, services, ctx }) => {
-    const profileId = query.profileId as string;
-    let targetProfileId: string;
-    
-    if (!profileId) {
-      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
-      if (profiles.length === 0) {
-        throw new Error("Perfil no encontrado");
+  .get(
+    "/products/sku/:sku",
+    async ({ params, query, services, ctx }) => {
+      const profileId = query.profileId as string;
+      let targetProfileId: string;
+      
+      if (!profileId) {
+        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        if (profiles.length === 0) {
+          throw new Error("Perfil no encontrado");
+        }
+        targetProfileId = profiles[0].id;
+      } else {
+        targetProfileId = profileId;
       }
-      targetProfileId = profiles[0].id;
-    } else {
-      targetProfileId = profileId;
-    }
-    
-    return services.productService.getProductBySku(ctx!, params.sku, targetProfileId);
-  })
+      
+      return services.productService.getProductBySku(ctx!, params.sku, targetProfileId);
+    },
+    {
+      detail: {
+        tags: ["Inventory"],
+        summary: "Obtener producto por SKU",
+        description: "Busca un producto por su código SKU.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Producto encontrado" },
+          "404": { description: "Producto no encontrado" },
+        },
+      },
+      params: t.Object({
+        sku: t.String(),
+      }),
+      query: t.Object({
+        profileId: t.Optional(t.String()),
+      }),
+    },
+  )
   
   // ========================================
   // STOCK ADJUSTMENT
@@ -216,6 +332,17 @@ export const inventoryRoutes = new Elysia({ prefix: "/inventory" })
       return result;
     },
     {
+      detail: {
+        tags: ["Inventory"],
+        summary: "Ajustar stock",
+        description: "Ajusta la cantidad de stock de un producto. Requiere especificar una razón (compra, venta, daño, devolución, ajuste, inicial, transferencia, expirado).",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Stock ajustado exitosamente" },
+          "400": { description: "Datos inválidos" },
+          "404": { description: "Producto no encontrado" },
+        },
+      },
       body: t.Object({
         profileId: t.Optional(t.String()),
         productId: t.String({ minLength: 1 }),
@@ -239,44 +366,85 @@ export const inventoryRoutes = new Elysia({ prefix: "/inventory" })
   )
   
   // Get stock for a product
-  .get("/stock/:productId", async ({ params, query, services, ctx }) => {
-    const profileId = query.profileId as string;
-    let targetProfileId: string;
-    
-    if (!profileId) {
-      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
-      if (profiles.length === 0) {
-        throw new Error("Perfil no encontrado");
+  .get(
+    "/stock/:productId",
+    async ({ params, query, services, ctx }) => {
+      const profileId = query.profileId as string;
+      let targetProfileId: string;
+      
+      if (!profileId) {
+        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        if (profiles.length === 0) {
+          throw new Error("Perfil no encontrado");
+        }
+        targetProfileId = profiles[0].id;
+      } else {
+        targetProfileId = profileId;
       }
-      targetProfileId = profiles[0].id;
-    } else {
-      targetProfileId = profileId;
-    }
-    
-    return services.inventoryService.getStockDirect(params.productId, targetProfileId);
-  })
+      
+      return services.inventoryService.getStockDirect(params.productId, targetProfileId);
+    },
+    {
+      detail: {
+        tags: ["Inventory"],
+        summary: "Obtener stock de producto",
+        description: "Obtiene la cantidad actual de stock para un producto específico.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Stock del producto" },
+          "404": { description: "Producto no encontrado" },
+        },
+      },
+      params: t.Object({
+        productId: t.String(),
+      }),
+      query: t.Object({
+        profileId: t.Optional(t.String()),
+      }),
+    },
+  )
   
   // Get low stock products
-  .get("/low-stock", async ({ query, services, ctx }) => {
-    const profileId = query.profileId as string;
-    let targetProfileId: string;
-    
-    if (!profileId) {
-      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
-      if (profiles.length === 0) {
-        throw new Error("Perfil no encontrado");
+  .get(
+    "/low-stock",
+    async ({ query, services, ctx }) => {
+      const profileId = query.profileId as string;
+      let targetProfileId: string;
+      
+      if (!profileId) {
+        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        if (profiles.length === 0) {
+          throw new Error("Perfil no encontrado");
+        }
+        targetProfileId = profiles[0].id;
+      } else {
+        targetProfileId = profileId;
       }
-      targetProfileId = profiles[0].id;
-    } else {
-      targetProfileId = profileId;
-    }
-    
-    return services.productService.getLowStockProducts(targetProfileId, {
-      location: query.location as string | undefined,
-      limit: query.limit ? parseInt(query.limit as string) : undefined,
-      offset: query.offset ? parseInt(query.offset as string) : undefined,
-    });
-  })
+      
+      return services.productService.getLowStockProducts(targetProfileId, {
+        location: query.location as string | undefined,
+        limit: query.limit ? parseInt(query.limit as string) : undefined,
+        offset: query.offset ? parseInt(query.offset as string) : undefined,
+      });
+    },
+    {
+      detail: {
+        tags: ["Inventory"],
+        summary: "Productos con stock bajo",
+        description: "Obtiene una lista de productos cuyo stock está por debajo del umbral mínimo configurado.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Lista de productos con stock bajo" },
+        },
+      },
+      query: t.Object({
+        profileId: t.Optional(t.String()),
+        location: t.Optional(t.String()),
+        limit: t.Optional(t.String()),
+        offset: t.Optional(t.String()),
+      }),
+    },
+  )
   
   // ========================================
   // STOCK MOVEMENTS / HISTORY
@@ -337,48 +505,89 @@ export const inventoryRoutes = new Elysia({ prefix: "/inventory" })
   // ========================================
   
   // List suppliers
-  .get("/suppliers", async ({ query, services, ctx }) => {
-    const profileId = query.profileId as string;
-    let targetProfileId: string;
-    
-    if (!profileId) {
-      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
-      if (profiles.length === 0) {
-        return [];
+  .get(
+    "/suppliers",
+    async ({ query, services, ctx }) => {
+      const profileId = query.profileId as string;
+      let targetProfileId: string;
+      
+      if (!profileId) {
+        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        if (profiles.length === 0) {
+          return [];
+        }
+        targetProfileId = profiles[0].id;
+      } else {
+        targetProfileId = profileId;
       }
-      targetProfileId = profiles[0].id;
-    } else {
-      targetProfileId = profileId;
-    }
-    
-    return services.supplierRepository.findByProfileIdDirect(targetProfileId, {
-      limit: query.limit ? parseInt(query.limit as string) : undefined,
-      offset: query.offset ? parseInt(query.offset as string) : undefined,
-      isActive: query.isActive === "true" ? true : query.isActive === "false" ? false : undefined,
-    });
-  })
+      
+      return services.supplierRepository.findByProfileIdDirect(targetProfileId, {
+        limit: query.limit ? parseInt(query.limit as string) : undefined,
+        offset: query.offset ? parseInt(query.offset as string) : undefined,
+        isActive: query.isActive === "true" ? true : query.isActive === "false" ? false : undefined,
+      });
+    },
+    {
+      detail: {
+        tags: ["Inventory"],
+        summary: "Listar proveedores",
+        description: "Obtiene una lista de proveedores con filtros opcionales por estado.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Lista de proveedores" },
+        },
+      },
+      query: t.Object({
+        profileId: t.Optional(t.String()),
+        isActive: t.Optional(t.String()),
+        limit: t.Optional(t.String()),
+        offset: t.Optional(t.String()),
+      }),
+    },
+  )
   
   // Get single supplier
-  .get("/suppliers/:id", async ({ params, query, services, ctx }) => {
-    const profileId = query.profileId as string;
-    let targetProfileId: string;
-    
-    if (!profileId) {
-      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
-      if (profiles.length === 0) {
-        throw new Error("Perfil no encontrado");
+  .get(
+    "/suppliers/:id",
+    async ({ params, query, services, ctx }) => {
+      const profileId = query.profileId as string;
+      let targetProfileId: string;
+      
+      if (!profileId) {
+        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        if (profiles.length === 0) {
+          throw new Error("Perfil no encontrado");
+        }
+        targetProfileId = profiles[0].id;
+      } else {
+        targetProfileId = profileId;
       }
-      targetProfileId = profiles[0].id;
-    } else {
-      targetProfileId = profileId;
-    }
-    
-    const supplier = await services.supplierRepository.findByIdAndProfile(params.id, targetProfileId);
-    if (!supplier) {
-      throw new Error("Proveedor no encontrado");
-    }
-    return supplier;
-  })
+      
+      const supplier = await services.supplierRepository.findByIdAndProfile(params.id, targetProfileId);
+      if (!supplier) {
+        throw new Error("Proveedor no encontrado");
+      }
+      return supplier;
+    },
+    {
+      detail: {
+        tags: ["Inventory"],
+        summary: "Obtener proveedor por ID",
+        description: "Obtiene los detalles de un proveedor específico.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Proveedor encontrado" },
+          "404": { description: "Proveedor no encontrado" },
+        },
+      },
+      params: t.Object({
+        id: t.String(),
+      }),
+      query: t.Object({
+        profileId: t.Optional(t.String()),
+      }),
+    },
+  )
   
   // Create supplier
   .post(
@@ -414,6 +623,16 @@ export const inventoryRoutes = new Elysia({ prefix: "/inventory" })
       return supplier;
     },
     {
+      detail: {
+        tags: ["Inventory"],
+        summary: "Crear proveedor",
+        description: "Crea un nuevo proveedor con información de contacto y dirección.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "201": { description: "Proveedor creado exitosamente" },
+          "400": { description: "Datos inválidos" },
+        },
+      },
       body: t.Object({
         profileId: t.Optional(t.String()),
         name: t.String({ minLength: 1 }),

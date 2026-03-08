@@ -49,6 +49,15 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
       );
     },
     {
+      detail: {
+        tags: ["Staff"],
+        summary: "Listar personal",
+        description: "Obtiene una lista de miembros del personal activos para un perfil de negocio.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Lista de personal" },
+        },
+      },
       query: t.Object({
         profileId: t.Optional(t.String()),
       }),
@@ -93,6 +102,15 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
       return staffWithRelations;
     },
     {
+      detail: {
+        tags: ["Staff"],
+        summary: "Listar personal con relaciones",
+        description: "Obtiene una lista de miembros del personal con sus servicios asignados y disponibilidad.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Lista de personal con relaciones" },
+        },
+      },
       query: t.Object({
         profileId: t.Optional(t.String()),
       }),
@@ -121,6 +139,16 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
       return staff;
     },
     {
+      detail: {
+        tags: ["Staff"],
+        summary: "Obtener miembro del personal por ID",
+        description: "Obtiene los detalles de un miembro del personal específico con sus servicios y disponibilidad.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Miembro del personal encontrado" },
+          "404": { description: "Miembro del personal no encontrado" },
+        },
+      },
       params: t.Object({
         id: t.String(),
       }),
@@ -156,6 +184,17 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
       return staff;
     },
     {
+      detail: {
+        tags: ["Staff"],
+        summary: "Crear miembro del personal",
+        description: "Crea un nuevo miembro del personal con nombre, email, teléfono y rol.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "201": { description: "Personal creado exitosamente" },
+          "400": { description: "Datos inválidos" },
+          "403": { description: "Sin permiso" },
+        },
+      },
       body: t.Object({
         profileId: t.Optional(t.String()),
         name: t.String({ minLength: 1 }),
@@ -235,6 +274,17 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
       set.status = 204;
     },
     {
+      detail: {
+        tags: ["Staff"],
+        summary: "Eliminar miembro del personal",
+        description: "Elimina un miembro del personal mediante soft delete (marcado como inactivo).",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "204": { description: "Personal eliminado" },
+          "403": { description: "Sin permiso" },
+          "404": { description: "Personal no encontrado" },
+        },
+      },
       params: t.Object({
         id: t.String(),
       }),

@@ -90,34 +90,89 @@ export const automationRoutes = new Elysia({ prefix: "/automations" })
   // ========================================
 
   // Get all templates (optionally filtered by business type)
-  .get("/templates", async ({ query, services }) => {
-    const businessTypeKey = query.businessType as string | undefined;
-    const category = query.category as string | undefined;
-    const limit = query.limit ? parseInt(query.limit as string) : undefined;
-    const offset = query.offset ? parseInt(query.offset as string) : undefined;
+  .get(
+    "/templates",
+    async ({ query, services }) => {
+      const businessTypeKey = query.businessType as string | undefined;
+      const category = query.category as string | undefined;
+      const limit = query.limit ? parseInt(query.limit as string) : undefined;
+      const offset = query.offset ? parseInt(query.offset as string) : undefined;
 
-    return services.automationTemplateService.getTemplates(businessTypeKey, {
-      category,
-      isActive: true,
-      limit,
-      offset,
-    });
-  })
+      return services.automationTemplateService.getTemplates(businessTypeKey, {
+        category,
+        isActive: true,
+        limit,
+        offset,
+      });
+    },
+    {
+      detail: {
+        tags: ["Automation"],
+        summary: "Listar plantillas de automatizaciones",
+        description: "Obtiene una lista de plantillas de automatizaciones pre-configuradas, filtradas por tipo de negocio y categoría.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Lista de plantillas" },
+        },
+      },
+      query: t.Object({
+        businessType: t.Optional(t.String()),
+        category: t.Optional(t.String()),
+        limit: t.Optional(t.String()),
+        offset: t.Optional(t.String()),
+      }),
+    },
+  )
 
   // Get template categories
-  .get("/templates/categories", async ({ query, services }) => {
-    const businessTypeKey = query.businessType as string | undefined;
-    return services.automationTemplateService.getCategories(businessTypeKey);
-  })
+  .get(
+    "/templates/categories",
+    async ({ query, services }) => {
+      const businessTypeKey = query.businessType as string | undefined;
+      return services.automationTemplateService.getCategories(businessTypeKey);
+    },
+    {
+      detail: {
+        tags: ["Automation"],
+        summary: "Categorías de plantillas",
+        description: "Obtiene las categorías disponibles de plantillas de automatizaciones.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Lista de categorías" },
+        },
+      },
+      query: t.Object({
+        businessType: t.Optional(t.String()),
+      }),
+    },
+  )
 
   // Get single template by ID
-  .get("/templates/:id", async ({ params, services }) => {
-    const template = await services.automationTemplateService.getTemplateById(params.id);
-    if (!template) {
-      throw new Error("Plantilla no encontrada");
-    }
-    return template;
-  })
+  .get(
+    "/templates/:id",
+    async ({ params, services }) => {
+      const template = await services.automationTemplateService.getTemplateById(params.id);
+      if (!template) {
+        throw new Error("Plantilla no encontrada");
+      }
+      return template;
+    },
+    {
+      detail: {
+        tags: ["Automation"],
+        summary: "Obtener plantilla por ID",
+        description: "Obtiene los detalles de una plantilla de automatización específica.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Plantilla encontrada" },
+          "404": { description: "Plantilla no encontrada" },
+        },
+      },
+      params: t.Object({
+        id: t.String(),
+      }),
+    },
+  )
 
   // Apply template - create automation from template
   .post(
@@ -158,42 +213,80 @@ export const automationRoutes = new Elysia({ prefix: "/automations" })
   // ========================================
 
   // List automations for a profile
-  .get("/", async ({ query, services, ctx }) => {
-    const profileId = query.profileId as string;
-    if (!profileId) {
-      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
-      if (profiles.length === 0) {
-        return [];
+  .get(
+    "/",
+    async ({ query, services, ctx }) => {
+      const profileId = query.profileId as string;
+      if (!profileId) {
+        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        if (profiles.length === 0) {
+          return [];
+        }
+        return services.automationRepository.findByProfileId(profiles[0].id, {
+          enabled: query.enabled === "true" ? true : query.enabled === "false" ? false : undefined,
+          limit: query.limit ? parseInt(query.limit as string) : undefined,
+          offset: query.offset ? parseInt(query.offset as string) : undefined,
+        });
       }
-      return services.automationRepository.findByProfileId(profiles[0].id, {
+      return services.automationRepository.findByProfileId(profileId, {
         enabled: query.enabled === "true" ? true : query.enabled === "false" ? false : undefined,
         limit: query.limit ? parseInt(query.limit as string) : undefined,
         offset: query.offset ? parseInt(query.offset as string) : undefined,
       });
-    }
-    return services.automationRepository.findByProfileId(profileId, {
-      enabled: query.enabled === "true" ? true : query.enabled === "false" ? false : undefined,
-      limit: query.limit ? parseInt(query.limit as string) : undefined,
-      offset: query.offset ? parseInt(query.offset as string) : undefined,
-    });
-  })
+    },
+    {
+      detail: {
+        tags: ["Automation"],
+        summary: "Listar automatizaciones",
+        description: "Obtiene una lista de automatizaciones para un perfil de negocio.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Lista de automatizaciones" },
+        },
+      },
+      query: t.Object({
+        profileId: t.Optional(t.String()),
+        enabled: t.Optional(t.String()),
+        limit: t.Optional(t.String()),
+        offset: t.Optional(t.String()),
+      }),
+    },
+  )
 
   // Get single automation with triggers and actions
-  .get("/:id", async ({ params, services, ctx }) => {
-    const automation = await services.automationRepository.findById(params.id);
-    if (!automation) {
-      throw new Error("Automatización no encontrada");
-    }
+  .get(
+    "/:id",
+    async ({ params, services, ctx }) => {
+      const automation = await services.automationRepository.findById(params.id);
+      if (!automation) {
+        throw new Error("Automatización no encontrada");
+      }
 
-    const triggers = await services.automationTriggerRepository.findByAutomationId(params.id);
-    const actions = await services.automationActionRepository.findByAutomationId(params.id);
+      const triggers = await services.automationTriggerRepository.findByAutomationId(params.id);
+      const actions = await services.automationActionRepository.findByAutomationId(params.id);
 
-    return {
-      ...automation,
-      triggers,
-      actions,
-    };
-  })
+      return {
+        ...automation,
+        triggers,
+        actions,
+      };
+    },
+    {
+      detail: {
+        tags: ["Automation"],
+        summary: "Obtener automatización por ID",
+        description: "Obtiene los detalles de una automatización específica, incluyendo sus triggers y acciones.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Automatización encontrada" },
+          "404": { description: "Automatización no encontrada" },
+        },
+      },
+      params: t.Object({
+        id: t.String(),
+      }),
+    },
+  )
 
   // Create automation
   .post(
