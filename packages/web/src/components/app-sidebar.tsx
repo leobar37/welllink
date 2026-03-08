@@ -96,6 +96,11 @@ const items = [
     icon: Truck,
   },
   {
+    title: "Personal",
+    url: "/dashboard/staff",
+    icon: Users,
+  },
+  {
     title: "Funciones",
     url: "/dashboard/features",
     icon: Sparkles,
