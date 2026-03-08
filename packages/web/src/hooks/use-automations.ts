@@ -559,3 +559,153 @@ export function useExecuteAutomation() {
     },
   });
 }
+
+// ========================================
+// GLOBAL ANALYTICS HOOKS
+// ========================================
+
+export interface GlobalAutomationStats {
+  totalExecutions: number;
+  successCount: number;
+  failedCount: number;
+  partialCount: number;
+  pendingCount: number;
+  runningCount: number;
+  successRate: number;
+  failureRate: number;
+  averageDuration: number;
+}
+
+export interface AutomationUsage {
+  automationId: string;
+  automationName: string;
+  executionCount: number;
+  successCount: number;
+  failureCount: number;
+  lastExecutedAt: string | null;
+}
+
+export interface ExecutionTrend {
+  date: string;
+  total: number;
+  success: number;
+  failed: number;
+}
+
+export interface GlobalExecutionLog {
+  id: string;
+  automationId: string;
+  triggerType: string;
+  triggerData: Record<string, unknown>;
+  status: "pending" | "running" | "success" | "partial" | "failed";
+  actionsExecuted: Array<{
+    actionId: string;
+    actionName: string | null;
+    actionType: string;
+    success: boolean;
+    result?: unknown;
+    error?: string;
+  }>;
+  errorMessage?: string;
+  startedAt: string;
+  completedAt: string | null;
+  createdAt: string;
+  automation?: {
+    name: string;
+  };
+}
+
+// Hook for fetching global automation analytics stats
+export function useGlobalAutomationStats(profileId: string) {
+  return useQuery({
+    queryKey: ["global-automation-stats", profileId],
+    queryFn: async () => {
+      const { data, error } = await api.api.automations.analytics.stats.get({ profileId });
+      if (error) {
+        throw new Error(extractErrorMessage(error));
+      }
+      return data as GlobalAutomationStats;
+    },
+    enabled: !!profileId,
+  });
+}
+
+// Hook for fetching most used automations
+export function useMostUsedAutomations(profileId: string, limit: number = 10) {
+  return useQuery({
+    queryKey: ["most-used-automations", profileId, limit],
+    queryFn: async () => {
+      const { data, error } = await api.api.automations.analytics["most-used"].get({ 
+        profileId,
+        limit: limit.toString() 
+      });
+      if (error) {
+        throw new Error(extractErrorMessage(error));
+      }
+      return data as AutomationUsage[];
+    },
+    enabled: !!profileId,
+  });
+}
+
+// Hook for fetching execution trends
+export function useExecutionTrends(profileId: string, days: number = 30) {
+  return useQuery({
+    queryKey: ["execution-trends", profileId, days],
+    queryFn: async () => {
+      const { data, error } = await api.api.automations.analytics.trends.get({ 
+        profileId,
+        days: days.toString()
+      });
+      if (error) {
+        throw new Error(extractErrorMessage(error));
+      }
+      return data as ExecutionTrend[];
+    },
+    enabled: !!profileId,
+  });
+}
+
+// Hook for fetching global execution logs
+export function useGlobalAutomationLogs(
+  profileId: string, 
+  options?: {
+    limit?: number;
+    offset?: number;
+    status?: string;
+    automationId?: string;
+  }
+) {
+  return useQuery({
+    queryKey: ["global-automation-logs", profileId, options],
+    queryFn: async () => {
+      const { data, error } = await api.api.automations.analytics.logs.get({
+        profileId,
+        limit: options?.limit?.toString(),
+        offset: options?.offset?.toString(),
+        status: options?.status,
+        automationId: options?.automationId,
+      });
+      if (error) {
+        throw new Error(extractErrorMessage(error));
+      }
+      return data as GlobalExecutionLog[];
+    },
+    enabled: !!profileId,
+  });
+}
+
+// Hook for fetching all automations for the profile (for filter dropdown)
+export function useProfileAutomations(profileId: string) {
+  return useQuery({
+    queryKey: ["automations", profileId],
+    queryFn: async () => {
+      const { data, error } = await api.api.automations.get({ profileId });
+      if (error) {
+        throw new Error(extractErrorMessage(error));
+      }
+      return data || [];
+    },
+    enabled: !!profileId,
+  });
+}

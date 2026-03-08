@@ -1,0 +1,51 @@
+{
+  "featureId": "m2-3-purchase-order-api",
+  "reviewedAt": "2026-03-08T05:00:00.000Z",
+  "commitId": "0d46e2f",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The implementation covers the CRUD endpoints and status workflow as required, but contains a blocking bug in supplier validation. The code attempts to validate suppliers but uses the wrong repository method, making supplier validation ineffective.",
+    "issues": [
+      {
+        "file": "packages/api/src/services/business/purchase-order.ts",
+        "line": "66-70",
+        "severity": "blocking",
+        "description": "Supplier validation is broken: code uses `purchaseOrderRepository.findByIdAndProfile()` to validate suppliers, but this method looks up purchase orders, not suppliers. The result is fetched but never checked - invalid supplier IDs will be accepted. Should use `supplierRepository.findByIdAndProfile()` instead, and SupplierRepository needs to be injected into the service."
+      },
+      {
+        "file": "packages/api/src/services/business/purchase-order.ts",
+        "line": "175-180",
+        "severity": "blocking",
+        "description": "Same supplier validation issue in updatePurchaseOrder - the code fetches a supplier but doesn't use the result to validate the supplier exists. Additionally, SupplierRepository is not injected into the service constructor."
+      },
+      {
+        "file": "packages/api/src/services/business/purchase-order.ts",
+        "line": "253-307",
+        "severity": "non_blocking",
+        "description": "receivePurchaseOrder lacks database transaction wrapping. Updates to receivedQuantity and stock movements happen in separate operations without transaction protection. If stock movement creation fails after updating receivedQuantity, data could be left in inconsistent state."
+      },
+      {
+        "file": "packages/api/src/api/routes/inventory.ts",
+        "line": "754-1000",
+        "severity": "non_blocking",
+        "description": "Repeated profile resolution pattern (lines 758-766, 781-789, etc.) - each route duplicates the same logic to get targetProfileId from user. Consider extracting to a helper function to reduce duplication."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "conventions",
+      "observation": "AGENTS.md specifies 'ALWAYS use Repository + Business pattern' but doesn't mandate that every entity needs its own repository validation. The supplier validation gap occurred because there's no explicit rule that suppliers must be validated when creating POs.",
+      "evidence": "purchase-order.ts:66-70 - supplier fetched but not validated"
+    },
+    {
+      "area": "skills",
+      "observation": "fullstack-backend skill provides general architecture patterns but doesn't specify when to validate foreign key relationships or how to inject repositories for different entity types.",
+      "evidence": "Skill SKILL.md focuses on layer patterns but not on entity validation requirements"
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "The feature implements all required API endpoints (POST /purchase-orders, GET/PUT/DELETE /purchase-orders/:id, POST send/receive/cancel) with proper status workflow (draft→sent→partial→received). However, it has a blocking bug: supplier validation is ineffective because it uses the wrong repository method and doesn't actually validate supplier existence. This allows creating purchase orders with invalid supplier IDs. The build passes and lint shows no new errors in purchase-order files, but the supplier validation issue must be fixed."
+}

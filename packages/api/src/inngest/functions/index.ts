@@ -42,6 +42,8 @@ import {
   testInactivityTriggers,
   testAnniversaryTriggers,
   testLowStockTriggers,
+  checkNoShowReservations,
+  testNoShowCheck,
 } from "./advanced-triggers";
 
 export const functions = [
@@ -71,4 +73,6 @@ export const functions = [
   testInactivityTriggers,
   testAnniversaryTriggers,
   testLowStockTriggers,
+  checkNoShowReservations,
+  testNoShowCheck,
 ];

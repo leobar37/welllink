@@ -29,6 +29,7 @@ import { profileRoutes } from "./api/routes/profiles";
 // health-survey routes: REMOVED - legacy wellness feature
 import { assetRoutes } from "./api/routes/assets";
 import { analyticsRoutes } from "./api/routes/analytics";
+import { businessKPIRoutes } from "./api/routes/business-kpi";
 
 import { uploadRoutes } from "./api/routes/upload";
 import { onboardingRoutes } from "./api/routes/onboarding";
@@ -52,6 +53,7 @@ import { inventoryRoutes } from "./api/routes/inventory";
 import { automationRoutes } from "./api/routes/automation";
 import { businessTypeRoutes } from "./api/routes/business-types";
 import { staffRoutes } from "./api/routes/staff";
+import { packageRoutes } from "./api/routes/packages";
 
 // Test routes - ONLY enabled via ENABLE_TEST_ROUTES=true (SECURITY: never in production)
 const enableTestRoutes = env.ENABLE_TEST_ROUTES === "true";
@@ -151,6 +153,7 @@ const app = new Elysia()
       // healthSurveyRoutes: REMOVED
       .use(assetRoutes)
       .use(analyticsRoutes)
+      .use(businessKPIRoutes)
       .use(uploadRoutes)
       .use(onboardingRoutes)
       .use(publicRoutes)
@@ -172,6 +175,7 @@ const app = new Elysia()
       .use(automationRoutes)
       .use(businessTypeRoutes)
       .use(staffRoutes)
+      .use(packageRoutes)
       // Test routes - ONLY enabled via ENABLE_TEST_ROUTES=true (SECURITY: never in production)
       .use(
         enableTestRoutes

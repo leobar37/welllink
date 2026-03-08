@@ -672,4 +672,89 @@ export const automationRoutes = new Elysia({ prefix: "/automations" })
         triggerData: t.Optional(t.Record(t.String(), t.Unknown())),
       }),
     },
-  );
+  )
+
+  // ========================================
+  // GLOBAL ANALYTICS (across all automations)
+  // ========================================
+
+  // Get global automation analytics for a profile
+  .get("/analytics/stats", async ({ query, services, ctx }) => {
+    const profileId = query.profileId as string;
+    let targetProfileId = profileId;
+
+    if (!targetProfileId) {
+      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+      if (profiles.length === 0) {
+        return {
+          totalExecutions: 0,
+          successCount: 0,
+          failedCount: 0,
+          partialCount: 0,
+          pendingCount: 0,
+          runningCount: 0,
+          successRate: 0,
+          failureRate: 0,
+          averageDuration: 0,
+        };
+      }
+      targetProfileId = profiles[0].id;
+    }
+
+    return services.automationExecutionLogRepository.getGlobalStats(targetProfileId);
+  })
+
+  // Get most used automations
+  .get("/analytics/most-used", async ({ query, services, ctx }) => {
+    const profileId = query.profileId as string;
+    const limit = query.limit ? parseInt(query.limit as string) : 10;
+    let targetProfileId = profileId;
+
+    if (!targetProfileId) {
+      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+      if (profiles.length === 0) {
+        return [];
+      }
+      targetProfileId = profiles[0].id;
+    }
+
+    return services.automationExecutionLogRepository.getMostUsedAutomations(targetProfileId, limit);
+  })
+
+  // Get execution trends over time
+  .get("/analytics/trends", async ({ query, services, ctx }) => {
+    const profileId = query.profileId as string;
+    const days = query.days ? parseInt(query.days as string) : 30;
+    let targetProfileId = profileId;
+
+    if (!targetProfileId) {
+      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+      if (profiles.length === 0) {
+        return [];
+      }
+      targetProfileId = profiles[0].id;
+    }
+
+    return services.automationExecutionLogRepository.getExecutionTrend(targetProfileId, days);
+  })
+
+  // Get global execution logs for all automations
+  .get("/analytics/logs", async ({ query, services, ctx }) => {
+    const profileId = query.profileId as string;
+    let targetProfileId = profileId;
+
+    if (!targetProfileId) {
+      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+      if (profiles.length === 0) {
+        return [];
+      }
+      targetProfileId = profiles[0].id;
+    }
+
+    return services.automationExecutionLogRepository.findByProfileId(targetProfileId, {
+      limit: query.limit ? parseInt(query.limit as string) : 50,
+      offset: query.offset ? parseInt(query.offset as string) : undefined,
+      status: query.status as string,
+      automationId: query.automationId as string,
+    });
+  });

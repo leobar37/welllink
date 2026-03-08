@@ -1,0 +1,39 @@
+commands:
+  install: bun install
+  typecheck: cd packages/api && bun run typecheck && cd ../web && bun run typecheck
+  build: bun run build
+  test: bun run test
+  lint: bun run lint
+  dev: bun run dev
+  db:generate: cd packages/api && bun run db:generate
+  db:migrate: cd packages/api && bun run db:migrate
+  db:studio: cd packages/api && bun run db:studio
+
+services:
+  postgres:
+    start: docker compose up -d postgres
+    stop: docker compose stop postgres
+    healthcheck: pg_isready -h localhost -p 5432
+    port: 5432
+    depends_on: []
+
+  api:
+    start: cd packages/api && PORT=5300 bun run dev
+    stop: lsof -ti :5300 | xargs kill -9 2>/dev/null || true
+    healthcheck: curl -sf http://localhost:5300/health || curl -sf http://localhost:5300/api/health
+    port: 5300
+    depends_on: [postgres]
+
+  web:
+    start: cd packages/web && PORT=5176 bun run dev
+    stop: lsof -ti :5176 | xargs kill -9 2>/dev/null || true
+    healthcheck: curl -sf http://localhost:5176
+    port: 5176
+    depends_on: [api]
+
+  inngest:
+    start: cd packages/api && bun run inngest:dev
+    stop: lsof -ti :8288 | xargs kill -9 2>/dev/null || true
+    healthcheck: curl -sf http://localhost:8288
+    port: 8288
+    depends_on: [api]

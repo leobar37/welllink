@@ -85,11 +85,13 @@ import { AutomationTemplateService } from "../services/business/automation-templ
 import { ServicePackageRepository } from "../services/repository/service-package";
 import { MembershipRepository } from "../services/repository/membership";
 import { ClientPackageRepository } from "../services/repository/client-package";
+import { BusinessKPIRepository } from "../services/repository/business-kpi";
 
 // NEW PACKAGES & MEMBERSHIPS SERVICES
 import { ServicePackageService } from "../services/business/service-package";
 import { MembershipService } from "../services/business/membership";
 import { ClientPackageService } from "../services/business/client-package";
+import { BusinessKPIService } from "../services/business/business-kpi";
 
 let storageInstance: StorageStrategy | null = null;
 let initialized = false;
@@ -196,6 +198,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     const servicePackageRepository = new ServicePackageRepository();
     const membershipRepository = new MembershipRepository();
     const clientPackageRepository = new ClientPackageRepository();
+    const businessKPIRepository = new BusinessKPIRepository();
 
     // Evolution API service
     const evolutionService = new EvolutionService({
@@ -282,6 +285,8 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
       inventoryRepository,
       serviceProductRepository
     );
+
+    const businessKPIService = new BusinessKPIService(businessKPIRepository);
 
     // Services
     const assetService = new AssetService(assetRepository, storage);
@@ -406,6 +411,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         servicePackageService,
         membershipService,
         clientPackageService,
+        businessKPIService,
         // AI Messaging Strategy
         getMessageStrategy,
       },

@@ -107,6 +107,13 @@ export interface MedicalReservationEvents {
     };
   };
 
+  "reservation.no_show": {
+    data: {
+      reservationId: string;
+      profileId: string;
+    };
+  };
+
   "appointment/reminder-24h": {
     data: {
       reservationId: string;

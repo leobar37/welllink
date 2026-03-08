@@ -16,6 +16,9 @@ import {
   HelpCircle,
   Package,
   Truck,
+  CreditCard,
+  BarChart3,
+  TrendingUp,
 } from "lucide-react";
 import { LogoCitaBot } from "@/components/ui/logo-citabot";
 import {
@@ -101,6 +104,21 @@ function getMenuItems(terminology: { customers: string; services: string }) {
       title: "Personal",
       url: "/dashboard/staff",
       icon: Users,
+    },
+    {
+      title: "Paquetes",
+      url: "/dashboard/packages",
+      icon: CreditCard,
+    },
+    {
+      title: "Análisis de Automatizaciones",
+      url: "/dashboard/automation-analytics",
+      icon: BarChart3,
+    },
+    {
+      title: "Panel de Negocios",
+      url: "/dashboard/business",
+      icon: TrendingUp,
     },
     {
       title: "Funciones",

@@ -66,3 +66,8 @@ export * from "./business-type";
 export * from "./staff";
 export * from "./staff-service";
 export * from "./staff-availability";
+
+// PACKAGES & MEMBERSHIPS
+export * from "./service-package";
+export * from "./membership";
+export * from "./client-package";

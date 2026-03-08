@@ -906,3 +906,122 @@ export const testLowStockTriggers = inngest.createFunction(
     return { triggered: 0, automationsFound: automations.length };
   }
 );
+
+
+// ============================================================================
+// NO-SHOW DETECTION (Cron-based)
+// ============================================================================
+
+/**
+ * Check for no-show reservations and send events
+ * Runs every hour to detect reservations that were scheduled but not completed
+ */
+export const checkNoShowReservations = inngest.createFunction(
+  {
+    id: "check-no-show-reservations",
+    name: "Check No-Show Reservations",
+  },
+  { cron: "0 * * * *" }, // Every hour
+  async ({ logger }) => {
+    logger.info("Checking for no-show reservations");
+
+    // Find confirmed reservations where scheduled time has passed
+    // We consider a reservation as no-show if:
+    // 1. Status is "confirmed"
+    // 2. scheduledAtUtc is in the past (more than 2 hours ago to be safe)
+    const now = new Date();
+    const cutoffTime = new Date(now.getTime() - 2 * 60 * 60 * 1000); // 2 hours ago
+
+    const noShowReservations = await db
+      .select({
+        id: reservation.id,
+        profileId: reservation.profileId,
+        customerName: reservation.customerName,
+        customerPhone: reservation.customerPhone,
+        scheduledAtUtc: reservation.scheduledAtUtc,
+      })
+      .from(reservation)
+      .where(
+        and(
+          eq(reservation.status, "confirmed" as ReservationStatus),
+          sql`${reservation.scheduledAtUtc} < ${cutoffTime}`
+        )
+      );
+
+    if (noShowReservations.length === 0) {
+      logger.info("No no-show reservations found");
+      return { markedAsNoShow: 0 };
+    }
+
+    logger.info(`Found ${noShowReservations.length} potential no-show reservations`);
+
+    let markedCount = 0;
+
+    // Process each reservation
+    for (const res of noShowReservations) {
+      try {
+        // Update the reservation status to no_show
+        await db
+          .update(reservation)
+          .set({
+            status: "no_show" as ReservationStatus,
+            noShow: true,
+            updatedAt: new Date(),
+          })
+          .where(eq(reservation.id, res.id));
+
+        // Send the no_show event to trigger automations
+        await inngest.send({
+          name: "reservation.no_show",
+          data: {
+            reservationId: res.id,
+            profileId: res.profileId,
+          },
+        });
+
+        markedCount++;
+        logger.info(`Marked reservation ${res.id} as no-show and sent event`);
+      } catch (error) {
+        logger.error(`Failed to process no-show for reservation ${res.id}`, { error });
+      }
+    }
+
+    logger.info(`No-show check completed: ${markedCount} reservations marked`);
+    return { markedAsNoShow: markedCount };
+  }
+);
+
+/**
+ * Test function to manually trigger no-show check
+ */
+export const testNoShowCheck = inngest.createFunction(
+  {
+    id: "test-no-show-check",
+    name: "Test No-Show Check",
+  },
+  { event: "automation.test.no_show_check" },
+  async ({ logger }) => {
+    logger.info("Manually testing no-show check");
+    // Execute the logic directly
+    const now = new Date();
+    const cutoffTime = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+
+    const noShowReservations = await db
+      .select({
+        id: reservation.id,
+        profileId: reservation.profileId,
+        customerName: reservation.customerName,
+        customerPhone: reservation.customerPhone,
+        scheduledAtUtc: reservation.scheduledAtUtc,
+      })
+      .from(reservation)
+      .where(
+        and(
+          eq(reservation.status, "confirmed" as ReservationStatus),
+          sql`${reservation.scheduledAtUtc} < ${cutoffTime}`
+        )
+      );
+
+    return { potentialNoShows: noShowReservations.length };
+  }
+);
