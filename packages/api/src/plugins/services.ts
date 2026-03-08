@@ -57,6 +57,7 @@ import { SupplierRepository } from "../services/repository/supplier";
 import { ProductCategoryRepository } from "../services/repository/product-category";
 import { SupplierProductRepository } from "../services/repository/supplier-product";
 import { PurchaseOrderRepository } from "../services/repository/purchase-order";
+import { ReportRepository } from "../services/repository/report";
 import { ServiceProductRepository } from "../services/repository/service-product";
 import { ServiceRepository } from "../services/repository/service";
 import { StaffRepository } from "../services/repository/staff";
@@ -69,6 +70,7 @@ import { InventoryService } from "../services/business/inventory";
 import { SupplierProductService } from "../services/business/supplier-product";
 import { PurchaseOrderService } from "../services/business/purchase-order";
 import { ServiceProductService } from "../services/business/service-product";
+import { ReportService } from "../services/business/report";
 
 // NEW AUTOMATION IMPORTS
 import { AutomationRepository } from "../services/repository/automation";
@@ -78,6 +80,16 @@ import { AutomationExecutionLogRepository } from "../services/repository/automat
 import { AutomationService } from "../services/business/automation";
 import { AutomationTemplateRepository } from "../services/repository/automation-template";
 import { AutomationTemplateService } from "../services/business/automation-template";
+
+// NEW PACKAGES & MEMBERSHIPS REPOSITORIES
+import { ServicePackageRepository } from "../services/repository/service-package";
+import { MembershipRepository } from "../services/repository/membership";
+import { ClientPackageRepository } from "../services/repository/client-package";
+
+// NEW PACKAGES & MEMBERSHIPS SERVICES
+import { ServicePackageService } from "../services/business/service-package";
+import { MembershipService } from "../services/business/membership";
+import { ClientPackageService } from "../services/business/client-package";
 
 let storageInstance: StorageStrategy | null = null;
 let initialized = false;
@@ -167,6 +179,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     const supplierProductRepository = new SupplierProductRepository();
     const purchaseOrderRepository = new PurchaseOrderRepository();
     const serviceProductRepository = new ServiceProductRepository();
+    const reportRepository = new ReportRepository();
     const serviceRepository = new ServiceRepository();
     const staffRepository = new StaffRepository();
     const staffServiceRepository = new StaffServiceRepository();
@@ -178,6 +191,11 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     const automationActionRepository = new AutomationActionRepository();
     const automationExecutionLogRepository = new AutomationExecutionLogRepository();
     const automationTemplateRepository = new AutomationTemplateRepository();
+
+    // PACKAGES & MEMBERSHIPS REPOSITORIES
+    const servicePackageRepository = new ServicePackageRepository();
+    const membershipRepository = new MembershipRepository();
+    const clientPackageRepository = new ClientPackageRepository();
 
     // Evolution API service
     const evolutionService = new EvolutionService({
@@ -236,6 +254,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
       serviceRepository,
       productRepository
     );
+    const reportService = new ReportService(reportRepository);
 
     // AUTOMATION SERVICE
     const automationService = new AutomationService(evolutionService);
@@ -245,6 +264,23 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
       automationTriggerRepository,
       automationActionRepository,
       profileRepository,
+    );
+
+    // PACKAGES & MEMBERSHIPS SERVICES
+    const servicePackageService = new ServicePackageService(
+      servicePackageRepository,
+      clientPackageRepository
+    );
+    const membershipService = new MembershipService(
+      membershipRepository,
+      clientPackageRepository
+    );
+    const clientPackageService = new ClientPackageService(
+      clientPackageRepository,
+      servicePackageRepository,
+      membershipRepository,
+      inventoryRepository,
+      serviceProductRepository
     );
 
     // Services
@@ -362,9 +398,14 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         supplierProductService,
         purchaseOrderService,
         serviceProductService,
+        reportService,
         // AUTOMATION SERVICE
         automationService,
         automationTemplateService,
+        // PACKAGES & MEMBERSHIPS SERVICES
+        servicePackageService,
+        membershipService,
+        clientPackageService,
         // AI Messaging Strategy
         getMessageStrategy,
       },

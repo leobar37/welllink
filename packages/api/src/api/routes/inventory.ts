@@ -999,4 +999,156 @@ export const inventoryRoutes = new Elysia({ prefix: "/inventory" })
         reason: t.String({ minLength: 1 }),
       }),
     },
-  );
+  )
+
+  
+  // ========================================
+  // REPORTS
+  // ========================================
+  
+  // Get inventory rotation report
+  .get("/reports/rotation", async ({ query, services, ctx }) => {
+    const profileId = query.profileId as string;
+    let targetProfileId: string;
+    
+    if (!profileId) {
+      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+      if (profiles.length === 0) {
+        return { items: [], summary: { totalProducts: 0, averageRotationRate: 0, totalConsumed: 0, totalPurchased: 0 }, filters: {} };
+      }
+      targetProfileId = profiles[0].id;
+    } else {
+      targetProfileId = profileId;
+    }
+    
+    return services.reportService.getInventoryRotation(targetProfileId, {
+      startDate: query.startDate ? new Date(query.startDate as string) : undefined,
+      endDate: query.endDate ? new Date(query.endDate as string) : undefined,
+      categoryId: query.categoryId as string | undefined,
+      location: query.location as string | undefined,
+    });
+  })
+  
+  // Get stock valuation report
+  .get("/reports/valuation", async ({ query, services, ctx }) => {
+    const profileId = query.profileId as string;
+    let targetProfileId: string;
+    
+    if (!profileId) {
+      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+      if (profiles.length === 0) {
+        return { totalValue: 0, totalItems: 0, byCategory: [], filters: {} };
+      }
+      targetProfileId = profiles[0].id;
+    } else {
+      targetProfileId = profileId;
+    }
+    
+    return services.reportService.getStockValuation(targetProfileId, {
+      startDate: query.startDate ? new Date(query.startDate as string) : undefined,
+      endDate: query.endDate ? new Date(query.endDate as string) : undefined,
+      categoryId: query.categoryId as string | undefined,
+      location: query.location as string | undefined,
+    });
+  })
+  
+  // Get top consumed products report
+  .get("/reports/consumed", async ({ query, services, ctx }) => {
+    const profileId = query.profileId as string;
+    let targetProfileId: string;
+    
+    if (!profileId) {
+      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+      if (profiles.length === 0) {
+        return { items: [], summary: { totalProducts: 0, totalQuantity: 0, totalValue: 0 }, filters: {} };
+      }
+      targetProfileId = profiles[0].id;
+    } else {
+      targetProfileId = profileId;
+    }
+    
+    const limit = query.limit ? parseInt(query.limit as string) : 10;
+    
+    return services.reportService.getTopConsumedProducts(targetProfileId, {
+      startDate: query.startDate ? new Date(query.startDate as string) : undefined,
+      endDate: query.endDate ? new Date(query.endDate as string) : undefined,
+      categoryId: query.categoryId as string | undefined,
+      location: query.location as string | undefined,
+    }, limit);
+  })
+  
+  // Export report to Excel
+  .get("/reports/export/xlsx", async ({ query, services, ctx, set }) => {
+    const profileId = query.profileId as string;
+    let targetProfileId: string;
+    
+    if (!profileId) {
+      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+      if (profiles.length === 0) {
+        throw new Error("Perfil no encontrado");
+      }
+      targetProfileId = profiles[0].id;
+    } else {
+      targetProfileId = profileId;
+    }
+    
+    const reportType = query.type as "rotation" | "valuation" | "consumed";
+    if (!["rotation", "valuation", "consumed"].includes(reportType)) {
+      throw new Error("Tipo de reporte inválido. Use: rotation, valuation, o consumed");
+    }
+    
+    const buffer = await services.reportService.exportToExcel(
+      reportType,
+      targetProfileId,
+      {
+        startDate: query.startDate ? new Date(query.startDate as string) : undefined,
+        endDate: query.endDate ? new Date(query.endDate as string) : undefined,
+        categoryId: query.categoryId as string | undefined,
+        location: query.location as string | undefined,
+      },
+      { title: query.title as string }
+    );
+    
+    set.headers["Content-Type"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    set.headers["Content-Disposition"] = `attachment; filename="reporte-${reportType}-${new Date().toISOString().split('T')[0]}.xlsx"`;
+    
+    return buffer;
+  })
+  
+  // Export report to PDF
+  .get("/reports/export/pdf", async ({ query, services, ctx, set }) => {
+    const profileId = query.profileId as string;
+    let targetProfileId: string;
+    
+    if (!profileId) {
+      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+      if (profiles.length === 0) {
+        throw new Error("Perfil no encontrado");
+      }
+      targetProfileId = profiles[0].id;
+    } else {
+      targetProfileId = profileId;
+    }
+    
+    const reportType = query.type as "rotation" | "valuation" | "consumed";
+    if (!["rotation", "valuation", "consumed"].includes(reportType)) {
+      throw new Error("Tipo de reporte inválido. Use: rotation, valuation, o consumed");
+    }
+    
+    const buffer = await services.reportService.exportToPdf(
+      reportType,
+      targetProfileId,
+      {
+        startDate: query.startDate ? new Date(query.startDate as string) : undefined,
+        endDate: query.endDate ? new Date(query.endDate as string) : undefined,
+        categoryId: query.categoryId as string | undefined,
+        location: query.location as string | undefined,
+      },
+      { title: query.title as string }
+    );
+    
+    set.headers["Content-Type"] = "application/pdf";
+    set.headers["Content-Disposition"] = `attachment; filename="reporte-${reportType}-${new Date().toISOString().split('T')[0]}.pdf"`;
+    
+    return buffer;
+  });

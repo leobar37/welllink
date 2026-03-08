@@ -33,14 +33,17 @@
     "drizzle-orm": "^0.44.7",
     "elysia": "latest",
     "inngest": "^3.49.1",
+    "pdfkit": "^0.17.2",
     "postgres": "^3.4.7",
     "qrcode": "^1.5.4",
     "uuid": "^13.0.0",
     "vercel-minimax-ai-provider": "^0.0.2",
+    "xlsx": "^0.18.5",
     "zod": "^4.1.13",
     "zod-to-json-schema": "^3.25.0"
   },
   "devDependencies": {
+    "@types/pdfkit": "^0.17.5",
     "@types/qrcode": "^1.5.6",
     "@types/uuid": "^11.0.0",
     "bun-types": "latest",
