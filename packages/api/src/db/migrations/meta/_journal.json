@@ -15,6 +15,13 @@
       "when": 1769807160739,
       "tag": "0001_medical_freak",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1772950250287,
+      "tag": "0002_service_product",
+      "breakpoints": true
     }
   ]
 }
