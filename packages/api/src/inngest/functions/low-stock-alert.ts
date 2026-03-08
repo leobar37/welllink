@@ -4,6 +4,8 @@ import { profile } from "../../db/schema/profile";
 import { eq, and, sql } from "drizzle-orm";
 import { inventoryItem } from "../../db/schema/inventory-item";
 import { product } from "../../db/schema/product";
+import { whatsappConfig } from "../../db/schema/whatsapp-config";
+import { evolutionService } from "./types";
 
 interface LowStockItem {
   productId: string;
@@ -101,12 +103,15 @@ export const checkLowStock = inngest.createFunction(
     logger.info("Starting daily low stock check");
 
     // Step 1: Get all profiles with low stock items
-    const profilesWithLowStock = await step.run(
+    const profilesWithLowStockRaw = await step.run(
       "get-low-stock-items",
       async () => {
         return getProfilesWithLowStock();
       }
     );
+
+    // Cast the deserialized JSON data back to the proper type
+    const profilesWithLowStock = profilesWithLowStockRaw as ProfileLowStockData[];
 
     logger.info(
       `Found ${profilesWithLowStock.length} profiles with low stock items`
@@ -128,18 +133,61 @@ export const checkLowStock = inngest.createFunction(
             // Format the notification message
             const message = formatLowStockMessage(profileData);
 
-            // Log the notification (in production, this would send via WhatsApp/Email)
+            // Log the notification
             console.log(`[LOW STOCK ALERT] Sending to profile ${profileData.profileId}:`);
             console.log(message);
             console.log("---");
 
-            // TODO: Integrate with actual notification service
-            // For now, we log to console
-            // In production:
-            // await whatsappService.sendMessage({
-            //   to: profileData.adminPhone,
-            //   message: message
-            // });
+            // Get the profile's WhatsApp number
+            const profileDataResult = await db
+              .select({ whatsappNumber: profile.whatsappNumber })
+              .from(profile)
+              .where(eq(profile.id, profileData.profileId))
+              .limit(1);
+
+            const targetPhone = profileDataResult[0]?.whatsappNumber;
+
+            if (!targetPhone) {
+              console.log(`[LOW STOCK ALERT] No WhatsApp number configured for profile ${profileData.profileId}, skipping notification`);
+              results.push({
+                profileId: profileData.profileId,
+                success: false,
+                error: "No WhatsApp number configured",
+              });
+              continue;
+            }
+
+            // Get the active WhatsApp configuration for this profile
+            const configs = await db
+              .select()
+              .from(whatsappConfig)
+              .where(
+                and(
+                  eq(whatsappConfig.profileId, profileData.profileId),
+                  eq(whatsappConfig.isEnabled, true),
+                  eq(whatsappConfig.isConnected, true)
+                )
+              )
+              .limit(1);
+
+            if (configs.length === 0) {
+              console.log(`[LOW STOCK ALERT] No active WhatsApp config for profile ${profileData.profileId}, skipping notification`);
+              results.push({
+                profileId: profileData.profileId,
+                success: false,
+                error: "No active WhatsApp configuration",
+              });
+              continue;
+            }
+
+            // Send the WhatsApp message via Evolution API
+            const formattedPhone = evolutionService.formatPhoneNumber(targetPhone);
+            await evolutionService.sendText(configs[0].instanceName, {
+              number: formattedPhone,
+              text: message,
+            });
+
+            console.log(`[LOW STOCK ALERT] Successfully sent notification to profile ${profileData.profileId}`);
 
             results.push({
               profileId: profileData.profileId,
@@ -195,12 +243,15 @@ export const testLowStockAlert = inngest.createFunction(
     logger.info("Manual low stock check triggered");
 
     // Same logic but triggered manually
-    const profilesWithLowStock = await step.run(
+    const profilesWithLowStockRaw = await step.run(
       "get-low-stock-items",
       async () => {
         return getProfilesWithLowStock();
       }
     );
+
+    // Cast the deserialized JSON data back to the proper type
+    const profilesWithLowStock = profilesWithLowStockRaw as ProfileLowStockData[];
 
     const notificationResults = await step.run(
       "send-low-stock-notifications",
@@ -208,20 +259,76 @@ export const testLowStockAlert = inngest.createFunction(
         const results: Array<{
           profileId: string;
           success: boolean;
+          error?: string;
         }> = [];
 
         for (const profileData of profilesWithLowStock) {
           try {
+            // Format the notification message
             const message = formatLowStockMessage(profileData);
             console.log(`[TEST LOW STOCK ALERT]:\n${message}`);
+
+            // Get the profile's WhatsApp number
+            const profileDataResult = await db
+              .select({ whatsappNumber: profile.whatsappNumber })
+              .from(profile)
+              .where(eq(profile.id, profileData.profileId))
+              .limit(1);
+
+            const targetPhone = profileDataResult[0]?.whatsappNumber;
+
+            if (!targetPhone) {
+              console.log(`[TEST LOW STOCK ALERT] No WhatsApp number configured for profile ${profileData.profileId}, skipping notification`);
+              results.push({
+                profileId: profileData.profileId,
+                success: false,
+                error: "No WhatsApp number configured",
+              });
+              continue;
+            }
+
+            // Get the active WhatsApp configuration for this profile
+            const configs = await db
+              .select()
+              .from(whatsappConfig)
+              .where(
+                and(
+                  eq(whatsappConfig.profileId, profileData.profileId),
+                  eq(whatsappConfig.isEnabled, true),
+                  eq(whatsappConfig.isConnected, true)
+                )
+              )
+              .limit(1);
+
+            if (configs.length === 0) {
+              console.log(`[TEST LOW STOCK ALERT] No active WhatsApp config for profile ${profileData.profileId}, skipping notification`);
+              results.push({
+                profileId: profileData.profileId,
+                success: false,
+                error: "No active WhatsApp configuration",
+              });
+              continue;
+            }
+
+            // Send the WhatsApp message via Evolution API
+            const formattedPhone = evolutionService.formatPhoneNumber(targetPhone);
+            await evolutionService.sendText(configs[0].instanceName, {
+              number: formattedPhone,
+              text: message,
+            });
+
+            console.log(`[TEST LOW STOCK ALERT] Successfully sent notification to profile ${profileData.profileId}`);
+
             results.push({
               profileId: profileData.profileId,
               success: true,
             });
           } catch (error) {
+            console.error(`[TEST LOW STOCK ALERT] Failed to send notification for profile ${profileData.profileId}:`, error);
             results.push({
               profileId: profileData.profileId,
               success: false,
+              error: error instanceof Error ? error.message : "Unknown error",
             });
           }
         }
