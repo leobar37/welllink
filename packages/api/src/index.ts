@@ -50,6 +50,7 @@ import { whatsappAgentWebhook } from "./services/ai/whatsapp-agent/webhooks";
 import { createStorageStrategy } from "./services/storage";
 import { inventoryRoutes } from "./api/routes/inventory";
 import { automationRoutes } from "./api/routes/automation";
+import { businessTypeRoutes } from "./api/routes/business-types";
 
 // Test routes - ONLY enabled via ENABLE_TEST_ROUTES=true (SECURITY: never in production)
 const enableTestRoutes = env.ENABLE_TEST_ROUTES === "true";
@@ -168,6 +169,7 @@ const app = new Elysia()
       .use(paymentMethodRoutes)
       .use(inventoryRoutes)
       .use(automationRoutes)
+      .use(businessTypeRoutes)
       // Test routes - ONLY enabled via ENABLE_TEST_ROUTES=true (SECURITY: never in production)
       .use(
         enableTestRoutes

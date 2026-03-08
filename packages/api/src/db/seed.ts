@@ -17,6 +17,7 @@ import { seedReservationRequests } from "./seeders/reservation-requests.seeder";
 // ai-recommendations seeder: REMOVED - legacy wellness feature
 import { seedClientNotes } from "./seeders/client-notes.seeder";
 import { seedPaymentMethods } from "./seeders/payment-methods.seeder";
+import { seedBusinessTypes } from "./seeders/business-type.seeder";
 import { db } from "./index";
 import { user, profile, account, session, asset } from "./schema";
 import { eq, sql } from "drizzle-orm";
@@ -334,6 +335,9 @@ async function seed() {
 
     // 2. CLEANUP: Remove existing seed data (tables exist now)
     await cleanupSeedData();
+
+    // 2.1 Business Types (global configuration, no dependencies)
+    await seedBusinessTypes();
 
     // 3. Execute seeders in dependency order
     // 1. Users (no dependencies)
