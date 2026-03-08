@@ -24,6 +24,9 @@ import { staff } from "./staff";
 import { staffService } from "./staff-service";
 import { staffAvailability } from "./staff-availability";
 
+// BUSINESS TYPE
+import { businessType } from "./business-type";
+
 // User relations
 export const userRelations = relations(user, ({ many }) => ({
   accounts: many(account),
@@ -81,6 +84,12 @@ export const profileRelations = relations(profile, ({ one, many }) => ({
   services: many(service),
   whatsappConfigs: many(whatsappConfig),
   whatsappContexts: many(whatsappContext),
+  // Business type (industry categorization)
+  businessType: one(businessType, {
+    fields: [profile.businessTypeId],
+    references: [businessType.id],
+    relationName: "profileBusinessType",
+  }),
 }));
 
 // Profile Customization relations

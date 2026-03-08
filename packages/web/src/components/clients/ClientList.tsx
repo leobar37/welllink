@@ -13,11 +13,13 @@ import { ClientCard } from "./ClientCard";
 import { ClientForm } from "./ClientForm";
 import { ClientNotesModal } from "./ClientNotesModal";
 import { useClients } from "@/hooks/use-clients";
+import { useTerminology } from "@/hooks/use-terminology";
 import type { Client } from "@/hooks/use-clients";
 
 export function ClientList() {
   const { clients, isLoading, createClient, updateClient, deleteClient } =
     useClients();
+  const { terminology } = useTerminology();
   const [showForm, setShowForm] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | undefined>();
   const [viewingClient, setViewingClient] = useState<Client | null>(null);
@@ -92,7 +94,7 @@ export function ClientList() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar por nombre, teléfono o email..."
+              placeholder={`Buscar ${terminology.customer.toLowerCase()}...`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -117,7 +119,7 @@ export function ClientList() {
 
         <Button onClick={() => setShowForm(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Agregar Cliente
+          Agregar {terminology.customer}
         </Button>
       </div>
 
@@ -136,8 +138,8 @@ export function ClientList() {
         ) : (
           <div className="text-center py-12 text-muted-foreground bg-muted/30 rounded-lg">
             {clients?.length === 0
-              ? 'No hay clientes agregados aún. Haz clic en "Agregar Cliente" para empezar.'
-              : "No se encontraron clientes con los filtros aplicados."}
+              ? `No hay ${terminology.customers.toLowerCase()} agregados aún. Haz clic en "Agregar ${terminology.customer}" para empezar.`
+              : `No se encontraron ${terminology.customers.toLowerCase()} con los filtros aplicados.`}
           </div>
         )}
       </div>

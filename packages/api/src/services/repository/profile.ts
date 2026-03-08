@@ -12,6 +12,7 @@ export class ProfileRepository {
         coverImage: true,
         customization: true,
         socialLinks: true,
+        businessType: true,
       },
     });
   }
@@ -27,6 +28,7 @@ export class ProfileRepository {
         coverImage: true,
         customization: true,
         socialLinks: true,
+        businessType: true,
       },
     });
 
@@ -79,6 +81,7 @@ export class ProfileRepository {
         coverImage: true,
         customization: true,
         socialLinks: true,
+        businessType: true,
       },
     });
 
