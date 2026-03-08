@@ -1370,4 +1370,233 @@ export const inventoryRoutes = new Elysia({ prefix: "/inventory" })
     set.headers["Content-Disposition"] = `attachment; filename="reporte-${reportType}-${new Date().toISOString().split('T')[0]}.pdf"`;
     
     return buffer;
-  });
+  })
+  
+  // ========================================
+  // PRODUCT CATEGORIES
+  // ========================================
+  
+  // List categories
+  .get(
+    "/categories",
+    async ({ query, services, ctx }) => {
+      const profileId = query.profileId as string;
+      let targetProfileId: string;
+      
+      if (!profileId) {
+        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        if (profiles.length === 0) {
+          return [];
+        }
+        targetProfileId = profiles[0].id;
+      } else {
+        targetProfileId = profileId;
+      }
+      
+      return services.productCategoryService.getCategories(ctx!, {
+        profileId: targetProfileId,
+        isActive: query.isActive === "true" ? true : query.isActive === "false" ? false : undefined,
+        limit: query.limit ? parseInt(query.limit as string) : undefined,
+        offset: query.offset ? parseInt(query.offset as string) : undefined,
+      });
+    },
+    {
+      detail: {
+        tags: ["Inventory"],
+        summary: "Listar categorías",
+        description: "Obtiene una lista de categorías de productos con filtros opcionales por estado.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Lista de categorías" },
+        },
+      },
+      query: t.Object({
+        profileId: t.Optional(t.String()),
+        isActive: t.Optional(t.String()),
+        limit: t.Optional(t.String()),
+        offset: t.Optional(t.String()),
+      }),
+    },
+  )
+  
+  // Get single category
+  .get(
+    "/categories/:id",
+    async ({ params, query, services, ctx }) => {
+      const profileId = query.profileId as string;
+      let targetProfileId: string;
+      
+      if (!profileId) {
+        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        if (profiles.length === 0) {
+          throw new Error("Perfil no encontrado");
+        }
+        targetProfileId = profiles[0].id;
+      } else {
+        targetProfileId = profileId;
+      }
+      
+      const category = await services.productCategoryService.getCategory(ctx!, params.id, targetProfileId);
+      if (!category) {
+        throw new Error("Categoría no encontrada");
+      }
+      return category;
+    },
+    {
+      detail: {
+        tags: ["Inventory"],
+        summary: "Obtener categoría por ID",
+        description: "Obtiene los detalles de una categoría específica.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Categoría encontrada" },
+          "404": { description: "Categoría no encontrada" },
+        },
+      },
+      params: t.Object({
+        id: t.String(),
+      }),
+      query: t.Object({
+        profileId: t.Optional(t.String()),
+      }),
+    },
+  )
+  
+  // Create category
+  .post(
+    "/categories",
+    async ({ body, set, services, ctx }) => {
+      const profileId = body.profileId as string;
+      let targetProfileId: string;
+      
+      if (!profileId) {
+        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        if (profiles.length === 0) {
+          throw new Error("Perfil no encontrado");
+        }
+        targetProfileId = profiles[0].id;
+      } else {
+        targetProfileId = profileId;
+      }
+      
+      const category = await services.productCategoryService.createCategory(ctx!, {
+        profileId: targetProfileId,
+        name: body.name,
+        description: body.description,
+        color: body.color,
+        icon: body.icon,
+        sortOrder: body.sortOrder,
+      });
+      
+      set.status = 201;
+      return category;
+    },
+    {
+      detail: {
+        tags: ["Inventory"],
+        summary: "Crear categoría",
+        description: "Crea una nueva categoría de productos.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "201": { description: "Categoría creada exitosamente" },
+          "400": { description: "Datos inválidos" },
+          "409": { description: "Nombre de categoría duplicado" },
+        },
+      },
+      body: t.Object({
+        profileId: t.Optional(t.String()),
+        name: t.String({ minLength: 1 }),
+        description: t.Optional(t.String()),
+        color: t.Optional(t.String()),
+        icon: t.Optional(t.String()),
+        sortOrder: t.Optional(t.Number()),
+      }),
+    },
+  )
+  
+  // Update category
+  .put(
+    "/categories/:id",
+    async ({ params, body, query, services, ctx }) => {
+      const profileId = query.profileId as string;
+      let targetProfileId: string;
+      
+      if (!profileId) {
+        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        if (profiles.length === 0) {
+          throw new Error("Perfil no encontrado");
+        }
+        targetProfileId = profiles[0].id;
+      } else {
+        targetProfileId = profileId;
+      }
+      
+      return services.productCategoryService.updateCategory(ctx!, params.id, targetProfileId, body);
+    },
+    {
+      detail: {
+        tags: ["Inventory"],
+        summary: "Actualizar categoría",
+        description: "Actualiza los datos de una categoría existente.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Categoría actualizada" },
+          "404": { description: "Categoría no encontrada" },
+        },
+      },
+      params: t.Object({
+        id: t.String(),
+      }),
+      query: t.Object({
+        profileId: t.Optional(t.String()),
+      }),
+      body: t.Object({
+        name: t.Optional(t.String({ minLength: 1 })),
+        description: t.Optional(t.String()),
+        color: t.Optional(t.String()),
+        icon: t.Optional(t.String()),
+        sortOrder: t.Optional(t.Number()),
+        isActive: t.Optional(t.Boolean()),
+      }),
+    },
+  )
+  
+  // Delete category (soft delete)
+  .delete(
+    "/categories/:id",
+    async ({ params, query, services, ctx, set }) => {
+      const profileId = query.profileId as string;
+      let targetProfileId: string;
+      
+      if (!profileId) {
+        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        if (profiles.length === 0) {
+          throw new Error("Perfil no encontrado");
+        }
+        targetProfileId = profiles[0].id;
+      } else {
+        targetProfileId = profileId;
+      }
+      
+      await services.productCategoryService.deleteCategory(ctx!, params.id, targetProfileId);
+      set.status = 204;
+    },
+    {
+      detail: {
+        tags: ["Inventory"],
+        summary: "Eliminar categoría",
+        description: "Elimina una categoría mediante soft delete (marcada como inactiva).",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "204": { description: "Categoría eliminada" },
+          "404": { description: "Categoría no encontrada" },
+        },
+      },
+      params: t.Object({
+        id: t.String(),
+      }),
+      query: t.Object({
+        profileId: t.Optional(t.String()),
+      }),
+    },
+  );

@@ -71,6 +71,7 @@ import { SupplierProductService } from "../services/business/supplier-product";
 import { PurchaseOrderService } from "../services/business/purchase-order";
 import { ServiceProductService } from "../services/business/service-product";
 import { ReportService } from "../services/business/report";
+import { ProductCategoryService } from "../services/business/product-category";
 
 // NEW AUTOMATION IMPORTS
 import { AutomationRepository } from "../services/repository/automation";
@@ -258,6 +259,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
       productRepository
     );
     const reportService = new ReportService(reportRepository);
+    const productCategoryService = new ProductCategoryService(productCategoryRepository);
 
     // AUTOMATION SERVICE
     const automationService = new AutomationService(evolutionService);
@@ -404,6 +406,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         purchaseOrderService,
         serviceProductService,
         reportService,
+        productCategoryService,
         // AUTOMATION SERVICE
         automationService,
         automationTemplateService,
