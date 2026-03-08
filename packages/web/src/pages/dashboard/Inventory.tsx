@@ -326,6 +326,9 @@ export function InventoryPage() {
           <Button variant="outline" onClick={() => navigate("/dashboard/suppliers")}>
             Proveedores
           </Button>
+          <Button variant="outline" onClick={() => navigate("/dashboard/purchase-orders")}>
+            Órdenes de Compra
+          </Button>
           <Button onClick={() => handleOpenProductModal()}>
             <Plus className="h-4 w-4 mr-2" />
             Nuevo Producto
