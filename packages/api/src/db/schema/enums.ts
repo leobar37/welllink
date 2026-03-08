@@ -47,6 +47,7 @@ export const stockMovementReasonEnum = pgEnum("stock_movement_reason", [
   "initial",
   "transfer",
   "expired",
+  "service_consumption",
 ]);
 
 // Purchase order status enum
@@ -90,7 +91,8 @@ export type StockMovementReason =
   | "adjustment"
   | "initial"
   | "transfer"
-  | "expired";
+  | "expired"
+  | "service_consumption";
 
 // Purchase order status type
 export type PurchaseOrderStatus =

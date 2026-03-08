@@ -8,6 +8,13 @@
       "when": 1769807160738,
       "tag": "0000_regular_nico_minoru",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1769807160739,
+      "tag": "0001_medical_freak",
+      "breakpoints": true
     }
   ]
 }

@@ -78,6 +78,7 @@ export class InventoryService {
       "adjustment",
       "transfer",
       "initial",
+      "service_consumption",
     ];
     if (!validReasons.includes(reason)) {
       throw new BadRequestException(`Razón de movimiento inválida: ${reason}`);
@@ -350,6 +351,7 @@ export class InventoryService {
       "adjustment",
       "transfer",
       "initial",
+      "service_consumption",
     ];
     if (!validReasons.includes(reason)) {
       throw new BadRequestException(`Razón de movimiento inválida: ${reason}`);

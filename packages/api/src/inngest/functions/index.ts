@@ -7,6 +7,7 @@ export * from "./doctor-notifications";
 // slot-generation: REMOVED - availability simplified, no pre-generated slots
 export * from "./follow-up";
 export * from "./reservation-confirmation";
+export * from "./reservation-completed";
 
 import { expirePendingRequests } from "./request-expiration";
 import { send24HourReminder, send2HourReminder } from "./reminders";
@@ -20,6 +21,7 @@ import {
   handleReservationApproved,
   handleReservationCancelled,
 } from "./reservation-confirmation";
+import { handleReservationCompleted } from "./reservation-completed";
 
 export const functions = [
   expirePendingRequests,
@@ -31,4 +33,5 @@ export const functions = [
   sendFollowUpMessage,
   handleReservationApproved,
   handleReservationCancelled,
+  handleReservationCompleted,
 ];
