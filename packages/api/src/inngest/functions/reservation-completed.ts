@@ -72,7 +72,8 @@ export const handleReservationCompleted = inngest.createFunction(
           and(
             eq(serviceProduct.serviceId, reservationData.serviceId),
             eq(serviceProduct.profileId, profileId),
-            eq(serviceProduct.isActive, true)
+            eq(serviceProduct.isActive, true),
+            eq(serviceProduct.isRequired, true)
           )
         );
 

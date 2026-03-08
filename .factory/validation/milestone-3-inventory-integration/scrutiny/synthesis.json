@@ -1,0 +1,49 @@
+{
+  "milestone": "milestone-3-inventory-integration",
+  "round": 2,
+  "status": "fail",
+  "validatorsRun": {
+    "test": {
+      "passed": false,
+      "command": "cd packages/api && bun run test",
+      "exitCode": 1,
+      "observation": "18 tests pass, 2 tests fail with pre-existing MockTimeSlotRepository issues. New tests for milestone 3 features pass."
+    },
+    "typecheck": {
+      "passed": false,
+      "command": "cd packages/api && bun run lint (tsc --noEmit)",
+      "exitCode": 2,
+      "observation": "Multiple pre-existing type errors in test files and other modules (MockTimeSlotRepository, reservation tests, whatsapp services). New code for milestone 3 appears to compile without errors."
+    },
+    "lint": {
+      "passed": false,
+      "command": "cd packages/web && bun run lint",
+      "exitCode": 1,
+      "observation": "200 problems (163 errors, 37 warnings) - mostly pre-existing issues in React Router auto-generated types and test files. No new errors from milestone 3 features."
+    }
+  },
+  "reviewsSummary": {
+    "total": 6,
+    "passed": 5,
+    "failed": 1,
+    "failedFeatures": ["m3-2-automatic-stock-deduction"]
+  },
+  "blockingIssues": [
+    {
+      "featureId": "m3-2-automatic-stock-deduction",
+      "severity": "blocking",
+      "description": "The Inngest function processes ALL service products instead of filtering by isRequired=true. At lines 67-90 of reservation-completed.ts, the code iterates through all products without checking the isRequired field. Optional products will incorrectly have stock deducted when they shouldn't. Tests verify filtering by isRequired but code doesn't implement it."
+    }
+  ],
+  "appliedUpdates": [],
+  "suggestedGuidanceUpdates": [
+    {
+      "target": "fullstack-inngest skill",
+      "suggestion": "Add guidance about handling optional vs required relationships. When a junction table has an isRequired boolean field, workers must filter by isRequired=true when processing required items (e.g., products that MUST be consumed). The tests should match implementation - if tests verify isRequired filtering, the code must implement it.",
+      "evidence": "m3-2-automatic-stock-deduction has test case 'should filter required products only' but implementation doesn't filter. Tests written for correct behavior but implementation missed the filter.",
+      "isSystemic": true
+    }
+  ],
+  "rejectedObservations": [],
+  "previousRound": ".factory/validation/milestone-3-inventory-integration/scrutiny/synthesis.json"
+}
