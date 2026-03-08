@@ -73,6 +73,8 @@ import { AutomationTriggerRepository } from "../services/repository/automation-t
 import { AutomationActionRepository } from "../services/repository/automation-action";
 import { AutomationExecutionLogRepository } from "../services/repository/automation-execution-log";
 import { AutomationService } from "../services/business/automation";
+import { AutomationTemplateRepository } from "../services/repository/automation-template";
+import { AutomationTemplateService } from "../services/business/automation-template";
 
 let storageInstance: StorageStrategy | null = null;
 let initialized = false;
@@ -169,6 +171,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     const automationTriggerRepository = new AutomationTriggerRepository();
     const automationActionRepository = new AutomationActionRepository();
     const automationExecutionLogRepository = new AutomationExecutionLogRepository();
+    const automationTemplateRepository = new AutomationTemplateRepository();
 
     // Evolution API service
     const evolutionService = new EvolutionService({
@@ -226,6 +229,13 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
 
     // AUTOMATION SERVICE
     const automationService = new AutomationService(evolutionService);
+    const automationTemplateService = new AutomationTemplateService(
+      automationTemplateRepository,
+      automationRepository,
+      automationTriggerRepository,
+      automationActionRepository,
+      profileRepository,
+    );
 
     // Services
     const assetService = new AssetService(assetRepository, storage);
@@ -313,6 +323,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         automationTriggerRepository,
         automationActionRepository,
         automationExecutionLogRepository,
+        automationTemplateRepository,
         // Services
         assetService,
         cdnService,
@@ -343,6 +354,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         serviceProductService,
         // AUTOMATION SERVICE
         automationService,
+        automationTemplateService,
         // AI Messaging Strategy
         getMessageStrategy,
       },

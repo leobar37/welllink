@@ -57,6 +57,7 @@ export * from "./automation";
 export * from "./automation-trigger";
 export * from "./automation-action";
 export * from "./automation-execution-log";
+export * from "./automation-template";
 
 // BUSINESS TYPE
 export * from "./business-type";

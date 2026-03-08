@@ -84,6 +84,75 @@ export const automationRoutes = new Elysia({ prefix: "/automations" })
   .use(errorMiddleware)
   .use(servicesPlugin)
   .use(authGuard)
+
+  // ========================================
+  // TEMPLATES
+  // ========================================
+
+  // Get all templates (optionally filtered by business type)
+  .get("/templates", async ({ query, services }) => {
+    const businessTypeKey = query.businessType as string | undefined;
+    const category = query.category as string | undefined;
+    const limit = query.limit ? parseInt(query.limit as string) : undefined;
+    const offset = query.offset ? parseInt(query.offset as string) : undefined;
+
+    return services.automationTemplateService.getTemplates(businessTypeKey, {
+      category,
+      isActive: true,
+      limit,
+      offset,
+    });
+  })
+
+  // Get template categories
+  .get("/templates/categories", async ({ query, services }) => {
+    const businessTypeKey = query.businessType as string | undefined;
+    return services.automationTemplateService.getCategories(businessTypeKey);
+  })
+
+  // Get single template by ID
+  .get("/templates/:id", async ({ params, services }) => {
+    const template = await services.automationTemplateService.getTemplateById(params.id);
+    if (!template) {
+      throw new Error("Plantilla no encontrada");
+    }
+    return template;
+  })
+
+  // Apply template - create automation from template
+  .post(
+    "/templates/:id/apply",
+    async ({ params, body, set, services, ctx }) => {
+      // Get profile ID from body or user's default profile
+      let profileId = body.profileId as string | undefined;
+
+      if (!profileId) {
+        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        if (profiles.length === 0) {
+          throw new Error("Perfil no encontrado");
+        }
+        profileId = profiles[0].id;
+      }
+
+      const result = await services.automationTemplateService.applyTemplate({
+        templateId: params.id,
+        profileId,
+        name: body.name as string | undefined,
+        description: body.description as string | undefined,
+      });
+
+      set.status = 201;
+      return result;
+    },
+    {
+      body: t.Object({
+        profileId: t.Optional(t.String()),
+        name: t.Optional(t.String()),
+        description: t.Optional(t.String()),
+      }),
+    },
+  )
+
   // ========================================
   // AUTOMATIONS CRUD
   // ========================================
