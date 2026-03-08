@@ -405,6 +405,7 @@ export const inventoryRoutes = new Elysia({ prefix: "/inventory" })
         phone: body.phone,
         address: body.address,
         taxId: body.rfc,
+        paymentTerms: body.paymentTerms,
         notes: body.notes,
         isActive: true,
       });
@@ -421,6 +422,7 @@ export const inventoryRoutes = new Elysia({ prefix: "/inventory" })
         phone: t.Optional(t.String()),
         address: t.Optional(t.String()),
         rfc: t.Optional(t.String()),
+        paymentTerms: t.Optional(t.String()),
         notes: t.Optional(t.String()),
       }),
     },
@@ -453,6 +455,7 @@ export const inventoryRoutes = new Elysia({ prefix: "/inventory" })
         phone: t.Optional(t.String()),
         address: t.Optional(t.String()),
         rfc: t.Optional(t.String()),
+        paymentTerms: t.Optional(t.String()),
         notes: t.Optional(t.String()),
         isActive: t.Optional(t.Boolean()),
       }),
@@ -498,4 +501,247 @@ export const inventoryRoutes = new Elysia({ prefix: "/inventory" })
     }
     
     return services.inventoryService.getInventoryValueForProfile(targetProfileId);
+  })
+  
+  // ========================================
+  // SUPPLIER-PRODUCT ASSOCIATIONS
+  // ========================================
+  
+  // Get products for a supplier
+  .get("/suppliers/:supplierId/products", async ({ params, query, services, ctx }) => {
+    const profileId = query.profileId as string;
+    let targetProfileId: string;
+    
+    if (!profileId) {
+      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+      if (profiles.length === 0) {
+        return [];
+      }
+      targetProfileId = profiles[0].id;
+    } else {
+      targetProfileId = profileId;
+    }
+    
+    return services.supplierProductService.getProductsBySupplier(
+      ctx!,
+      targetProfileId,
+      params.supplierId,
+      {
+        limit: query.limit ? parseInt(query.limit as string) : undefined,
+        offset: query.offset ? parseInt(query.offset as string) : undefined,
+        isActive: query.isActive === "true" ? true : query.isActive === "false" ? false : undefined,
+      }
+    );
+  })
+  
+  // Get suppliers for a product
+  .get("/products/:productId/suppliers", async ({ params, query, services, ctx }) => {
+    const profileId = query.profileId as string;
+    let targetProfileId: string;
+    
+    if (!profileId) {
+      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+      if (profiles.length === 0) {
+        return [];
+      }
+      targetProfileId = profiles[0].id;
+    } else {
+      targetProfileId = profileId;
+    }
+    
+    return services.supplierProductService.getSuppliersByProduct(
+      ctx!,
+      targetProfileId,
+      params.productId,
+      {
+        limit: query.limit ? parseInt(query.limit as string) : undefined,
+        offset: query.offset ? parseInt(query.offset as string) : undefined,
+        isActive: query.isActive === "true" ? true : query.isActive === "false" ? false : undefined,
+      }
+    );
+  })
+  
+  // Get single supplier-product association
+  .get("/supplier-products/:id", async ({ params, query, services, ctx }) => {
+    const profileId = query.profileId as string;
+    let targetProfileId: string;
+    
+    if (!profileId) {
+      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+      if (profiles.length === 0) {
+        throw new Error("Perfil no encontrado");
+      }
+      targetProfileId = profiles[0].id;
+    } else {
+      targetProfileId = profileId;
+    }
+    
+    const supplierProduct = await services.supplierProductService.getSupplierProduct(
+      ctx!,
+      targetProfileId,
+      params.id
+    );
+    
+    if (!supplierProduct) {
+      throw new Error("Asociación de proveedor-producto no encontrada");
+    }
+    
+    return supplierProduct;
+  })
+  
+  // Create supplier-product association
+  .post(
+    "/supplier-products",
+    async ({ body, set, services, ctx }) => {
+      const profileId = body.profileId as string;
+      let targetProfileId: string;
+      
+      if (!profileId) {
+        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        if (profiles.length === 0) {
+          throw new Error("Perfil no encontrado");
+        }
+        targetProfileId = profiles[0].id;
+      } else {
+        targetProfileId = profileId;
+      }
+      
+      const supplierProduct = await services.supplierProductService.createSupplierProduct(
+        ctx!,
+        targetProfileId,
+        {
+          supplierId: body.supplierId,
+          productId: body.productId,
+          supplierSku: body.supplierSku,
+          costPrice: body.costPrice,
+          leadTimeDays: body.leadTimeDays,
+          minOrderQty: body.minOrderQty,
+          isPrimary: body.isPrimary,
+          notes: body.notes,
+        }
+      );
+      
+      set.status = 201;
+      return supplierProduct;
+    },
+    {
+      body: t.Object({
+        profileId: t.Optional(t.String()),
+        supplierId: t.String({ minLength: 1 }),
+        productId: t.String({ minLength: 1 }),
+        supplierSku: t.Optional(t.String()),
+        costPrice: t.Optional(t.Union([t.Number(), t.String()])),
+        leadTimeDays: t.Optional(t.Number()),
+        minOrderQty: t.Optional(t.Number()),
+        isPrimary: t.Optional(t.Boolean()),
+        notes: t.Optional(t.String()),
+      }),
+    },
+  )
+  
+  // Update supplier-product association
+  .put(
+    "/supplier-products/:id",
+    async ({ params, body, query, services, ctx }) => {
+      const profileId = query.profileId as string;
+      let targetProfileId: string;
+      
+      if (!profileId) {
+        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        if (profiles.length === 0) {
+          throw new Error("Perfil no encontrado");
+        }
+        targetProfileId = profiles[0].id;
+      } else {
+        targetProfileId = profileId;
+      }
+      
+      return services.supplierProductService.updateSupplierProduct(
+        ctx!,
+        targetProfileId,
+        params.id,
+        body
+      );
+    },
+    {
+      body: t.Object({
+        supplierSku: t.Optional(t.String()),
+        costPrice: t.Optional(t.Union([t.Number(), t.String()])),
+        leadTimeDays: t.Optional(t.Number()),
+        minOrderQty: t.Optional(t.Number()),
+        isPrimary: t.Optional(t.Boolean()),
+        notes: t.Optional(t.String()),
+        isActive: t.Optional(t.Boolean()),
+      }),
+    },
+  )
+  
+  // Delete supplier-product association
+  .delete("/supplier-products/:id", async ({ params, query, services, ctx, set }) => {
+    const profileId = query.profileId as string;
+    let targetProfileId: string;
+    
+    if (!profileId) {
+      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+      if (profiles.length === 0) {
+        throw new Error("Perfil no encontrado");
+      }
+      targetProfileId = profiles[0].id;
+    } else {
+      targetProfileId = profileId;
+    }
+    
+    await services.supplierProductService.deleteSupplierProduct(
+      ctx!,
+      targetProfileId,
+      params.id
+    );
+    set.status = 204;
+  })
+  
+  // Set supplier-product as primary
+  .post(
+    "/supplier-products/:id/set-primary",
+    async ({ params, query, services, ctx }) => {
+      const profileId = query.profileId as string;
+      let targetProfileId: string;
+      
+      if (!profileId) {
+        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        if (profiles.length === 0) {
+          throw new Error("Perfil no encontrado");
+        }
+        targetProfileId = profiles[0].id;
+      } else {
+        targetProfileId = profileId;
+      }
+      
+      return services.supplierProductService.setAsPrimary(
+        ctx!,
+        targetProfileId,
+        params.id
+      );
+    },
+  )
+  
+  // Get primary supplier for a product
+  .get("/products/:productId/primary-supplier", async ({ params, query, services, ctx }) => {
+    const profileId = query.profileId as string;
+    let targetProfileId: string;
+    
+    if (!profileId) {
+      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+      if (profiles.length === 0) {
+        return null;
+      }
+      targetProfileId = profiles[0].id;
+    } else {
+      targetProfileId = profileId;
+    }
+    
+    return services.supplierProductService.getPrimarySupplier(
+      ctx!,
+      targetProfileId,
+      params.productId
+    );
   });

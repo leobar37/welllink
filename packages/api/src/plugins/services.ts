@@ -55,10 +55,12 @@ import { ProductRepository } from "../services/repository/product";
 import { InventoryRepository } from "../services/repository/inventory";
 import { SupplierRepository } from "../services/repository/supplier";
 import { ProductCategoryRepository } from "../services/repository/product-category";
+import { SupplierProductRepository } from "../services/repository/supplier-product";
 
 // NEW INVENTORY SERVICES
 import { ProductService } from "../services/business/product";
 import { InventoryService } from "../services/business/inventory";
+import { SupplierProductService } from "../services/business/supplier-product";
 
 let storageInstance: StorageStrategy | null = null;
 let initialized = false;
@@ -145,6 +147,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     const inventoryRepository = new InventoryRepository();
     const supplierRepository = new SupplierRepository();
     const productCategoryRepository = new ProductCategoryRepository();
+    const supplierProductRepository = new SupplierProductRepository();
 
     // Evolution API service
     const evolutionService = new EvolutionService({
@@ -183,6 +186,11 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     // INVENTORY SERVICES
     const productService = new ProductService(productRepository, inventoryRepository);
     const inventoryService = new InventoryService(inventoryRepository, productRepository);
+    const supplierProductService = new SupplierProductService(
+      supplierProductRepository,
+      supplierRepository,
+      productRepository
+    );
 
     // Services
     const assetService = new AssetService(assetRepository, storage);
@@ -261,6 +269,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         inventoryRepository,
         supplierRepository,
         productCategoryRepository,
+        supplierProductRepository,
         // Services
         assetService,
         cdnService,
@@ -286,6 +295,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         // INVENTORY SERVICES
         productService,
         inventoryService,
+        supplierProductService,
         // AI Messaging Strategy
         getMessageStrategy,
       },

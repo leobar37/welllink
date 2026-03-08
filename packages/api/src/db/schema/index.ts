@@ -42,6 +42,7 @@ export * from "./agent-config";
 
 // INVENTORY TABLES
 export * from "./supplier";
+export * from "./supplier-product";
 export * from "./product-category";
 export * from "./product";
 export * from "./inventory-item";

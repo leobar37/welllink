@@ -27,6 +27,7 @@ export const supplier = pgTable(
     city: varchar("city", { length: 100 }),
     country: varchar("country", { length: 100 }),
     taxId: varchar("tax_id", { length: 50 }), // Tax identification number
+    paymentTerms: varchar("payment_terms", { length: 100 }), // Payment terms (e.g., "Net 30", "Net 60", "Cash on delivery")
     notes: text("notes"),
     isActive: boolean("is_active").notNull().default(true),
     createdAt: timestamp("created_at").notNull().defaultNow(),
