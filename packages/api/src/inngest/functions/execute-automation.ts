@@ -9,7 +9,7 @@ import { profile } from "../../db/schema/profile";
 import { WhatsAppActionConfig, EmailActionConfig, UpdateRecordActionConfig, CreateTaskActionConfig } from "../../db/schema/automation-action";
 import { EventTriggerConfig, ScheduleTriggerConfig, ConditionTriggerConfig } from "../../db/schema/automation-trigger";
 import { EvolutionService } from "../../services/business/evolution-api";
-import { env } from "../../config/env";
+import { evolutionService } from "./types";
 import type { MedicalReservationEvents } from "../../types/inngest-events";
 
 // Type for automation events
@@ -580,11 +580,6 @@ export const executeAutomation = inngest.createFunction(
       triggerType: event.data.triggerType,
     });
 
-    const evolutionService = new EvolutionService({
-      baseUrl: env.EVOLUTION_API_URL,
-      apiKey: env.EVOLUTION_API_KEY,
-    });
-
     try {
       const profileId = event.data.profileId;
       const triggerData = event.data.triggerData;
@@ -680,11 +675,6 @@ export const runScheduledAutomations = inngest.createFunction(
   async ({ logger }: { logger: { info: (...args: unknown[]) => void; error: (...args: unknown[]) => void; warn?: (...args: unknown[]) => void; debug?: (...args: unknown[]) => void } }) => {
     logger.info("Scheduled automation check started");
 
-    const evolutionService = new EvolutionService({
-      baseUrl: env.EVOLUTION_API_URL,
-      apiKey: env.EVOLUTION_API_KEY,
-    });
-
     // Get all enabled automations with schedule triggers
     const automations = await db.query.automation.findMany({
       where: eq(automation.enabled, true),
@@ -750,11 +740,6 @@ export const retryAutomationExecution = inngest.createFunction(
     logger.info("Automation retry triggered", { 
       executionLogId: event.data.executionLogId,
       automationId: event.data.automationId,
-    });
-
-    const evolutionService = new EvolutionService({
-      baseUrl: env.EVOLUTION_API_URL,
-      apiKey: env.EVOLUTION_API_KEY,
     });
 
     // Get the original execution log

@@ -23,8 +23,7 @@ import { product } from "../../db/schema/product";
 import { inventoryItem } from "../../db/schema/inventory-item";
 import { lowStockAlertSent } from "../../db/schema/low-stock-alert-sent";
 import { whatsappConfig } from "../../db/schema/whatsapp-config";
-import { EvolutionService } from "../../services/business/evolution-api";
-import { env } from "../../config/env";
+import { evolutionService } from "./types";
 import type {
   BirthdayTriggerConfig,
   InactivityTriggerConfig,
@@ -35,16 +34,6 @@ import type {
 import type { ReservationStatus } from "../../db/schema/reservation";
 
 /**
- * Get EvolutionService instance
- */
-function getEvolutionServiceInstance(): EvolutionService {
-  return new EvolutionService({
-    baseUrl: env.EVOLUTION_API_URL,
-    apiKey: env.EVOLUTION_API_KEY,
-  });
-}
-
-/**
  * Helper to process automation with trigger data
  */
 async function processAutomationWithTriggerData(
@@ -52,7 +41,7 @@ async function processAutomationWithTriggerData(
   triggerType: string,
   triggerData: Record<string, unknown>
 ): Promise<{ executed: boolean; success?: boolean; error?: string }> {
-  const evolutionService = getEvolutionServiceInstance();
+  // Use the singleton evolutionService from types.ts
 
   // Get active actions for this automation
   const actions = await db.query.automationAction.findMany({
