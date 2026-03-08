@@ -7,6 +7,7 @@ import {
 import { PurchaseOrderRepository, CreatePurchaseOrderInput, UpdatePurchaseOrderInput, ReceiveItemInput } from "../repository/purchase-order";
 import { InventoryRepository } from "../repository/inventory";
 import { ProductRepository } from "../repository/product";
+import { SupplierRepository } from "../repository/supplier";
 import type { PurchaseOrder } from "../../db/schema/purchase-order";
 import { purchaseOrderItem } from "../../db/schema/purchase-order-item";
 import type { PurchaseOrderItem } from "../../db/schema/purchase-order-item";
@@ -54,6 +55,7 @@ export class PurchaseOrderService {
     private purchaseOrderRepository: PurchaseOrderRepository,
     private inventoryRepository: InventoryRepository,
     private productRepository: ProductRepository,
+    private supplierRepository: SupplierRepository,
   ) {}
 
   /**
@@ -64,10 +66,14 @@ export class PurchaseOrderService {
     data: CreatePurchaseOrderDTO
   ): Promise<PurchaseOrderWithItems> {
     // Validate supplier exists and belongs to profile
-    const supplier = await this.purchaseOrderRepository.findByIdAndProfile?.(
+    const supplier = await this.supplierRepository.findByIdAndProfile(
       data.supplierId,
       data.profileId
     );
+    
+    if (!supplier) {
+      throw new NotFoundException(`Proveedor no encontrado: ${data.supplierId}`);
+    }
     
     // Validate all products exist
     for (const item of data.items) {
@@ -174,10 +180,14 @@ export class PurchaseOrderService {
 
     // Validate supplier if changed
     if (data.supplierId && data.supplierId !== existing.supplierId) {
-      const supplier = await this.purchaseOrderRepository.findByIdAndProfile?.(
+      const supplier = await this.supplierRepository.findByIdAndProfile(
         data.supplierId,
         profileId
       );
+      
+      if (!supplier) {
+        throw new NotFoundException(`Proveedor no encontrado: ${data.supplierId}`);
+      }
     }
 
     // Update the PO

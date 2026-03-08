@@ -197,7 +197,8 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     const purchaseOrderService = new PurchaseOrderService(
       purchaseOrderRepository,
       inventoryRepository,
-      productRepository
+      productRepository,
+      supplierRepository
     );
 
     // Services
