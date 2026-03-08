@@ -19,6 +19,7 @@ export * from "./whatsapp-context";
 
 // SERVICE & RESERVATION TABLES
 export * from "./service";
+export * from "./service-product";
 // time-slot: REMOVED - availability simplified, no pre-generated slots
 export * from "./reservation-request";
 export * from "./reservation";

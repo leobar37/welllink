@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMedicalServices } from "@/hooks/use-medical-services";
+import { useReplaceMedicalServiceProducts } from "@/hooks/use-service-products";
 import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { Form } from "@/components/ui/form";
@@ -24,6 +25,8 @@ export function MedicalServicesCatalog({
 }: MedicalServicesCatalogProps) {
   const { services, isLoading, createService, updateService, deleteService } =
     useMedicalServices(profileId);
+  
+  const replaceProducts = useReplaceMedicalServiceProducts(profileId);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -64,6 +67,7 @@ export function MedicalServicesCatalog({
   const openEditModal = (service: MedicalService) => {
     setEditingService(service);
     editForm.reset({
+      id: service.id,
       name: service.name,
       description: service.description || "",
       duration: service.duration,
@@ -77,10 +81,20 @@ export function MedicalServicesCatalog({
   };
 
   const handleCreate = async (data: MedicalServiceFormValues) => {
-    await createService.mutateAsync({
+    const { products, ...serviceData } = data;
+    
+    const newService = await createService.mutateAsync({
       profileId,
-      ...data,
+      ...serviceData,
     });
+
+    // If there are products, associate them with the service
+    if (products && products.length > 0 && newService?.id) {
+      await replaceProducts.mutateAsync({
+        serviceId: newService.id,
+        products,
+      });
+    }
 
     createForm.reset();
     setIsCreateModalOpen(false);
@@ -89,10 +103,20 @@ export function MedicalServicesCatalog({
   const handleEdit = async (data: MedicalServiceFormValues) => {
     if (!editingService) return;
 
+    const { products, ...serviceData } = data;
+
     await updateService.mutateAsync({
       id: editingService.id,
-      data,
+      data: serviceData,
     });
+
+    // Update the products associations
+    if (products) {
+      await replaceProducts.mutateAsync({
+        serviceId: editingService.id,
+        products,
+      });
+    }
 
     editForm.reset();
     setEditingService(null);
@@ -184,7 +208,7 @@ export function MedicalServicesCatalog({
         }
       >
         <Form {...createForm}>
-          <ServiceForm form={createForm} profileId={profileId} />
+          <ServiceForm form={createForm} profileId={profileId} mode="create" />
         </Form>
       </ResponsiveModal>
 
@@ -218,7 +242,7 @@ export function MedicalServicesCatalog({
         }
       >
         <Form {...editForm}>
-          <ServiceForm form={editForm} profileId={profileId} />
+          <ServiceForm form={editForm} profileId={profileId} mode="edit" />
         </Form>
       </ResponsiveModal>
     </div>

@@ -57,12 +57,15 @@ import { SupplierRepository } from "../services/repository/supplier";
 import { ProductCategoryRepository } from "../services/repository/product-category";
 import { SupplierProductRepository } from "../services/repository/supplier-product";
 import { PurchaseOrderRepository } from "../services/repository/purchase-order";
+import { ServiceProductRepository } from "../services/repository/service-product";
+import { ServiceRepository } from "../services/repository/service";
 
 // NEW INVENTORY SERVICES
 import { ProductService } from "../services/business/product";
 import { InventoryService } from "../services/business/inventory";
 import { SupplierProductService } from "../services/business/supplier-product";
 import { PurchaseOrderService } from "../services/business/purchase-order";
+import { ServiceProductService } from "../services/business/service-product";
 
 let storageInstance: StorageStrategy | null = null;
 let initialized = false;
@@ -151,6 +154,8 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     const productCategoryRepository = new ProductCategoryRepository();
     const supplierProductRepository = new SupplierProductRepository();
     const purchaseOrderRepository = new PurchaseOrderRepository();
+    const serviceProductRepository = new ServiceProductRepository();
+    const serviceRepository = new ServiceRepository();
 
     // Evolution API service
     const evolutionService = new EvolutionService({
@@ -199,6 +204,11 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
       inventoryRepository,
       productRepository,
       supplierRepository
+    );
+    const serviceProductService = new ServiceProductService(
+      serviceProductRepository,
+      serviceRepository,
+      productRepository
     );
 
     // Services
@@ -280,6 +290,8 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         productCategoryRepository,
         supplierProductRepository,
         purchaseOrderRepository,
+        serviceProductRepository,
+        serviceRepository,
         // Services
         assetService,
         cdnService,
@@ -307,6 +319,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         inventoryService,
         supplierProductService,
         purchaseOrderService,
+        serviceProductService,
         // AI Messaging Strategy
         getMessageStrategy,
       },

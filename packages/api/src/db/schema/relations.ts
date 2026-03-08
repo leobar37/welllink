@@ -8,6 +8,8 @@ import { socialLink } from "./social-link";
 import { profileView, socialClick, qrDownload } from "./analytics";
 // ai-recommendation: REMOVED - legacy wellness feature
 import { service } from "./service";
+import { serviceProduct } from "./service-product";
+import { product } from "./product";
 import { whatsappConfig } from "./whatsapp-config";
 import { whatsappMessage } from "./whatsapp-message";
 import { whatsappTemplate } from "./whatsapp-template";
@@ -120,7 +122,7 @@ export const qrDownloadRelations = relations(qrDownload, ({ one }) => ({
 }));
 
 // Service relations
-export const serviceRelations = relations(service, ({ one }) => ({
+export const serviceRelations = relations(service, ({ one, many }) => ({
   profile: one(profile, {
     fields: [service.profileId],
     references: [profile.id],
@@ -128,6 +130,23 @@ export const serviceRelations = relations(service, ({ one }) => ({
   imageAsset: one(asset, {
     fields: [service.imageAssetId],
     references: [asset.id],
+  }),
+  serviceProducts: many(serviceProduct),
+}));
+
+// Service-Product junction relations
+export const serviceProductRelations = relations(serviceProduct, ({ one }) => ({
+  profile: one(profile, {
+    fields: [serviceProduct.profileId],
+    references: [profile.id],
+  }),
+  service: one(service, {
+    fields: [serviceProduct.serviceId],
+    references: [service.id],
+  }),
+  product: one(product, {
+    fields: [serviceProduct.productId],
+    references: [product.id],
   }),
 }));
 
