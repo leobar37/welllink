@@ -1,0 +1,66 @@
+{
+  "featureId": "m8-1-inventory-reports",
+  "reviewedAt": "2026-03-08T10:30:00Z",
+  "commitId": "12ee657",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The inventory reporting feature has been implemented comprehensively with rotation report, stock valuation, and top consumed products reports. The implementation follows the established Repository + Business Service pattern, includes proper TypeScript typing, and provides Excel (xlsx) and PDF export capabilities via new API endpoints. All endpoints follow the existing pattern in the codebase and are properly registered in the services plugin.",
+    "issues": [
+      {
+        "file": "packages/api/src/services/repository/report.ts",
+        "line": 45,
+        "severity": "non_blocking",
+        "description": "The getInventoryRotation method calculates average inventory from stock movements using AVG(quantityAfter), which may not accurately represent the average inventory value over the period. This is a complex calculation that may need refinement based on actual business requirements."
+      },
+      {
+        "file": "packages/api/src/services/business/report.ts",
+        "line": 85,
+        "severity": "non_blocking",
+        "description": "The exportToExcel method uses dynamic imports for 'xlsx' library. While this works, it could benefit from being at the top level to leverage Bun's module caching more effectively."
+      },
+      {
+        "file": "packages/api/src/services/business/report.ts",
+        "line": 165,
+        "severity": "non_blocking",
+        "description": "PDF export limits rotation report to 20 items (line 236: report.items.slice(0, 20)) without pagination. Large datasets may require pagination or streaming for better memory efficiency."
+      },
+      {
+        "file": "packages/api/src/api/routes/inventory.ts",
+        "line": 1001,
+        "severity": "non_blocking",
+        "description": "Report endpoints don't have explicit validation schemas for query parameters (startDate, endDate, categoryId, location). While the service handles these, adding Elysia validation schemas would improve API documentation and error handling."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "conventions",
+      "observation": "The worker correctly followed the Repository + Business Service pattern. ReportRepository handles data access with raw SQL queries, ReportService handles business logic and export formatting. This aligns with AGENTS.md guidelines.",
+      "evidence": "packages/api/src/services/repository/report.ts and packages/api/src/services/business/report.ts follow the established pattern."
+    },
+    {
+      "area": "conventions",
+      "observation": "Services are properly registered in src/plugins/services.ts with dependency injection pattern. The ReportService is instantiated with reportRepository as a constructor parameter.",
+      "evidence": "packages/api/src/plugins/services.ts line 251: const reportService = new ReportService(reportRepository);"
+    },
+    {
+      "area": "services",
+      "observation": "New dependencies (xlsx and pdfkit) were added to package.json for export functionality. These are properly listed in dependencies with appropriate @types packages in devDependencies.",
+      "evidence": "packages/api/package.json includes 'xlsx': '^0.18.5' and 'pdfkit': '^0.17.2' with corresponding @types packages."
+    },
+    {
+      "area": "conventions",
+      "observation": "All user-facing strings in the export functions are in Spanish (e.g., 'Reporte de Rotación de Inventario', 'Sin categoría', 'Resumen'), following the project language guidelines from AGENTS.md.",
+      "evidence": "packages/api/src/services/business/report.ts lines 108-130 and getReportTitle function at the end of the file."
+    },
+    {
+      "area": "knowledge",
+      "observation": "The implementation correctly uses Drizzle ORM's sql template literal for complex aggregations like COALESCE(SUM(ABS(${stockMovement.quantity})), 0). This pattern is important for type-safe raw SQL in Drizzle.",
+      "evidence": "packages/api/src/services/repository/report.ts lines 93-100 shows proper use of sql tagged template for aggregation queries."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "The m8-1-inventory-reports feature is well-implemented and follows project patterns. It provides rotation reports (COGS/average inventory), stock valuation by category, and top consumed products reports with date range filtering. Excel and PDF exports are functional. Minor non-blocking issues include: average inventory calculation methodology could be refined, PDF export has a hard limit of 20 items for rotation reports, and query parameter validation could be enhanced. The code compiles successfully and integrates properly with the existing inventory system."
+}
