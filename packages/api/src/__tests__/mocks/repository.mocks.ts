@@ -52,7 +52,21 @@ export function seedMockData(data: {
 
 /**
  * Mock TimeSlotRepository: REMOVED - availability simplified, no pre-generated slots
+ * Adding mock for backwards compatibility with tests
  */
+export class MockTimeSlotRepository {
+  async findById(id: string): Promise<any | null> {
+    return null;
+  }
+
+  async findByProfileId(profileId: string): Promise<any[]> {
+    return [];
+  }
+
+  async updateStatus(id: string, status: string): Promise<any | null> {
+    return null;
+  }
+}
 
 /**
  * Mock MedicalServiceRepository
