@@ -47,3 +47,5 @@ export * from "./product-category";
 export * from "./product";
 export * from "./inventory-item";
 export * from "./stock-movement";
+export * from "./purchase-order";
+export * from "./purchase-order-item";

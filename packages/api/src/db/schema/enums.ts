@@ -49,6 +49,15 @@ export const stockMovementReasonEnum = pgEnum("stock_movement_reason", [
   "expired",
 ]);
 
+// Purchase order status enum
+export const purchaseOrderStatusEnum = pgEnum("purchase_order_status", [
+  "draft",
+  "sent",
+  "partial",
+  "received",
+  "cancelled",
+]);
+
 // Payment method type
 export type PaymentMethodType =
   | "cash"
@@ -82,3 +91,11 @@ export type StockMovementReason =
   | "initial"
   | "transfer"
   | "expired";
+
+// Purchase order status type
+export type PurchaseOrderStatus =
+  | "draft"
+  | "sent"
+  | "partial"
+  | "received"
+  | "cancelled";
