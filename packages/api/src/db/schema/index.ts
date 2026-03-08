@@ -51,3 +51,9 @@ export * from "./stock-movement";
 export * from "./purchase-order";
 export * from "./purchase-order-item";
 export * from "./low-stock-alert-sent";
+
+// AUTOMATION TABLES
+export * from "./automation";
+export * from "./automation-trigger";
+export * from "./automation-action";
+export * from "./automation-execution-log";

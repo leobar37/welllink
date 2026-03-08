@@ -14,6 +14,10 @@ import { whatsappConfig } from "./whatsapp-config";
 import { whatsappMessage } from "./whatsapp-message";
 import { whatsappTemplate } from "./whatsapp-template";
 import { whatsappContext } from "./whatsapp-context";
+import { automation } from "./automation";
+import { automationTrigger } from "./automation-trigger";
+import { automationAction } from "./automation-action";
+import { automationExecutionLog } from "./automation-execution-log";
 
 // User relations
 export const userRelations = relations(user, ({ many }) => ({
@@ -194,4 +198,45 @@ export const whatsappContextRelations = relations(
       references: [profile.id],
     }),
   }),
+);
+
+// Automation relations
+export const automationRelations = relations(automation, ({ one, many }) => ({
+  profile: one(profile, {
+    fields: [automation.profileId],
+    references: [profile.id],
+  }),
+  triggers: many(automationTrigger),
+  actions: many(automationAction),
+  executionLogs: many(automationExecutionLog),
+}));
+
+// Automation Trigger relations
+export const automationTriggerRelations = relations(
+  automationTrigger,
+  ({ one }) => ({
+    automation: one(automation, {
+      fields: [automationTrigger.automationId],
+      references: [automation.id],
+    }),
+  })
+);
+
+// Automation Action relations
+export const automationActionRelations = relations(automationAction, ({ one }) => ({
+  automation: one(automation, {
+    fields: [automationAction.automationId],
+    references: [automation.id],
+  }),
+}));
+
+// Automation Execution Log relations
+export const automationExecutionLogRelations = relations(
+  automationExecutionLog,
+  ({ one }) => ({
+    automation: one(automation, {
+      fields: [automationExecutionLog.automationId],
+      references: [automation.id],
+    }),
+  })
 );

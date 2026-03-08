@@ -59,6 +59,27 @@ export const purchaseOrderStatusEnum = pgEnum("purchase_order_status", [
   "cancelled",
 ]);
 
+// Automation trigger type enum
+export const automationTriggerTypeEnum = pgEnum("automation_trigger_type", [
+  "event",
+  "schedule",
+  "condition",
+]);
+
+// Automation action type enum
+export const automationActionTypeEnum = pgEnum("automation_action_type", [
+  "whatsapp",
+  "email",
+  "update_record",
+  "create_task",
+]);
+
+// Automation execution status enum
+export const automationExecutionStatusEnum = pgEnum(
+  "automation_execution_status",
+  ["pending", "running", "success", "partial", "failed"]
+);
+
 // Payment method type
 export type PaymentMethodType =
   | "cash"
@@ -101,3 +122,17 @@ export type PurchaseOrderStatus =
   | "partial"
   | "received"
   | "cancelled";
+
+// Automation trigger type
+export type AutomationTriggerType = "event" | "schedule" | "condition";
+
+// Automation action type
+export type AutomationActionType = "whatsapp" | "email" | "update_record" | "create_task";
+
+// Automation execution status type
+export type AutomationExecutionStatus =
+  | "pending"
+  | "running"
+  | "success"
+  | "partial"
+  | "failed";
