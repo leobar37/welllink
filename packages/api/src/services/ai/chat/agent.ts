@@ -15,6 +15,8 @@ import {
   getPaymentMethodDetailsTool,
   loadWhatsAppContextTool,
   pauseForHumanTool,
+  checkInventoryTool,
+  getProductInfoTool,
 } from "./tools";
 
 /**
@@ -53,6 +55,10 @@ export function createMedicalChatAgent(instructions?: string): Agent {
       // Payment information tools
       listPaymentMethodsTool,
       getPaymentMethodDetailsTool,
+
+      // Inventory tools
+      checkInventoryTool,
+      getProductInfoTool,
 
       // WhatsApp context tools
       loadWhatsAppContextTool,

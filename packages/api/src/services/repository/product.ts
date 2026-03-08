@@ -144,6 +144,46 @@ export class ProductRepository {
   }
 
   /**
+   * Search products by name, SKU, or barcode directly (for AI tools)
+   */
+  async searchByNameOrSkuDirect(profileId: string, searchTerm: string, options?: {
+    limit?: number;
+    offset?: number;
+    categoryId?: string;
+    isActive?: boolean;
+  }) {
+    const searchPattern = `%${searchTerm}%`;
+    
+    const conditions = [
+      eq(product.profileId, profileId),
+      or(
+        ilike(product.name, searchPattern),
+        ilike(product.sku, searchPattern),
+        ilike(product.barcode, searchPattern)
+      ),
+    ];
+
+    if (options?.categoryId) {
+      conditions.push(eq(product.categoryId, options.categoryId));
+    }
+
+    if (options?.isActive !== undefined) {
+      conditions.push(eq(product.isActive, options.isActive));
+    }
+
+    return db.query.product.findMany({
+      where: and(...conditions),
+      orderBy: desc(product.createdAt),
+      limit: options?.limit,
+      offset: options?.offset,
+      with: {
+        category: true,
+        supplier: true,
+      },
+    });
+  }
+
+  /**
    * Search products by name or SKU
    */
   async searchByNameOrSku(ctx: RequestContext, searchTerm: string, options?: {
