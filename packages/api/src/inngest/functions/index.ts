@@ -9,6 +9,7 @@ export * from "./follow-up";
 export * from "./reservation-confirmation";
 export * from "./reservation-completed";
 export * from "./low-stock-alert";
+export * from "./execute-automation";
 
 import { expirePendingRequests } from "./request-expiration";
 import { send24HourReminder, send2HourReminder } from "./reminders";
@@ -24,6 +25,11 @@ import {
 } from "./reservation-confirmation";
 import { handleReservationCompleted } from "./reservation-completed";
 import { checkLowStock, testLowStockAlert } from "./low-stock-alert";
+import { 
+  executeAutomation, 
+  runScheduledAutomations, 
+  retryAutomationExecution 
+} from "./execute-automation";
 
 export const functions = [
   expirePendingRequests,
@@ -38,4 +44,8 @@ export const functions = [
   handleReservationCompleted,
   checkLowStock,
   testLowStockAlert,
+  // Automation functions
+  executeAutomation,
+  runScheduledAutomations,
+  retryAutomationExecution,
 ];

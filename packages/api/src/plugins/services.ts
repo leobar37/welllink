@@ -67,6 +67,13 @@ import { SupplierProductService } from "../services/business/supplier-product";
 import { PurchaseOrderService } from "../services/business/purchase-order";
 import { ServiceProductService } from "../services/business/service-product";
 
+// NEW AUTOMATION IMPORTS
+import { AutomationRepository } from "../services/repository/automation";
+import { AutomationTriggerRepository } from "../services/repository/automation-trigger";
+import { AutomationActionRepository } from "../services/repository/automation-action";
+import { AutomationExecutionLogRepository } from "../services/repository/automation-execution-log";
+import { AutomationService } from "../services/business/automation";
+
 let storageInstance: StorageStrategy | null = null;
 let initialized = false;
 let storageInitializationFailed = false;
@@ -157,6 +164,12 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     const serviceProductRepository = new ServiceProductRepository();
     const serviceRepository = new ServiceRepository();
 
+    // AUTOMATION REPOSITORIES
+    const automationRepository = new AutomationRepository();
+    const automationTriggerRepository = new AutomationTriggerRepository();
+    const automationActionRepository = new AutomationActionRepository();
+    const automationExecutionLogRepository = new AutomationExecutionLogRepository();
+
     // Evolution API service
     const evolutionService = new EvolutionService({
       baseUrl: env.EVOLUTION_API_URL,
@@ -210,6 +223,9 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
       serviceRepository,
       productRepository
     );
+
+    // AUTOMATION SERVICE
+    const automationService = new AutomationService(evolutionService);
 
     // Services
     const assetService = new AssetService(assetRepository, storage);
@@ -292,6 +308,11 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         purchaseOrderRepository,
         serviceProductRepository,
         serviceRepository,
+        // AUTOMATION REPOSITORIES
+        automationRepository,
+        automationTriggerRepository,
+        automationActionRepository,
+        automationExecutionLogRepository,
         // Services
         assetService,
         cdnService,
@@ -320,6 +341,8 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         supplierProductService,
         purchaseOrderService,
         serviceProductService,
+        // AUTOMATION SERVICE
+        automationService,
         // AI Messaging Strategy
         getMessageStrategy,
       },

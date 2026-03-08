@@ -223,4 +223,24 @@ export interface MedicalReservationEvents {
       expiredAt: string;
     };
   };
+
+  // Automation events
+  "automation/execute": {
+    data: {
+      automationId?: string;
+      profileId: string;
+      triggerType: "event" | "schedule" | "condition";
+      eventType?: string;
+      triggerData: Record<string, unknown>;
+    };
+  };
+
+  "automation/retry": {
+    data: {
+      executionLogId: string;
+      automationId: string;
+      profileId: string;
+      triggerData: Record<string, unknown>;
+    };
+  };
 }
