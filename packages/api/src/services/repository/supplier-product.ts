@@ -11,8 +11,16 @@ import {
   type SupplierProduct,
   type NewSupplierProduct,
 } from "../../db/schema/supplier-product";
+import { product, type Product } from "../../db/schema/product";
 import { profile } from "../../db/schema/profile";
 import type { RequestContext } from "../../types/context";
+
+/**
+ * Extended type for supplier product with product details
+ */
+export interface SupplierProductWithProduct extends SupplierProduct {
+  product: Product;
+}
 
 export class SupplierProductRepository {
   /**
@@ -192,6 +200,36 @@ export class SupplierProductRepository {
       ),
     });
     return result ?? null;
+  }
+
+  /**
+   * Find all products for a supplier with product details
+   */
+  async findBySupplierIdWithProduct(supplierId: string, profileId: string, options?: {
+    limit?: number;
+    offset?: number;
+    isActive?: boolean;
+  }): Promise<SupplierProductWithProduct[]> {
+    const conditions = [
+      eq(supplierProduct.supplierId, supplierId),
+      eq(supplierProduct.profileId, profileId),
+    ];
+    if (options?.isActive !== undefined) {
+      conditions.push(eq(supplierProduct.isActive, options.isActive));
+    }
+
+    const results = await db.select()
+      .from(supplierProduct)
+      .leftJoin(product, eq(supplierProduct.productId, product.id))
+      .where(and(...conditions))
+      .orderBy(desc(supplierProduct.createdAt))
+      .limit(options?.limit ?? 100)
+      .offset(options?.offset ?? 0);
+
+    return results.map((r) => ({
+      ...r.supplier_product,
+      product: r.product!,
+    }));
   }
 
   /**

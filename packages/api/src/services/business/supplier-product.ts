@@ -1,5 +1,5 @@
 import { NotFoundException, BadRequestException } from "../../utils/http-exceptions";
-import { SupplierProductRepository } from "../repository/supplier-product";
+import { SupplierProductRepository, type SupplierProductWithProduct } from "../repository/supplier-product";
 import { SupplierRepository } from "../repository/supplier";
 import { ProductRepository } from "../repository/product";
 import type { SupplierProduct, NewSupplierProduct } from "../../db/schema/supplier-product";
@@ -105,7 +105,7 @@ export class SupplierProductService {
       offset?: number;
       isActive?: boolean;
     }
-  ): Promise<SupplierProduct[]> {
+  ): Promise<SupplierProductWithProduct[]> {
     // Validate supplier exists
     const supplier = await this.supplierRepository.findByIdAndProfile(
       supplierId,
@@ -115,7 +115,7 @@ export class SupplierProductService {
       throw new NotFoundException("Proveedor no encontrado");
     }
 
-    return this.supplierProductRepository.findBySupplierIdAndProfile(
+    return this.supplierProductRepository.findBySupplierIdWithProduct(
       supplierId,
       profileId,
       options

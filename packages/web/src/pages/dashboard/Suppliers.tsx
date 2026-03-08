@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router";
 import { useProfile } from "@/hooks/use-profile";
 import { useSuppliers, type Supplier, type CreateSupplierData, type UpdateSupplierData } from "@/hooks/use-inventory";
-import { Loader2, Plus, Pencil, Trash2, Search, Phone, Mail, MapPin, ArrowLeft } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Search, Phone, Mail, MapPin, ArrowLeft, Eye } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -240,7 +240,15 @@ export function SuppliersPage() {
               ) : (
                 paginatedSuppliers.map((supplier) => (
                   <TableRow key={supplier.id}>
-                    <TableCell className="font-medium">{supplier.name}</TableCell>
+                    <TableCell className="font-medium">
+                      <Button 
+                        variant="link" 
+                        className="p-0 h-auto font-medium"
+                        onClick={() => navigate(`/dashboard/suppliers/${supplier.id}`)}
+                      >
+                        {supplier.name}
+                      </Button>
+                    </TableCell>
                     <TableCell>
                       {supplier.contactPerson ? (
                         <span>{supplier.contactPerson}</span>
@@ -287,6 +295,14 @@ export function SuppliersPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => navigate(`/dashboard/suppliers/${supplier.id}`)}
+                          title="Ver detalles"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"

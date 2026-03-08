@@ -51,10 +51,32 @@ export interface Supplier {
   city: string | null;
   country: string | null;
   taxId: string | null;
+  paymentTerms: string | null;
   notes: string | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+/**
+ * Supplier-product association with product details
+ */
+export interface SupplierProductWithProduct {
+  id: string;
+  profileId: string;
+  supplierId: string;
+  productId: string;
+  supplierSku: string | null;
+  costPrice: string | null;
+  leadTimeDays: number | null;
+  minOrderQty: number | null;
+  isPrimary: boolean;
+  notes: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  // Product details
+  product: Product;
 }
 
 export interface InventoryItem {
@@ -459,6 +481,68 @@ export function useSuppliers(profileId: string) {
     createSupplier,
     updateSupplier,
     deleteSupplier,
+  };
+}
+
+/**
+ * Hook to fetch a single supplier by ID
+ */
+export function useSupplier(profileId: string, supplierId: string) {
+  const {
+    data: supplier,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["supplier", profileId, supplierId],
+    queryFn: async () => {
+      const { data, error } = await api.api.inventory.suppliers[supplierId].get({
+        $query: { profileId },
+      });
+      if (error) throw error;
+      return data as unknown as Supplier;
+    },
+    enabled: !!profileId && !!supplierId,
+    refetchOnMount: "always",
+    staleTime: 0,
+  });
+
+  return {
+    supplier,
+    isLoading,
+    error,
+    refetch,
+  };
+}
+
+/**
+ * Hook to fetch products associated with a supplier
+ */
+export function useSupplierProducts(profileId: string, supplierId: string) {
+  const {
+    data: supplierProducts,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["supplier-products", profileId, supplierId],
+    queryFn: async () => {
+      const { data, error } = await api.api.inventory.suppliers[supplierId].products.get({
+        $query: { profileId },
+      });
+      if (error) throw error;
+      return data as unknown as SupplierProductWithProduct[];
+    },
+    enabled: !!profileId && !!supplierId,
+    refetchOnMount: "always",
+    staleTime: 0,
+  });
+
+  return {
+    supplierProducts,
+    isLoading,
+    error,
+    refetch,
   };
 }
 
