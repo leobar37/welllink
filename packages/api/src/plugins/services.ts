@@ -56,11 +56,13 @@ import { InventoryRepository } from "../services/repository/inventory";
 import { SupplierRepository } from "../services/repository/supplier";
 import { ProductCategoryRepository } from "../services/repository/product-category";
 import { SupplierProductRepository } from "../services/repository/supplier-product";
+import { PurchaseOrderRepository } from "../services/repository/purchase-order";
 
 // NEW INVENTORY SERVICES
 import { ProductService } from "../services/business/product";
 import { InventoryService } from "../services/business/inventory";
 import { SupplierProductService } from "../services/business/supplier-product";
+import { PurchaseOrderService } from "../services/business/purchase-order";
 
 let storageInstance: StorageStrategy | null = null;
 let initialized = false;
@@ -148,6 +150,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     const supplierRepository = new SupplierRepository();
     const productCategoryRepository = new ProductCategoryRepository();
     const supplierProductRepository = new SupplierProductRepository();
+    const purchaseOrderRepository = new PurchaseOrderRepository();
 
     // Evolution API service
     const evolutionService = new EvolutionService({
@@ -189,6 +192,11 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     const supplierProductService = new SupplierProductService(
       supplierProductRepository,
       supplierRepository,
+      productRepository
+    );
+    const purchaseOrderService = new PurchaseOrderService(
+      purchaseOrderRepository,
+      inventoryRepository,
       productRepository
     );
 
@@ -270,6 +278,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         supplierRepository,
         productCategoryRepository,
         supplierProductRepository,
+        purchaseOrderRepository,
         // Services
         assetService,
         cdnService,
@@ -296,6 +305,7 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         productService,
         inventoryService,
         supplierProductService,
+        purchaseOrderService,
         // AI Messaging Strategy
         getMessageStrategy,
       },

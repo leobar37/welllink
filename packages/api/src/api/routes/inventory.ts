@@ -744,4 +744,259 @@ export const inventoryRoutes = new Elysia({ prefix: "/inventory" })
       targetProfileId,
       params.productId
     );
-  });
+  })
+  
+  // ========================================
+  // PURCHASE ORDERS
+  // ========================================
+  
+  // List purchase orders
+  .get("/purchase-orders", async ({ query, services, ctx }) => {
+    const profileId = query.profileId as string;
+    let targetProfileId: string;
+    
+    if (!profileId) {
+      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+      if (profiles.length === 0) {
+        return [];
+      }
+      targetProfileId = profiles[0].id;
+    } else {
+      targetProfileId = profileId;
+    }
+    
+    return services.purchaseOrderService.listPurchaseOrders(targetProfileId, {
+      limit: query.limit ? parseInt(query.limit as string) : undefined,
+      offset: query.offset ? parseInt(query.offset as string) : undefined,
+      status: query.status as any,
+      supplierId: query.supplierId as string | undefined,
+    });
+  })
+  
+  // Get single purchase order
+  .get("/purchase-orders/:id", async ({ params, query, services, ctx }) => {
+    const profileId = query.profileId as string;
+    let targetProfileId: string;
+    
+    if (!profileId) {
+      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+      if (profiles.length === 0) {
+        throw new Error("Perfil no encontrado");
+      }
+      targetProfileId = profiles[0].id;
+    } else {
+      targetProfileId = profileId;
+    }
+    
+    const po = await services.purchaseOrderService.getPurchaseOrder(
+      ctx!,
+      params.id,
+      targetProfileId
+    );
+    
+    if (!po) {
+      throw new Error("Orden de compra no encontrada");
+    }
+    return po;
+  })
+  
+  // Create purchase order
+  .post(
+    "/purchase-orders",
+    async ({ body, set, services, ctx }) => {
+      const profileId = body.profileId as string;
+      let targetProfileId: string;
+      
+      if (!profileId) {
+        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        if (profiles.length === 0) {
+          throw new Error("Perfil no encontrado");
+        }
+        targetProfileId = profiles[0].id;
+      } else {
+        targetProfileId = profileId;
+      }
+      
+      const po = await services.purchaseOrderService.createPurchaseOrder(
+        ctx!,
+        {
+          profileId: targetProfileId,
+          supplierId: body.supplierId,
+          orderNumber: body.orderNumber,
+          expectedDate: body.expectedDate,
+          notes: body.notes,
+          items: body.items,
+        }
+      );
+      
+      set.status = 201;
+      return po;
+    },
+    {
+      body: t.Object({
+        profileId: t.Optional(t.String()),
+        supplierId: t.String({ minLength: 1 }),
+        orderNumber: t.Optional(t.String()),
+        expectedDate: t.Optional(t.String()),
+        notes: t.Optional(t.String()),
+        items: t.Array(t.Object({
+          productId: t.String({ minLength: 1 }),
+          quantity: t.Number({ minimum: 1 }),
+          unitPrice: t.Union([t.Number(), t.String()]),
+          notes: t.Optional(t.String()),
+        })),
+      }),
+    },
+  )
+  
+  // Update purchase order
+  .put(
+    "/purchase-orders/:id",
+    async ({ params, body, query, services, ctx }) => {
+      const profileId = query.profileId as string;
+      let targetProfileId: string;
+      
+      if (!profileId) {
+        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        if (profiles.length === 0) {
+          throw new Error("Perfil no encontrado");
+        }
+        targetProfileId = profiles[0].id;
+      } else {
+        targetProfileId = profileId;
+      }
+      
+      return services.purchaseOrderService.updatePurchaseOrder(
+        ctx!,
+        params.id,
+        targetProfileId,
+        body
+      );
+    },
+    {
+      body: t.Object({
+        supplierId: t.Optional(t.String()),
+        orderNumber: t.Optional(t.String()),
+        expectedDate: t.Optional(t.String()),
+        notes: t.Optional(t.String()),
+        tax: t.Optional(t.Union([t.Number(), t.String()])),
+      }),
+    },
+  )
+  
+  // Delete purchase order (only draft)
+  .delete("/purchase-orders/:id", async ({ params, query, services, ctx, set }) => {
+    const profileId = query.profileId as string;
+    let targetProfileId: string;
+    
+    if (!profileId) {
+      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+      if (profiles.length === 0) {
+        throw new Error("Perfil no encontrado");
+      }
+      targetProfileId = profiles[0].id;
+    } else {
+      targetProfileId = profileId;
+    }
+    
+    await services.purchaseOrderService.deletePurchaseOrder(
+      ctx!,
+      params.id,
+      targetProfileId
+    );
+    set.status = 204;
+  })
+  
+  // Send purchase order (draft -> sent)
+  .post(
+    "/purchase-orders/:id/send",
+    async ({ params, query, services, ctx }) => {
+      const profileId = query.profileId as string;
+      let targetProfileId: string;
+      
+      if (!profileId) {
+        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        if (profiles.length === 0) {
+          throw new Error("Perfil no encontrado");
+        }
+        targetProfileId = profiles[0].id;
+      } else {
+        targetProfileId = profileId;
+      }
+      
+      return services.purchaseOrderService.sendPurchaseOrder(
+        ctx!,
+        params.id,
+        targetProfileId
+      );
+    },
+  )
+  
+  // Receive purchase order (sent/partial -> partial/received)
+  .post(
+    "/purchase-orders/:id/receive",
+    async ({ params, body, query, services, ctx, set }) => {
+      const profileId = query.profileId as string;
+      let targetProfileId: string;
+      
+      if (!profileId) {
+        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        if (profiles.length === 0) {
+          throw new Error("Perfil no encontrado");
+        }
+        targetProfileId = profiles[0].id;
+      } else {
+        targetProfileId = profileId;
+      }
+      
+      const result = await services.purchaseOrderService.receivePurchaseOrder(
+        ctx!,
+        params.id,
+        targetProfileId,
+        body
+      );
+      
+      return result;
+    },
+    {
+      body: t.Object({
+        items: t.Array(t.Object({
+          productId: t.String({ minLength: 1 }),
+          quantity: t.Number({ minimum: 1 }),
+          location: t.Optional(t.String()),
+          notes: t.Optional(t.String()),
+        })),
+      }),
+    },
+  )
+  
+  // Cancel purchase order
+  .post(
+    "/purchase-orders/:id/cancel",
+    async ({ params, body, query, services, ctx }) => {
+      const profileId = query.profileId as string;
+      let targetProfileId: string;
+      
+      if (!profileId) {
+        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        if (profiles.length === 0) {
+          throw new Error("Perfil no encontrado");
+        }
+        targetProfileId = profiles[0].id;
+      } else {
+        targetProfileId = profileId;
+      }
+      
+      return services.purchaseOrderService.cancelPurchaseOrder(
+        ctx!,
+        params.id,
+        targetProfileId,
+        body.reason
+      );
+    },
+    {
+      body: t.Object({
+        reason: t.String({ minLength: 1 }),
+      }),
+    },
+  );
