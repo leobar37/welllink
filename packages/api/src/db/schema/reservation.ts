@@ -13,6 +13,7 @@ import {
 import { profile } from "./profile";
 import { service } from "./service";
 import { reservationRequest } from "./reservation-request";
+import { staff } from "./staff";
 
 export const reservationStatus = [
   "confirmed",
@@ -35,6 +36,9 @@ export const reservation = pgTable(
     serviceId: uuid("service_id")
       .notNull()
       .references(() => service.id, { onDelete: "cascade" }),
+    staffId: uuid("staff_id").references(() => staff.id, {
+      onDelete: "set null",
+    }),
     requestId: uuid("request_id").references(() => reservationRequest.id, {
       onDelete: "set null",
     }),

@@ -59,6 +59,9 @@ import { SupplierProductRepository } from "../services/repository/supplier-produ
 import { PurchaseOrderRepository } from "../services/repository/purchase-order";
 import { ServiceProductRepository } from "../services/repository/service-product";
 import { ServiceRepository } from "../services/repository/service";
+import { StaffRepository } from "../services/repository/staff";
+import { StaffServiceRepository } from "../services/repository/staff-service";
+import { StaffAvailabilityRepository } from "../services/repository/staff-availability";
 
 // NEW INVENTORY SERVICES
 import { ProductService } from "../services/business/product";
@@ -165,6 +168,9 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     const purchaseOrderRepository = new PurchaseOrderRepository();
     const serviceProductRepository = new ServiceProductRepository();
     const serviceRepository = new ServiceRepository();
+    const staffRepository = new StaffRepository();
+    const staffServiceRepository = new StaffServiceRepository();
+    const staffAvailabilityRepository = new StaffAvailabilityRepository();
 
     // AUTOMATION REPOSITORIES
     const automationRepository = new AutomationRepository();
@@ -190,6 +196,10 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
       reservationRequestRepository,
       reservationRepository,
       profileRepository,
+      staffRepository,
+      staffServiceRepository,
+      staffAvailabilityRepository,
+      serviceRepository,
     );
 
     const notificationService = new NotificationService(
