@@ -17,6 +17,9 @@ import {
   pauseForHumanTool,
   checkInventoryTool,
   getProductInfoTool,
+  getClientHistoryTool,
+  getServiceRecommendationsTool,
+  getUpsellRecommendationsTool,
 } from "./tools";
 
 /**
@@ -59,6 +62,11 @@ export function createMedicalChatAgent(instructions?: string): Agent {
       // Inventory tools
       checkInventoryTool,
       getProductInfoTool,
+
+      // Client history and recommendations
+      getClientHistoryTool,
+      getServiceRecommendationsTool,
+      getUpsellRecommendationsTool,
 
       // WhatsApp context tools
       loadWhatsAppContextTool,

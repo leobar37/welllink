@@ -29,3 +29,10 @@ export { pauseForHumanTool } from "./pause-for-human";
 
 // Inventory tools
 export { checkInventoryTool, getProductInfoTool } from "./inventory";
+
+// Recommendation tools
+export {
+  getClientHistoryTool,
+  getServiceRecommendationsTool,
+  getUpsellRecommendationsTool,
+} from "./recommendations";
