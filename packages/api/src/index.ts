@@ -51,6 +51,7 @@ import { createStorageStrategy } from "./services/storage";
 import { inventoryRoutes } from "./api/routes/inventory";
 import { automationRoutes } from "./api/routes/automation";
 import { businessTypeRoutes } from "./api/routes/business-types";
+import { staffRoutes } from "./api/routes/staff";
 
 // Test routes - ONLY enabled via ENABLE_TEST_ROUTES=true (SECURITY: never in production)
 const enableTestRoutes = env.ENABLE_TEST_ROUTES === "true";
@@ -170,6 +171,7 @@ const app = new Elysia()
       .use(inventoryRoutes)
       .use(automationRoutes)
       .use(businessTypeRoutes)
+      .use(staffRoutes)
       // Test routes - ONLY enabled via ENABLE_TEST_ROUTES=true (SECURITY: never in production)
       .use(
         enableTestRoutes

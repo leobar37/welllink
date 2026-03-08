@@ -85,6 +85,13 @@ export const automationExecutionStatusEnum = pgEnum(
   ["pending", "running", "success", "partial", "failed"]
 );
 
+// Staff role enum
+export const staffRoleEnum = pgEnum("staff_role", [
+  "admin",
+  "manager",
+  "staff",
+]);
+
 // Payment method type
 export type PaymentMethodType =
   | "cash"
@@ -141,3 +148,6 @@ export type AutomationExecutionStatus =
   | "success"
   | "partial"
   | "failed";
+
+// Staff role type
+export type StaffRole = "admin" | "manager" | "staff";

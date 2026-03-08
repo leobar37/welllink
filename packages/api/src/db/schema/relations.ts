@@ -19,6 +19,11 @@ import { automationTrigger } from "./automation-trigger";
 import { automationAction } from "./automation-action";
 import { automationExecutionLog } from "./automation-execution-log";
 
+// STAFF MANAGEMENT
+import { staff } from "./staff";
+import { staffService } from "./staff-service";
+import { staffAvailability } from "./staff-availability";
+
 // User relations
 export const userRelations = relations(user, ({ many }) => ({
   accounts: many(account),
@@ -240,3 +245,46 @@ export const automationExecutionLogRelations = relations(
     }),
   })
 );
+
+// ==========================================
+// STAFF MANAGEMENT RELATIONS
+// ==========================================
+
+// Staff relations
+export const staffRelations = relations(staff, ({ one, many }) => ({
+  profile: one(profile, {
+    fields: [staff.profileId],
+    references: [profile.id],
+  }),
+  user: one(user, {
+    fields: [staff.userId],
+    references: [user.id],
+  }),
+  avatar: one(asset, {
+    fields: [staff.avatarId],
+    references: [asset.id],
+    relationName: "staffAvatar",
+  }),
+  services: many(staffService),
+  availabilities: many(staffAvailability),
+}));
+
+// Staff-Service junction relations
+export const staffServiceRelations = relations(staffService, ({ one }) => ({
+  staff: one(staff, {
+    fields: [staffService.staffId],
+    references: [staff.id],
+  }),
+  service: one(service, {
+    fields: [staffService.serviceId],
+    references: [service.id],
+  }),
+}));
+
+// Staff Availability relations
+export const staffAvailabilityRelations = relations(staffAvailability, ({ one }) => ({
+  staff: one(staff, {
+    fields: [staffAvailability.staffId],
+    references: [staff.id],
+  }),
+}));

@@ -61,3 +61,8 @@ export * from "./automation-template";
 
 // BUSINESS TYPE
 export * from "./business-type";
+
+// STAFF MANAGEMENT
+export * from "./staff";
+export * from "./staff-service";
+export * from "./staff-availability";
