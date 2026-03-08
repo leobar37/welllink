@@ -10,6 +10,7 @@ export * from "./reservation-confirmation";
 export * from "./reservation-completed";
 export * from "./low-stock-alert";
 export * from "./execute-automation";
+export * from "./advanced-triggers";
 
 import { expirePendingRequests } from "./request-expiration";
 import { send24HourReminder, send2HourReminder } from "./reminders";
@@ -30,6 +31,18 @@ import {
   runScheduledAutomations, 
   retryAutomationExecution 
 } from "./execute-automation";
+// Advanced triggers
+import {
+  checkBirthdayTriggers,
+  checkInactivityTriggers,
+  checkAnniversaryTriggers,
+  checkLowStockTriggers,
+  handleNoShowTrigger,
+  testBirthdayTriggers,
+  testInactivityTriggers,
+  testAnniversaryTriggers,
+  testLowStockTriggers,
+} from "./advanced-triggers";
 
 export const functions = [
   expirePendingRequests,
@@ -48,4 +61,14 @@ export const functions = [
   executeAutomation,
   runScheduledAutomations,
   retryAutomationExecution,
+  // Advanced trigger functions
+  checkBirthdayTriggers,
+  checkInactivityTriggers,
+  checkAnniversaryTriggers,
+  checkLowStockTriggers,
+  handleNoShowTrigger,
+  testBirthdayTriggers,
+  testInactivityTriggers,
+  testAnniversaryTriggers,
+  testLowStockTriggers,
 ];

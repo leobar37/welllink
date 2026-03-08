@@ -373,7 +373,7 @@ export function evaluateEventTrigger(
 /**
  * Execute automation actions in sequence
  */
-async function executeActions(
+export async function executeActions(
   actions: typeof automationAction.$inferSelect[],
   triggerData: Record<string, unknown>,
   profileId: string,
@@ -483,6 +483,26 @@ async function processAutomation(
     } else if (trigger.type === "condition" && triggerType === "condition") {
       shouldTrigger = true;
       console.log(`[AUTOMATION] Condition trigger matched: ${trigger.name || trigger.id}`);
+      break;
+    } else if (trigger.type === "birthday" && triggerType === "birthday") {
+      shouldTrigger = true;
+      console.log(`[AUTOMATION] Birthday trigger matched: ${trigger.name || trigger.id}`);
+      break;
+    } else if (trigger.type === "inactivity" && triggerType === "inactivity") {
+      shouldTrigger = true;
+      console.log(`[AUTOMATION] Inactivity trigger matched: ${trigger.name || trigger.id}`);
+      break;
+    } else if (trigger.type === "anniversary" && triggerType === "anniversary") {
+      shouldTrigger = true;
+      console.log(`[AUTOMATION] Anniversary trigger matched: ${trigger.name || trigger.id}`);
+      break;
+    } else if (trigger.type === "low_stock" && triggerType === "low_stock") {
+      shouldTrigger = true;
+      console.log(`[AUTOMATION] Low stock trigger matched: ${trigger.name || trigger.id}`);
+      break;
+    } else if (trigger.type === "no_show" && triggerType === "no_show") {
+      shouldTrigger = true;
+      console.log(`[AUTOMATION] No-show trigger matched: ${trigger.name || trigger.id}`);
       break;
     }
   }

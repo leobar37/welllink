@@ -64,6 +64,11 @@ export const automationTriggerTypeEnum = pgEnum("automation_trigger_type", [
   "event",
   "schedule",
   "condition",
+  "birthday",
+  "inactivity",
+  "anniversary",
+  "low_stock",
+  "no_show",
 ]);
 
 // Automation action type enum
@@ -124,7 +129,7 @@ export type PurchaseOrderStatus =
   | "cancelled";
 
 // Automation trigger type
-export type AutomationTriggerType = "event" | "schedule" | "condition";
+export type AutomationTriggerType = "event" | "schedule" | "condition" | "birthday" | "inactivity" | "anniversary" | "low_stock" | "no_show";
 
 // Automation action type
 export type AutomationActionType = "whatsapp" | "email" | "update_record" | "create_task";
