@@ -55,6 +55,7 @@ import { automationRoutes } from "./api/routes/automation";
 import { businessTypeRoutes } from "./api/routes/business-types";
 import { staffRoutes } from "./api/routes/staff";
 import { packageRoutes } from "./api/routes/packages";
+import { constantsRoutes } from "./api/routes/constants";
 
 // Test routes - ONLY enabled via ENABLE_TEST_ROUTES=true (SECURITY: never in production)
 const enableTestRoutes = env.ENABLE_TEST_ROUTES === "true";
@@ -84,12 +85,22 @@ const app = new Elysia()
         info: {
           title: "CitaBot API",
           version: "1.0.0",
-          description: "API de gestión de inventario, automatizaciones y personal para CitaBot",
+          description:
+            "API de gestión de inventario, automatizaciones y personal para CitaBot",
         },
         tags: [
-          { name: "Inventory", description: "Gestión de inventario, productos y proveedores" },
-          { name: "Automation", description: "Motor de automatizaciones y plantillas" },
-          { name: "Staff", description: "Gestión de personal y disponibilidad" },
+          {
+            name: "Inventory",
+            description: "Gestión de inventario, productos y proveedores",
+          },
+          {
+            name: "Automation",
+            description: "Motor de automatizaciones y plantillas",
+          },
+          {
+            name: "Staff",
+            description: "Gestión de personal y disponibilidad",
+          },
           { name: "Auth", description: "Autenticación" },
           { name: "Profiles", description: "Perfiles de negocio" },
           { name: "Clients", description: "Gestión de clientes" },
@@ -200,6 +211,7 @@ const app = new Elysia()
       .use(businessTypeRoutes)
       .use(staffRoutes)
       .use(packageRoutes)
+      .use(constantsRoutes)
       // Test routes - ONLY enabled via ENABLE_TEST_ROUTES=true (SECURITY: never in production)
       .use(
         enableTestRoutes

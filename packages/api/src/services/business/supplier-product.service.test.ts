@@ -9,7 +9,6 @@ const mockSupplierProductRepository: Partial<SupplierProductRepository> = {
   create: jest.fn(),
   findById: jest.fn(),
   findByIdAndProfile: jest.fn(),
-  findByProfileId: jest.fn(),
   findBySupplierId: jest.fn(),
   findBySupplierIdAndProfile: jest.fn(),
   findByProductId: jest.fn(),
@@ -23,7 +22,6 @@ const mockSupplierProductRepository: Partial<SupplierProductRepository> = {
   delete: jest.fn(),
   deleteByIdAndProfile: jest.fn(),
   hardDelete: jest.fn(),
-  count: jest.fn(),
   countBySupplierId: jest.fn(),
   countByProductId: jest.fn(),
 };
@@ -191,7 +189,7 @@ describe("SupplierProductService", () => {
       (mockSupplierProductRepository.findBySupplierIdWithProduct as jest.Mock).mockResolvedValue(mockProducts);
 
       // Act
-      const result = await service.getProductsBySupplier("supplier-1", "profile-123");
+      const result = await service.getProductsBySupplier(mockContext as any, "profile-123", "supplier-1");
 
       // Assert
       expect(result).toHaveLength(2);
@@ -209,7 +207,7 @@ describe("SupplierProductService", () => {
       (mockSupplierProductRepository.findByProductIdAndProfile as jest.Mock).mockResolvedValue(mockSuppliers);
 
       // Act
-      const result = await service.getSuppliersByProduct("product-1", "profile-123");
+      const result = await service.getSuppliersByProduct(mockContext as any, "profile-123", "product-1");
 
       // Assert
       expect(result).toHaveLength(2);
@@ -228,7 +226,7 @@ describe("SupplierProductService", () => {
       (mockSupplierProductRepository.findByIdAndProfile as jest.Mock).mockResolvedValue(mockProduct);
 
       // Act
-      const result = await service.getSupplierProduct("sp-1", "profile-123");
+      const result = await service.getSupplierProduct(mockContext as any, "profile-123", "sp-1");
 
       // Assert
       expect(result).toBeDefined();
@@ -239,7 +237,7 @@ describe("SupplierProductService", () => {
       (mockSupplierProductRepository.findByIdAndProfile as jest.Mock).mockResolvedValue(null);
 
       // Act
-      const result = await service.getSupplierProduct("nonexistent", "profile-123");
+      const result = await service.getSupplierProduct(mockContext as any, "profile-123", "nonexistent");
 
       // Assert
       expect(result).toBeNull();
@@ -306,7 +304,7 @@ describe("SupplierProductService", () => {
       });
 
       // Act
-      await service.deleteSupplierProduct("sp-1", "profile-123");
+      await service.deleteSupplierProduct(mockContext as any, "profile-123", "sp-1");
 
       // Assert
       expect(mockSupplierProductRepository.deleteByIdAndProfile).toHaveBeenCalled();
@@ -318,7 +316,7 @@ describe("SupplierProductService", () => {
 
       // Act & Assert
       await expect(
-        service.deleteSupplierProduct("nonexistent", "profile-123")
+        service.deleteSupplierProduct(mockContext as any, "profile-123", "nonexistent")
       ).rejects.toThrow("Asociación de proveedor-producto no encontrada");
     });
   });
@@ -336,7 +334,7 @@ describe("SupplierProductService", () => {
       (mockSupplierProductRepository.findPrimaryByProductIdAndProfile as jest.Mock).mockResolvedValue(mockPrimary);
 
       // Act
-      const result = await service.getPrimarySupplier("product-1", "profile-123");
+      const result = await service.getPrimarySupplier(mockContext as any, "profile-123", "product-1");
 
       // Assert
       expect(result).toBeDefined();
@@ -348,7 +346,7 @@ describe("SupplierProductService", () => {
       (mockSupplierProductRepository.findPrimaryByProductIdAndProfile as jest.Mock).mockResolvedValue(null);
 
       // Act
-      const result = await service.getPrimarySupplier("product-1", "profile-123");
+      const result = await service.getPrimarySupplier(mockContext as any, "profile-123", "product-1");
 
       // Assert
       expect(result).toBeNull();

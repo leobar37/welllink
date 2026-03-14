@@ -19,6 +19,12 @@ import { seedClientNotes } from "./seeders/client-notes.seeder";
 import { seedPaymentMethods } from "./seeders/payment-methods.seeder";
 import { seedBusinessTypes } from "./seeders/business-type.seeder";
 import { seedAutomationTemplates } from "./seeders/automation-template.seeder";
+// Inventory seeders
+import { seedSuppliers } from "./seeders/suppliers.seeder";
+import { seedProductCategories } from "./seeders/product-categories.seeder";
+import { seedProducts } from "./seeders/products.seeder";
+import { seedInventoryItems } from "./seeders/inventory-items.seeder";
+
 import { db } from "./index";
 import { user, profile, account, session, asset } from "./schema";
 import { eq, sql } from "drizzle-orm";
@@ -56,9 +62,18 @@ async function cleanupSeedData() {
   }
 
   // First drop profile table completely and recreate it
+  // Skip if tables already exist (handle partial migrations)
   try {
-    await db.execute(sql`DROP TABLE IF EXISTS profile CASCADE`);
-    console.log("  ✓ Dropped profile table");
+    // Check if profile table exists with correct schema
+    const existingProfile = await db.execute(
+      sql`SELECT column_name FROM information_schema.columns WHERE table_name = 'profile' AND column_name = 'clinic_name' LIMIT 1`
+    );
+    
+    if (existingProfile.length > 0) {
+      console.log("  ✓ Profile table already exists with correct schema, skipping recreation");
+    } else {
+      await db.execute(sql`DROP TABLE IF EXISTS profile CASCADE`);
+      console.log("  ✓ Dropped profile table");
 
     // Recreate profile table with all required columns
     await db.execute(sql`
@@ -109,6 +124,8 @@ async function cleanupSeedData() {
     );
 
     console.log("  ✓ Recreated profile table with all columns");
+
+    } // End of profile table recreation check
 
     // Drop and recreate social_link table (was dropped by CASCADE)
     try {
@@ -173,23 +190,33 @@ async function cleanupSeedData() {
     // Time Slot table: REMOVED - availability simplified, no pre-generated slots
 
     // Drop and recreate client table (was dropped by CASCADE)
+    // Skip if table already has the required columns
     try {
-      await db.execute(sql`DROP TABLE IF EXISTS client CASCADE`);
-      await db.execute(sql`
-        CREATE TABLE client (
-          id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-          profile_id uuid NOT NULL REFERENCES profile(id) ON DELETE CASCADE,
-          name varchar(255) NOT NULL,
-          phone varchar(20) NOT NULL,
-          email varchar(255),
-          label text NOT NULL DEFAULT 'consumidor',
-          notes text,
-          last_contact_at timestamp,
-          metadata jsonb DEFAULT '{}',
-          created_at timestamp NOT NULL DEFAULT now(),
-          updated_at timestamp NOT NULL DEFAULT now()
-        );
-      `);
+      const existingClient = await db.execute(
+        sql`SELECT column_name FROM information_schema.columns WHERE table_name = 'client' AND column_name = 'birthday' LIMIT 1`
+      );
+      
+      if (existingClient.length > 0) {
+        console.log("  ✓ Client table already has correct schema, skipping recreation");
+      } else {
+        await db.execute(sql`DROP TABLE IF EXISTS client CASCADE`);
+        await db.execute(sql`
+          CREATE TABLE client (
+            id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+            profile_id uuid NOT NULL REFERENCES profile(id) ON DELETE CASCADE,
+            name varchar(255) NOT NULL,
+            phone varchar(20) NOT NULL,
+            email varchar(255),
+            label text NOT NULL DEFAULT 'consumidor',
+            notes text,
+            birthday date,
+            registration_date timestamp,
+            last_contact_at timestamp,
+            metadata jsonb DEFAULT '{}',
+            created_at timestamp NOT NULL DEFAULT now(),
+            updated_at timestamp NOT NULL DEFAULT now()
+          );
+        `);
       await db.execute(
         sql`CREATE INDEX IF NOT EXISTS client_profile_id_idx ON client(profile_id)`,
       );
@@ -200,61 +227,77 @@ async function cleanupSeedData() {
         sql`CREATE INDEX IF NOT EXISTS client_label_idx ON client(label)`,
       );
       console.log("  ✓ Recreated client table with metadata column");
+
+      } // End of client table check
+
     } catch (error: any) {
       console.log(`  ℹ️  Client table cleanup: ${error.message || "skipped"}`);
     }
 
     // Drop and recreate reservation table (was dropped by CASCADE)
+    // Skip if table already has the required columns
     try {
-      await db.execute(sql`DROP TABLE IF EXISTS reservation CASCADE`);
-      await db.execute(sql`
-        CREATE TABLE reservation (
-          id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-          profile_id uuid NOT NULL REFERENCES profile(id) ON DELETE CASCADE,
-          service_id uuid NOT NULL REFERENCES medical_service(id) ON DELETE CASCADE,
-          request_id uuid REFERENCES reservation_request(id) ON DELETE SET NULL,
-          patient_name varchar(255) NOT NULL,
-          patient_phone varchar(50) NOT NULL,
-          patient_email varchar(255),
-          status varchar(50) DEFAULT 'confirmed',
-          source varchar(50) DEFAULT 'whatsapp',
-          notes text,
-          scheduled_at_utc timestamp NOT NULL,
-          scheduled_timezone varchar(64) NOT NULL DEFAULT 'America/Lima',
-          rescheduled_from uuid REFERENCES reservation(id) ON DELETE SET NULL,
-          reminder_24h_sent boolean DEFAULT false,
-          reminder_2h_sent boolean DEFAULT false,
-          reminder_24h_scheduled boolean DEFAULT false,
-          reminder_2h_scheduled boolean DEFAULT false,
-          completed_at timestamp,
-          no_show boolean DEFAULT false,
-          price_at_booking decimal(10, 2),
-          payment_status varchar(50) DEFAULT 'pending',
-          created_at timestamp NOT NULL DEFAULT now(),
-          updated_at timestamp NOT NULL DEFAULT now(),
-          cancelled_at timestamp,
-          metadata jsonb DEFAULT '{}'
+      const existingRes = await db.execute(
+        sql`SELECT column_name FROM information_schema.columns WHERE table_name = 'reservation' AND column_name = 'customer_name' LIMIT 1`
+      );
+      
+      if (existingRes.length > 0) {
+        console.log("  ✓ Reservation table already has correct schema, skipping recreation");
+      } else {
+        await db.execute(sql`DROP TABLE IF EXISTS reservation CASCADE`);
+        await db.execute(sql`
+          CREATE TABLE reservation (
+            id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+            profile_id uuid NOT NULL REFERENCES profile(id) ON DELETE CASCADE,
+            service_id uuid NOT NULL REFERENCES medical_service(id) ON DELETE CASCADE,
+            staff_id uuid,
+            request_id uuid REFERENCES reservation_request(id) ON DELETE SET NULL,
+            customer_name varchar(255) NOT NULL,
+            customer_phone varchar(50) NOT NULL,
+            customer_email varchar(255),
+            status varchar(50) DEFAULT 'confirmed',
+            source varchar(50) DEFAULT 'whatsapp',
+            notes text,
+            scheduled_at_utc timestamp NOT NULL,
+            scheduled_timezone varchar(64) NOT NULL DEFAULT 'America/Lima',
+            rescheduled_from uuid REFERENCES reservation(id) ON DELETE SET NULL,
+            reminder_24h_sent boolean DEFAULT false,
+            reminder_2h_sent boolean DEFAULT false,
+            reminder_24h_scheduled boolean DEFAULT false,
+            reminder_2h_scheduled boolean DEFAULT false,
+            completed_at timestamp,
+            no_show boolean DEFAULT false,
+            price_at_booking decimal(10, 2),
+            payment_status varchar(50) DEFAULT 'pending',
+            created_at timestamp NOT NULL DEFAULT now(),
+            updated_at timestamp NOT NULL DEFAULT now(),
+            cancelled_at timestamp,
+            metadata jsonb DEFAULT '{}'
+          );
+        `);
+        await db.execute(
+          sql`CREATE INDEX IF NOT EXISTS idx_reservation_profile_id ON reservation(profile_id)`,
         );
-      `);
-      await db.execute(
-        sql`CREATE INDEX IF NOT EXISTS idx_reservation_profile_id ON reservation(profile_id)`,
-      );
-      await db.execute(
-        sql`CREATE INDEX IF NOT EXISTS idx_reservation_status ON reservation(status)`,
-      );
-      await db.execute(
-        sql`CREATE INDEX IF NOT EXISTS idx_reservation_patient_phone ON reservation(patient_phone)`,
-      );
-      await db.execute(
-        sql`CREATE INDEX IF NOT EXISTS idx_reservation_created ON reservation(created_at)`,
-      );
-      await db.execute(
-        sql`CREATE INDEX IF NOT EXISTS idx_reservation_scheduled_at_utc ON reservation(scheduled_at_utc)`,
-      );
-      await db.execute(
-        sql`ALTER TABLE reservation ADD CONSTRAINT fk_reservation_rescheduled_from FOREIGN KEY (rescheduled_from) REFERENCES reservation(id) ON DELETE SET NULL`,
-      );
-      console.log("  ✓ Recreated reservation table with metadata column");
+        await db.execute(
+          sql`CREATE INDEX IF NOT EXISTS idx_reservation_status ON reservation(status)`,
+        );
+        await db.execute(
+          sql`CREATE INDEX IF NOT EXISTS idx_reservation_patient_phone ON reservation(customer_phone)`,
+        );
+        await db.execute(
+          sql`CREATE INDEX IF NOT EXISTS idx_reservation_created ON reservation(created_at)`,
+        );
+        await db.execute(
+          sql`CREATE INDEX IF NOT EXISTS idx_reservation_scheduled_at_utc ON reservation(scheduled_at_utc)`,
+        );
+        await db.execute(
+          sql`ALTER TABLE reservation ADD CONSTRAINT fk_reservation_rescheduled_from FOREIGN KEY (rescheduled_from) REFERENCES reservation(id) ON DELETE SET NULL`,
+        );
+        await db.execute(
+          sql`ALTER TABLE reservation ADD CONSTRAINT fk_reservation_staff FOREIGN KEY (staff_id) REFERENCES staff(id) ON DELETE SET NULL`,
+        );
+        console.log("  ✓ Recreated reservation table with all columns");
+      }
     } catch (error: any) {
       console.log(
         `  ℹ️  Reservation table cleanup: ${error.message || "skipped"}`,
@@ -299,7 +342,15 @@ async function runMigrations() {
   const migrationsDir = join(__dirname, "migrations");
 
   const migrationFiles = [
-    "0000_regular_nico_minoru.sql", // Migración inicial fresca - todas las tablas
+    "0000_regular_nico_minoru.sql",
+    "0001_medical_freak.sql",
+    "0002_service_product.sql",
+    "0003_low_stock_alert_sent.sql",
+    "0004_automation_engine.sql",
+    "0005_business_type.sql",
+    "0006_automation_template.sql",
+    "0007_staff_management.sql",
+    "0008_reservation_staff_id.sql",
   ];
 
   for (const file of migrationFiles) {
@@ -388,6 +439,12 @@ async function seed() {
     // 15. Analytics (depends on profiles and social links)
     await seedAnalytics();
 
+    // 16. Inventory (depends on profiles, suppliers, categories, products)
+    await seedSuppliers();
+    await seedProductCategories();
+    await seedProducts();
+    await seedInventoryItems();
+
     console.log("\n🎉 Database seeding completed successfully!\n");
     console.log("📊 Summary:");
     console.log("  - 2 users created (individual + clinic)");
@@ -413,7 +470,11 @@ async function seed() {
     console.log("  - 3 campaigns created");
     console.log("  - 35+ profile views created");
     console.log("  - 40+ social clicks created");
-    console.log("  - 5 QR downloads created\n");
+    console.log("  - 5 QR downloads created");
+    console.log("  - 6 suppliers created (3 per profile)");
+    console.log("  - 10 product categories created (5 per profile)");
+    console.log("  - 16 products created (8 per profile)");
+    console.log("  - 16 inventory items created (8 per profile)\n");
     console.log("🔐 Login credentials:");
     console.log("  📱 Individual: test@wellness.com / test123456");
     console.log("  🏥 Clinic: clinic@wellness.com / test123456\n");

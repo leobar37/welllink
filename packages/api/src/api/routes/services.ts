@@ -32,9 +32,7 @@ export const serviceRoutes = new Elysia({ prefix: "/services" })
         throw new Error("profileId is required");
       }
 
-      return await serviceBusinessService.getServicesByProfile(
-        profileId,
-      );
+      return await serviceBusinessService.getServicesByProfile(profileId);
     },
     {
       query: t.Object({
@@ -109,14 +107,17 @@ export const serviceRoutes = new Elysia({ prefix: "/services" })
   // ========================================
   // SERVICE-PRODUCT ASSOCIATIONS
   // ========================================
-  
+
   // Get products for a service
-  .get("/:serviceId/products", async ({ params, query, services, ctx }) => {
+  .get("/:id/products", async ({ params, query, services, ctx }) => {
     const profileId = query.profileId as string;
     let targetProfileId: string;
-    
+
     if (!profileId) {
-      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+      const profiles = await services.profileRepository.findByUser(
+        ctx!,
+        ctx!.userId,
+      );
       if (profiles.length === 0) {
         return [];
       }
@@ -124,28 +125,36 @@ export const serviceRoutes = new Elysia({ prefix: "/services" })
     } else {
       targetProfileId = profileId;
     }
-    
+
     return services.serviceProductService.getProductsByService(
       ctx!,
       targetProfileId,
-      params.serviceId,
+      params.id,
       {
         limit: query.limit ? parseInt(query.limit as string) : undefined,
         offset: query.offset ? parseInt(query.offset as string) : undefined,
-        isActive: query.isActive === "true" ? true : query.isActive === "false" ? false : undefined,
-      }
+        isActive:
+          query.isActive === "true"
+            ? true
+            : query.isActive === "false"
+              ? false
+              : undefined,
+      },
     );
   })
-  
+
   // Add product to service
   .post(
-    "/:serviceId/products",
+    "/:id/products",
     async ({ params, body, set, services, ctx }) => {
       const profileId = body.profileId as string;
       let targetProfileId: string;
-      
+
       if (!profileId) {
-        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        const profiles = await services.profileRepository.findByUser(
+          ctx!,
+          ctx!.userId,
+        );
         if (profiles.length === 0) {
           throw new Error("Perfil no encontrado");
         }
@@ -153,19 +162,20 @@ export const serviceRoutes = new Elysia({ prefix: "/services" })
       } else {
         targetProfileId = profileId;
       }
-      
-      const serviceProduct = await services.serviceProductService.createServiceProduct(
-        ctx!,
-        targetProfileId,
-        {
-          serviceId: params.serviceId,
-          productId: body.productId,
-          quantityRequired: body.quantityRequired,
-          isRequired: body.isRequired,
-          notes: body.notes,
-        }
-      );
-      
+
+      const serviceProduct =
+        await services.serviceProductService.createServiceProduct(
+          ctx!,
+          targetProfileId,
+          {
+            serviceId: params.id,
+            productId: body.productId,
+            quantityRequired: body.quantityRequired,
+            isRequired: body.isRequired,
+            notes: body.notes,
+          },
+        );
+
       set.status = 201;
       return serviceProduct;
     },
@@ -179,16 +189,19 @@ export const serviceRoutes = new Elysia({ prefix: "/services" })
       }),
     },
   )
-  
+
   // Replace all products for a service
   .put(
-    "/:serviceId/products",
+    "/:id/products",
     async ({ params, body, set, services, ctx }) => {
       const profileId = body.profileId as string;
       let targetProfileId: string;
-      
+
       if (!profileId) {
-        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        const profiles = await services.profileRepository.findByUser(
+          ctx!,
+          ctx!.userId,
+        );
         if (profiles.length === 0) {
           throw new Error("Perfil no encontrado");
         }
@@ -196,37 +209,43 @@ export const serviceRoutes = new Elysia({ prefix: "/services" })
       } else {
         targetProfileId = profileId;
       }
-      
-      const serviceProducts = await services.serviceProductService.replaceProductsForService(
-        ctx!,
-        targetProfileId,
-        params.serviceId,
-        body.products
-      );
-      
+
+      const serviceProducts =
+        await services.serviceProductService.replaceProductsForService(
+          ctx!,
+          targetProfileId,
+          params.id,
+          body.products,
+        );
+
       set.status = 200;
       return serviceProducts;
     },
     {
       body: t.Object({
         profileId: t.Optional(t.String()),
-        products: t.Array(t.Object({
-          productId: t.String({ minLength: 1 }),
-          quantityRequired: t.Optional(t.Number({ minimum: 1 })),
-          isRequired: t.Optional(t.Boolean()),
-          notes: t.Optional(t.String()),
-        })),
+        products: t.Array(
+          t.Object({
+            productId: t.String({ minLength: 1 }),
+            quantityRequired: t.Optional(t.Number({ minimum: 1 })),
+            isRequired: t.Optional(t.Boolean()),
+            notes: t.Optional(t.String()),
+          }),
+        ),
       }),
     },
   )
-  
+
   // Get single service-product association
   .get("/products/:id", async ({ params, query, services, ctx }) => {
     const profileId = query.profileId as string;
     let targetProfileId: string;
-    
+
     if (!profileId) {
-      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+      const profiles = await services.profileRepository.findByUser(
+        ctx!,
+        ctx!.userId,
+      );
       if (profiles.length === 0) {
         throw new Error("Perfil no encontrado");
       }
@@ -234,29 +253,33 @@ export const serviceRoutes = new Elysia({ prefix: "/services" })
     } else {
       targetProfileId = profileId;
     }
-    
-    const serviceProduct = await services.serviceProductService.getServiceProduct(
-      ctx!,
-      targetProfileId,
-      params.id
-    );
-    
+
+    const serviceProduct =
+      await services.serviceProductService.getServiceProduct(
+        ctx!,
+        targetProfileId,
+        params.id,
+      );
+
     if (!serviceProduct) {
       throw new Error("Asociación de servicio-producto no encontrada");
     }
-    
+
     return serviceProduct;
   })
-  
+
   // Update service-product association
   .put(
     "/products/:id",
     async ({ params, body, query, services, ctx }) => {
       const profileId = query.profileId as string;
       let targetProfileId: string;
-      
+
       if (!profileId) {
-        const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+        const profiles = await services.profileRepository.findByUser(
+          ctx!,
+          ctx!.userId,
+        );
         if (profiles.length === 0) {
           throw new Error("Perfil no encontrado");
         }
@@ -264,12 +287,12 @@ export const serviceRoutes = new Elysia({ prefix: "/services" })
       } else {
         targetProfileId = profileId;
       }
-      
+
       return services.serviceProductService.updateServiceProduct(
         ctx!,
         targetProfileId,
         params.id,
-        body
+        body,
       );
     },
     {
@@ -281,14 +304,17 @@ export const serviceRoutes = new Elysia({ prefix: "/services" })
       }),
     },
   )
-  
+
   // Delete service-product association
   .delete("/products/:id", async ({ params, query, services, ctx, set }) => {
     const profileId = query.profileId as string;
     let targetProfileId: string;
-    
+
     if (!profileId) {
-      const profiles = await services.profileRepository.findByUser(ctx!, ctx!.userId);
+      const profiles = await services.profileRepository.findByUser(
+        ctx!,
+        ctx!.userId,
+      );
       if (profiles.length === 0) {
         throw new Error("Perfil no encontrado");
       }
@@ -296,11 +322,11 @@ export const serviceRoutes = new Elysia({ prefix: "/services" })
     } else {
       targetProfileId = profileId;
     }
-    
+
     await services.serviceProductService.deleteServiceProduct(
       ctx!,
       targetProfileId,
-      params.id
+      params.id,
     );
     set.status = 204;
   });

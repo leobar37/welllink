@@ -22,7 +22,7 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
       staffRepository,
       staffServiceRepo,
       staffAvailabilityRepo,
-      profileRepository
+      profileRepository,
     );
 
     return {
@@ -45,14 +45,15 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
 
       return staffService.getActiveStaffByProfile(
         { userId: "" } as any, // Will be set by auth context
-        query.profileId as string | undefined
+        query.profileId as string | undefined,
       );
     },
     {
       detail: {
         tags: ["Staff"],
         summary: "Listar personal",
-        description: "Obtiene una lista de miembros del personal activos para un perfil de negocio.",
+        description:
+          "Obtiene una lista de miembros del personal activos para un perfil de negocio.",
         security: [{ bearerAuth: [] }],
         responses: {
           "200": { description: "Lista de personal" },
@@ -61,7 +62,7 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
       query: t.Object({
         profileId: t.Optional(t.String()),
       }),
-    }
+    },
   )
 
   // Get staff with all relations
@@ -75,7 +76,7 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
 
       const staff = await staffService.getActiveStaffByProfile(
         { userId: "" } as any,
-        query.profileId as string | undefined
+        query.profileId as string | undefined,
       );
 
       // Add services and availability to each staff member
@@ -84,19 +85,19 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
           const services = await staffService.getStaffServices(
             { userId: "" } as any,
             s.id,
-            query.profileId as string | undefined
+            query.profileId as string | undefined,
           );
           const availabilities = await staffService.getAvailability(
             { userId: "" } as any,
             s.id,
-            query.profileId as string | undefined
+            query.profileId as string | undefined,
           );
           return {
             ...s,
             services,
             availabilities,
           };
-        })
+        }),
       );
 
       return staffWithRelations;
@@ -105,7 +106,8 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
       detail: {
         tags: ["Staff"],
         summary: "Listar personal con relaciones",
-        description: "Obtiene una lista de miembros del personal con sus servicios asignados y disponibilidad.",
+        description:
+          "Obtiene una lista de miembros del personal con sus servicios asignados y disponibilidad.",
         security: [{ bearerAuth: [] }],
         responses: {
           "200": { description: "Lista de personal con relaciones" },
@@ -114,7 +116,7 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
       query: t.Object({
         profileId: t.Optional(t.String()),
       }),
-    }
+    },
   )
 
   // Get single staff member
@@ -129,7 +131,7 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
       const staff = await staffService.getStaffWithRelations(
         { userId: "" } as any,
         params.id,
-        query.profileId as string | undefined
+        query.profileId as string | undefined,
       );
 
       if (!staff) {
@@ -142,7 +144,8 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
       detail: {
         tags: ["Staff"],
         summary: "Obtener miembro del personal por ID",
-        description: "Obtiene los detalles de un miembro del personal específico con sus servicios y disponibilidad.",
+        description:
+          "Obtiene los detalles de un miembro del personal específico con sus servicios y disponibilidad.",
         security: [{ bearerAuth: [] }],
         responses: {
           "200": { description: "Miembro del personal encontrado" },
@@ -155,7 +158,7 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
       query: t.Object({
         profileId: t.Optional(t.String()),
       }),
-    }
+    },
   )
 
   // Create staff member
@@ -177,7 +180,7 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
           role: body.role,
           avatarId: body.avatarId,
           metadata: body.metadata,
-        }
+        },
       );
 
       set.status = 201;
@@ -187,7 +190,8 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
       detail: {
         tags: ["Staff"],
         summary: "Crear miembro del personal",
-        description: "Crea un nuevo miembro del personal con nombre, email, teléfono y rol.",
+        description:
+          "Crea un nuevo miembro del personal con nombre, email, teléfono y rol.",
         security: [{ bearerAuth: [] }],
         responses: {
           "201": { description: "Personal creado exitosamente" },
@@ -200,15 +204,17 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
         name: t.String({ minLength: 1 }),
         email: t.Optional(t.String()),
         phone: t.Optional(t.String()),
-        role: t.Optional(t.Union([
-          t.Literal("admin"),
-          t.Literal("manager"),
-          t.Literal("staff"),
-        ])),
+        role: t.Optional(
+          t.Union([
+            t.Literal("admin"),
+            t.Literal("manager"),
+            t.Literal("staff"),
+          ]),
+        ),
         avatarId: t.Optional(t.String()),
         metadata: t.Optional(t.Record(t.String(), t.Any())),
       }),
-    }
+    },
   )
 
   // Update staff member
@@ -232,7 +238,7 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
           avatarId: body.avatarId,
           isActive: body.isActive,
           metadata: body.metadata,
-        }
+        },
       );
     },
     {
@@ -244,16 +250,18 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
         name: t.Optional(t.String({ minLength: 1 })),
         email: t.Optional(t.String()),
         phone: t.Optional(t.String()),
-        role: t.Optional(t.Union([
-          t.Literal("admin"),
-          t.Literal("manager"),
-          t.Literal("staff"),
-        ])),
+        role: t.Optional(
+          t.Union([
+            t.Literal("admin"),
+            t.Literal("manager"),
+            t.Literal("staff"),
+          ]),
+        ),
         avatarId: t.Optional(t.String()),
         isActive: t.Optional(t.Boolean()),
         metadata: t.Optional(t.Record(t.String(), t.Any())),
       }),
-    }
+    },
   )
 
   // Delete (soft delete) staff member
@@ -268,7 +276,7 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
       await staffService.deleteStaff(
         { userId: "" } as any,
         params.id,
-        query.profileId as string | undefined
+        query.profileId as string | undefined,
       );
 
       set.status = 204;
@@ -277,7 +285,8 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
       detail: {
         tags: ["Staff"],
         summary: "Eliminar miembro del personal",
-        description: "Elimina un miembro del personal mediante soft delete (marcado como inactivo).",
+        description:
+          "Elimina un miembro del personal mediante soft delete (marcado como inactivo).",
         security: [{ bearerAuth: [] }],
         responses: {
           "204": { description: "Personal eliminado" },
@@ -291,7 +300,7 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
       query: t.Object({
         profileId: t.Optional(t.String()),
       }),
-    }
+    },
   )
 
   // ========================================
@@ -300,7 +309,7 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
 
   // Get services assigned to a staff member
   .get(
-    "/:staffId/services",
+    "/:id/services",
     async ({ params, query, staffService, rbac }) => {
       // Require read permission
       if (!rbac.hasPermission("staff:read")) {
@@ -309,23 +318,23 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
 
       return staffService.getStaffServices(
         { userId: "" } as any,
-        params.staffId,
-        query.profileId as string | undefined
+        params.id,
+        query.profileId as string | undefined,
       );
     },
     {
       params: t.Object({
-        staffId: t.String(),
+        id: t.String(),
       }),
       query: t.Object({
         profileId: t.Optional(t.String()),
       }),
-    }
+    },
   )
 
   // Assign a service to a staff member
   .post(
-    "/:staffId/services",
+    "/:id/services",
     async ({ params, body, set, staffService, rbac }) => {
       // Require service assign permission
       if (!rbac.hasPermission("service:assign")) {
@@ -334,9 +343,9 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
 
       await staffService.assignService(
         { userId: "" } as any,
-        params.staffId,
+        params.id,
         body.serviceId,
-        body.profileId as string | undefined
+        body.profileId as string | undefined,
       );
 
       set.status = 201;
@@ -344,47 +353,49 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
     },
     {
       params: t.Object({
-        staffId: t.String(),
+        id: t.String(),
       }),
       body: t.Object({
         profileId: t.Optional(t.String()),
         serviceId: t.String({ minLength: 1 }),
       }),
-    }
+    },
   )
 
   // Remove a service from a staff member
   .delete(
-    "/:staffId/services/:serviceId",
+    "/:id/services/:serviceId",
     async ({ params, query, set, staffService, rbac }) => {
       // Require service assign permission
       if (!rbac.hasPermission("service:assign")) {
-        throw new Error("No tienes permiso para eliminar asignaciones de servicios");
+        throw new Error(
+          "No tienes permiso para eliminar asignaciones de servicios",
+        );
       }
 
       await staffService.removeService(
         { userId: "" } as any,
-        params.staffId,
+        params.id,
         params.serviceId,
-        query.profileId as string | undefined
+        query.profileId as string | undefined,
       );
 
       set.status = 204;
     },
     {
       params: t.Object({
-        staffId: t.String(),
+        id: t.String(),
         serviceId: t.String(),
       }),
       query: t.Object({
         profileId: t.Optional(t.String()),
       }),
-    }
+    },
   )
 
   // Replace all services for a staff member
   .put(
-    "/:staffId/services",
+    "/:id/services",
     async ({ params, body, set, staffService, rbac }) => {
       // Require service assign permission
       if (!rbac.hasPermission("service:assign")) {
@@ -393,9 +404,9 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
 
       await staffService.replaceStaffServices(
         { userId: "" } as any,
-        params.staffId,
+        params.id,
         body.serviceIds,
-        body.profileId as string | undefined
+        body.profileId as string | undefined,
       );
 
       set.status = 200;
@@ -403,13 +414,13 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
     },
     {
       params: t.Object({
-        staffId: t.String(),
+        id: t.String(),
       }),
       body: t.Object({
         profileId: t.Optional(t.String()),
         serviceIds: t.Array(t.String({ minLength: 1 })),
       }),
-    }
+    },
   )
 
   // ========================================
@@ -418,7 +429,7 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
 
   // Get availability for a staff member
   .get(
-    "/:staffId/availability",
+    "/:id/availability",
     async ({ params, query, staffService, rbac }) => {
       // Require read permission
       if (!rbac.hasPermission("staff:read")) {
@@ -427,23 +438,23 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
 
       return staffService.getAvailability(
         { userId: "" } as any,
-        params.staffId,
-        query.profileId as string | undefined
+        params.id,
+        query.profileId as string | undefined,
       );
     },
     {
       params: t.Object({
-        staffId: t.String(),
+        id: t.String(),
       }),
       query: t.Object({
         profileId: t.Optional(t.String()),
       }),
-    }
+    },
   )
 
   // Set availability for a staff member (single day)
   .post(
-    "/:staffId/availability",
+    "/:id/availability",
     async ({ params, body, set, staffService, rbac }) => {
       // Require availability manage permission
       if (!rbac.hasPermission("availability:manage")) {
@@ -452,7 +463,7 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
 
       await staffService.setAvailability(
         { userId: "" } as any,
-        params.staffId,
+        params.id,
         {
           dayOfWeek: body.dayOfWeek,
           startTime: body.startTime,
@@ -460,7 +471,7 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
           breaks: body.breaks,
           isAvailable: body.isAvailable,
         },
-        body.profileId as string | undefined
+        body.profileId as string | undefined,
       );
 
       set.status = 201;
@@ -468,25 +479,29 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
     },
     {
       params: t.Object({
-        staffId: t.String(),
+        id: t.String(),
       }),
       body: t.Object({
         profileId: t.Optional(t.String()),
         dayOfWeek: t.Number({ minimum: 1, maximum: 7 }),
         startTime: t.String({ minLength: 5, maxLength: 5 }),
         endTime: t.String({ minLength: 5, maxLength: 5 }),
-        breaks: t.Optional(t.Array(t.Object({
-          start: t.String({ minLength: 5, maxLength: 5 }),
-          end: t.String({ minLength: 5, maxLength: 5 }),
-        }))),
+        breaks: t.Optional(
+          t.Array(
+            t.Object({
+              start: t.String({ minLength: 5, maxLength: 5 }),
+              end: t.String({ minLength: 5, maxLength: 5 }),
+            }),
+          ),
+        ),
         isAvailable: t.Optional(t.Boolean()),
       }),
-    }
+    },
   )
 
   // Set multiple availabilities for a staff member
   .put(
-    "/:staffId/availability",
+    "/:id/availability",
     async ({ params, body, set, staffService, rbac }) => {
       // Require availability manage permission
       if (!rbac.hasPermission("availability:manage")) {
@@ -495,9 +510,9 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
 
       await staffService.setAvailabilities(
         { userId: "" } as any,
-        params.staffId,
+        params.id,
         body.availabilities,
-        body.profileId as string | undefined
+        body.profileId as string | undefined,
       );
 
       set.status = 200;
@@ -505,27 +520,33 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
     },
     {
       params: t.Object({
-        staffId: t.String(),
+        id: t.String(),
       }),
       body: t.Object({
         profileId: t.Optional(t.String()),
-        availabilities: t.Array(t.Object({
-          dayOfWeek: t.Number({ minimum: 1, maximum: 7 }),
-          startTime: t.String({ minLength: 5, maxLength: 5 }),
-          endTime: t.String({ minLength: 5, maxLength: 5 }),
-          breaks: t.Optional(t.Array(t.Object({
-            start: t.String({ minLength: 5, maxLength: 5 }),
-            end: t.String({ minLength: 5, maxLength: 5 }),
-          }))),
-          isAvailable: t.Optional(t.Boolean()),
-        })),
+        availabilities: t.Array(
+          t.Object({
+            dayOfWeek: t.Number({ minimum: 1, maximum: 7 }),
+            startTime: t.String({ minLength: 5, maxLength: 5 }),
+            endTime: t.String({ minLength: 5, maxLength: 5 }),
+            breaks: t.Optional(
+              t.Array(
+                t.Object({
+                  start: t.String({ minLength: 5, maxLength: 5 }),
+                  end: t.String({ minLength: 5, maxLength: 5 }),
+                }),
+              ),
+            ),
+            isAvailable: t.Optional(t.Boolean()),
+          }),
+        ),
       }),
-    }
+    },
   )
 
   // Delete availability for a staff member
   .delete(
-    "/:staffId/availability/:availabilityId",
+    "/:id/availability/:availabilityId",
     async ({ params, query, set, staffService, rbac }) => {
       // Require availability manage permission
       if (!rbac.hasPermission("availability:manage")) {
@@ -534,20 +555,20 @@ export const staffRoutes = new Elysia({ prefix: "/staff" })
 
       await staffService.deleteAvailability(
         { userId: "" } as any,
-        params.staffId,
+        params.id,
         params.availabilityId,
-        query.profileId as string | undefined
+        query.profileId as string | undefined,
       );
 
       set.status = 204;
     },
     {
       params: t.Object({
-        staffId: t.String(),
+        id: t.String(),
         availabilityId: t.String(),
       }),
       query: t.Object({
         profileId: t.Optional(t.String()),
       }),
-    }
+    },
   );

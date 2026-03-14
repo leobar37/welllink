@@ -22,19 +22,20 @@ const mockProductRepository: Partial<ProductRepository> = {
 };
 
 const mockInventoryRepository: Partial<InventoryRepository> = {
-  findById: jest.fn(),
+  findItemById: jest.fn(),
   findByProductId: jest.fn(),
-  findByProductIdAndLocation: jest.fn(),
-  create: jest.fn(),
-  update: jest.fn(),
+  findByProductIdDirect: jest.fn(),
+  findByProfileId: jest.fn(),
+  getStock: jest.fn(),
+  getStockDirect: jest.fn(),
   adjustStock: jest.fn(),
   adjustStockDirect: jest.fn(),
-  getTotalValue: jest.fn(),
-  getLowStock: jest.fn(),
-  getByProfileId: jest.fn(),
-  getMovementHistory: jest.fn(),
+  getMovements: jest.fn(),
+  getAllMovements: jest.fn(),
+  getLowStockItems: jest.fn(),
   getLowStockItemsWithProduct: jest.fn(),
-  getStockDirect: jest.fn(),
+  getOrCreateInventoryItem: jest.fn(),
+  getInventoryValue: jest.fn(),
 };
 
 const mockContext = {
