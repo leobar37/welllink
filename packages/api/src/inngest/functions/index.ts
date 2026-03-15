@@ -7,6 +7,10 @@ export * from "./doctor-notifications";
 // slot-generation: REMOVED - availability simplified, no pre-generated slots
 export * from "./follow-up";
 export * from "./reservation-confirmation";
+export * from "./reservation-completed";
+export * from "./low-stock-alert";
+export * from "./execute-automation";
+export * from "./advanced-triggers";
 
 import { expirePendingRequests } from "./request-expiration";
 import { send24HourReminder, send2HourReminder } from "./reminders";
@@ -20,6 +24,27 @@ import {
   handleReservationApproved,
   handleReservationCancelled,
 } from "./reservation-confirmation";
+import { handleReservationCompleted } from "./reservation-completed";
+import { checkLowStock, testLowStockAlert } from "./low-stock-alert";
+import { 
+  executeAutomation, 
+  runScheduledAutomations, 
+  retryAutomationExecution 
+} from "./execute-automation";
+// Advanced triggers
+import {
+  checkBirthdayTriggers,
+  checkInactivityTriggers,
+  checkAnniversaryTriggers,
+  checkLowStockTriggers,
+  handleNoShowTrigger,
+  testBirthdayTriggers,
+  testInactivityTriggers,
+  testAnniversaryTriggers,
+  testLowStockTriggers,
+  checkNoShowReservations,
+  testNoShowCheck,
+} from "./advanced-triggers";
 
 export const functions = [
   expirePendingRequests,
@@ -31,4 +56,23 @@ export const functions = [
   sendFollowUpMessage,
   handleReservationApproved,
   handleReservationCancelled,
+  handleReservationCompleted,
+  checkLowStock,
+  testLowStockAlert,
+  // Automation functions
+  executeAutomation,
+  runScheduledAutomations,
+  retryAutomationExecution,
+  // Advanced trigger functions
+  checkBirthdayTriggers,
+  checkInactivityTriggers,
+  checkAnniversaryTriggers,
+  checkLowStockTriggers,
+  handleNoShowTrigger,
+  testBirthdayTriggers,
+  testInactivityTriggers,
+  testAnniversaryTriggers,
+  testLowStockTriggers,
+  checkNoShowReservations,
+  testNoShowCheck,
 ];

@@ -2,14 +2,12 @@ import { format } from "date-fns";
 import { ProfileRepository } from "../repository/profile";
 import { ClientRepository } from "../repository/client";
 import type { RequestContext } from "../../types/context";
+import {
+  SYSTEM_VARIABLES,
+  ALL_SUPPORTED_VARIABLES,
+} from "../../constants/template-variables";
 
-export const TEMPLATE_VARIABLES = {
-  NOMBRE_CLIENTE: "{nombre_cliente}",
-  NOMBRE_ASESOR: "{nombre_asesor}",
-  TELEFONO: "{telefono}",
-  FECHA_ACTUAL: "{fecha_actual}",
-  HORA_ACTUAL: "{hora_actual}",
-} as const;
+export const TEMPLATE_VARIABLES = SYSTEM_VARIABLES;
 
 export type TemplateVariable =
   (typeof TEMPLATE_VARIABLES)[keyof typeof TEMPLATE_VARIABLES];
@@ -68,9 +66,8 @@ export class TemplateVariablesService {
     invalidVariables: string[];
   } {
     const extracted = this.extractVariables(template);
-    const validVariables = Object.values(TEMPLATE_VARIABLES);
     const invalidVariables = extracted.filter(
-      (v) => !validVariables.includes(v as TemplateVariable),
+      (v) => !ALL_SUPPORTED_VARIABLES.includes(v as TemplateVariable),
     );
 
     return {
@@ -133,11 +130,17 @@ export class TemplateVariablesService {
     variableMap: Record<string, string>,
     context: RequestContext,
   ): Promise<void> {
-    const profiles = await this.profileRepository.findByUser(context, context.userId);
+    const profiles = await this.profileRepository.findByUser(
+      context,
+      context.userId,
+    );
     if (profiles.length === 0) return;
 
-    const profile = profiles[0]; // Use the first profile
-    variableMap[TEMPLATE_VARIABLES.NOMBRE_ASESOR] = profile.displayName;
+    const profile = profiles[0];
+    const advisorName = profile.displayName;
+
+    variableMap[TEMPLATE_VARIABLES.NOMBRE_ASESOR] = advisorName;
+    variableMap[TEMPLATE_VARIABLES.NOMBRE] = advisorName;
   }
 
   /**

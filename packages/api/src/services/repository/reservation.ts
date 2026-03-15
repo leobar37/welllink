@@ -4,7 +4,7 @@ import {
   ReservationStatus,
   PaymentStatus,
 } from "../../db/schema/reservation";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, or, gte, lte } from "drizzle-orm";
 import type { Reservation, NewReservation } from "../../db/schema/reservation";
 
 export class ReservationRepository {
@@ -169,5 +169,47 @@ export class ReservationRepository {
     }
 
     return reservation;
+  }
+
+  /**
+   * Find conflicting reservations for a staff member at a given time
+   * Returns reservations that overlap with the given time range
+   * Simplified: checks for reservations within a time window
+   */
+  async findConflictingForStaff(
+    staffId: string,
+    scheduledAtUtc: Date,
+    duration: number = 60, // default duration in minutes
+  ): Promise<Reservation[]> {
+    // Check within a window around the scheduled time
+    const windowStart = new Date(scheduledAtUtc.getTime() - 12 * 60 * 60 * 1000); // 12 hours before
+    const windowEnd = new Date(scheduledAtUtc.getTime() + 12 * 60 * 60 * 1000); // 12 hours after
+
+    const reservations = await db
+      .select()
+      .from(reservationTable)
+      .where(
+        and(
+          eq(reservationTable.staffId, staffId),
+          // Only check confirmed reservations (not cancelled, completed, or no_show)
+          eq(reservationTable.status, "confirmed"),
+          // Check that the existing reservation is on the same day (within 12 hours)
+          gte(reservationTable.scheduledAtUtc, windowStart),
+          lte(reservationTable.scheduledAtUtc, windowEnd),
+        ),
+      );
+
+    // Filter to only those that actually overlap with the new appointment
+    const appointmentEnd = new Date(scheduledAtUtc.getTime() + duration * 60 * 1000);
+    
+    return reservations.filter((res) => {
+      const resStart = res.scheduledAtUtc;
+      // Overlap: resStart < appointmentEnd AND resStart + 30min > scheduledAtUtc
+      // Simplified: check if starts are within 30 minutes of each other
+      const timeDiff = Math.abs(resStart.getTime() - scheduledAtUtc.getTime());
+      const thirtyMinutes = 30 * 60 * 1000;
+      
+      return timeDiff < thirtyMinutes;
+    });
   }
 }

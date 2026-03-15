@@ -155,6 +155,7 @@ export const reservationRoutes = new Elysia({ prefix: "/reservations" })
         scheduledDate: t.String(),
         scheduledTime: t.String(),
         timezone: t.String(),
+        staffId: t.Optional(t.String()),
         notes: t.Optional(t.String()),
       }),
     },

@@ -1,0 +1,15 @@
+{
+  "featureId": "m5-3-fix-evolution-service-di",
+  "reviewedAt": "2026-03-08T10:30:00.000Z",
+  "commitId": "7860b13",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The fix correctly replaces all direct `new EvolutionService()` instantiations with the imported singleton from `./types`. In advanced-triggers.ts, removed the unnecessary `getEvolutionServiceInstance()` helper function. In execute-automation.ts, removed 3 direct instantiations. The EvolutionService class import is correctly retained in execute-automation.ts for type annotations in function parameters.",
+    "issues": []
+  },
+  "sharedStateObservations": [],
+  "addressesFailureFrom": null,
+  "summary": "The implementation correctly fixes the EvolutionService dependency injection issue. All direct `new EvolutionService()` calls were replaced with the imported singleton `evolutionService` from `./types`, following the existing pattern in other Inngest functions. TypeScript compiles without errors. The worker followed the correct procedure and verification steps passed."
+}

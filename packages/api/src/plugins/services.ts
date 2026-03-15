@@ -50,6 +50,50 @@ import { NotificationService } from "../services/business/notification";
 import { PaymentMethodService } from "../services/business/payment-method";
 import { AvailabilityValidationService } from "../services/business/availability-validation";
 
+// NEW INVENTORY REPOSITORIES
+import { ProductRepository } from "../services/repository/product";
+import { InventoryRepository } from "../services/repository/inventory";
+import { SupplierRepository } from "../services/repository/supplier";
+import { ProductCategoryRepository } from "../services/repository/product-category";
+import { SupplierProductRepository } from "../services/repository/supplier-product";
+import { PurchaseOrderRepository } from "../services/repository/purchase-order";
+import { ReportRepository } from "../services/repository/report";
+import { ServiceProductRepository } from "../services/repository/service-product";
+import { ServiceRepository } from "../services/repository/service";
+import { StaffRepository } from "../services/repository/staff";
+import { StaffServiceRepository } from "../services/repository/staff-service";
+import { StaffAvailabilityRepository } from "../services/repository/staff-availability";
+
+// NEW INVENTORY SERVICES
+import { ProductService } from "../services/business/product";
+import { InventoryService } from "../services/business/inventory";
+import { SupplierProductService } from "../services/business/supplier-product";
+import { PurchaseOrderService } from "../services/business/purchase-order";
+import { ServiceProductService } from "../services/business/service-product";
+import { ReportService } from "../services/business/report";
+import { ProductCategoryService } from "../services/business/product-category";
+
+// NEW AUTOMATION IMPORTS
+import { AutomationRepository } from "../services/repository/automation";
+import { AutomationTriggerRepository } from "../services/repository/automation-trigger";
+import { AutomationActionRepository } from "../services/repository/automation-action";
+import { AutomationExecutionLogRepository } from "../services/repository/automation-execution-log";
+import { AutomationService } from "../services/business/automation";
+import { AutomationTemplateRepository } from "../services/repository/automation-template";
+import { AutomationTemplateService } from "../services/business/automation-template";
+
+// NEW PACKAGES & MEMBERSHIPS REPOSITORIES
+import { ServicePackageRepository } from "../services/repository/service-package";
+import { MembershipRepository } from "../services/repository/membership";
+import { ClientPackageRepository } from "../services/repository/client-package";
+import { BusinessKPIRepository } from "../services/repository/business-kpi";
+
+// NEW PACKAGES & MEMBERSHIPS SERVICES
+import { ServicePackageService } from "../services/business/service-package";
+import { MembershipService } from "../services/business/membership";
+import { ClientPackageService } from "../services/business/client-package";
+import { BusinessKPIService } from "../services/business/business-kpi";
+
 let storageInstance: StorageStrategy | null = null;
 let initialized = false;
 let storageInitializationFailed = false;
@@ -130,6 +174,33 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     // availabilityRuleRepository: REMOVED - availability now in profile table
     const paymentMethodRepository = new PaymentMethodRepository();
 
+    // INVENTORY REPOSITORIES
+    const productRepository = new ProductRepository();
+    const inventoryRepository = new InventoryRepository();
+    const supplierRepository = new SupplierRepository();
+    const productCategoryRepository = new ProductCategoryRepository();
+    const supplierProductRepository = new SupplierProductRepository();
+    const purchaseOrderRepository = new PurchaseOrderRepository();
+    const serviceProductRepository = new ServiceProductRepository();
+    const reportRepository = new ReportRepository();
+    const serviceRepository = new ServiceRepository();
+    const staffRepository = new StaffRepository();
+    const staffServiceRepository = new StaffServiceRepository();
+    const staffAvailabilityRepository = new StaffAvailabilityRepository();
+
+    // AUTOMATION REPOSITORIES
+    const automationRepository = new AutomationRepository();
+    const automationTriggerRepository = new AutomationTriggerRepository();
+    const automationActionRepository = new AutomationActionRepository();
+    const automationExecutionLogRepository = new AutomationExecutionLogRepository();
+    const automationTemplateRepository = new AutomationTemplateRepository();
+
+    // PACKAGES & MEMBERSHIPS REPOSITORIES
+    const servicePackageRepository = new ServicePackageRepository();
+    const membershipRepository = new MembershipRepository();
+    const clientPackageRepository = new ClientPackageRepository();
+    const businessKPIRepository = new BusinessKPIRepository();
+
     // Evolution API service
     const evolutionService = new EvolutionService({
       baseUrl: env.EVOLUTION_API_URL,
@@ -147,6 +218,10 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
       reservationRequestRepository,
       reservationRepository,
       profileRepository,
+      staffRepository,
+      staffServiceRepository,
+      staffAvailabilityRepository,
+      serviceRepository,
     );
 
     const notificationService = new NotificationService(
@@ -163,6 +238,57 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
     const availabilityValidationService = new AvailabilityValidationService(
       profileRepository,
     );
+
+    // INVENTORY SERVICES
+    const productService = new ProductService(productRepository, inventoryRepository);
+    const inventoryService = new InventoryService(inventoryRepository, productRepository);
+    const supplierProductService = new SupplierProductService(
+      supplierProductRepository,
+      supplierRepository,
+      productRepository
+    );
+    const purchaseOrderService = new PurchaseOrderService(
+      purchaseOrderRepository,
+      inventoryRepository,
+      productRepository,
+      supplierRepository
+    );
+    const serviceProductService = new ServiceProductService(
+      serviceProductRepository,
+      serviceRepository,
+      productRepository
+    );
+    const reportService = new ReportService(reportRepository);
+    const productCategoryService = new ProductCategoryService(productCategoryRepository);
+
+    // AUTOMATION SERVICE
+    const automationService = new AutomationService(evolutionService);
+    const automationTemplateService = new AutomationTemplateService(
+      automationTemplateRepository,
+      automationRepository,
+      automationTriggerRepository,
+      automationActionRepository,
+      profileRepository,
+    );
+
+    // PACKAGES & MEMBERSHIPS SERVICES
+    const servicePackageService = new ServicePackageService(
+      servicePackageRepository,
+      clientPackageRepository
+    );
+    const membershipService = new MembershipService(
+      membershipRepository,
+      clientPackageRepository
+    );
+    const clientPackageService = new ClientPackageService(
+      clientPackageRepository,
+      servicePackageRepository,
+      membershipRepository,
+      inventoryRepository,
+      serviceProductRepository
+    );
+
+    const businessKPIService = new BusinessKPIService(businessKPIRepository);
 
     // Services
     const assetService = new AssetService(assetRepository, storage);
@@ -236,6 +362,21 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         reservationRepository,
         // availabilityRuleRepository: REMOVED - availability now in profile table
         paymentMethodRepository,
+        // INVENTORY REPOSITORIES
+        productRepository,
+        inventoryRepository,
+        supplierRepository,
+        productCategoryRepository,
+        supplierProductRepository,
+        purchaseOrderRepository,
+        serviceProductRepository,
+        serviceRepository,
+        // AUTOMATION REPOSITORIES
+        automationRepository,
+        automationTriggerRepository,
+        automationActionRepository,
+        automationExecutionLogRepository,
+        automationTemplateRepository,
         // Services
         assetService,
         cdnService,
@@ -258,6 +399,22 @@ export const servicesPlugin = new Elysia({ name: "services" }).derive(
         notificationService,
         paymentMethodService,
         availabilityValidationService,
+        // INVENTORY SERVICES
+        productService,
+        inventoryService,
+        supplierProductService,
+        purchaseOrderService,
+        serviceProductService,
+        reportService,
+        productCategoryService,
+        // AUTOMATION SERVICE
+        automationService,
+        automationTemplateService,
+        // PACKAGES & MEMBERSHIPS SERVICES
+        servicePackageService,
+        membershipService,
+        clientPackageService,
+        businessKPIService,
         // AI Messaging Strategy
         getMessageStrategy,
       },

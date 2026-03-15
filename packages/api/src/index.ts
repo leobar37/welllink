@@ -7,6 +7,7 @@ import { env } from "./config/env";
 
 import { Elysia, redirect } from "elysia";
 import { cors } from "@elysiajs/cors";
+import { swagger } from "@elysiajs/swagger";
 import { setDefaultResultOrder } from "node:dns";
 
 // Force IPv4 preference to avoid IPv6 connection issues in Docker/Cloud environments
@@ -29,6 +30,7 @@ import { profileRoutes } from "./api/routes/profiles";
 // health-survey routes: REMOVED - legacy wellness feature
 import { assetRoutes } from "./api/routes/assets";
 import { analyticsRoutes } from "./api/routes/analytics";
+import { businessKPIRoutes } from "./api/routes/business-kpi";
 
 import { uploadRoutes } from "./api/routes/upload";
 import { onboardingRoutes } from "./api/routes/onboarding";
@@ -48,6 +50,12 @@ import { paymentMethodRoutes } from "./api/routes/payment-methods";
 import { conversationsRoutes } from "./api/routes/conversations";
 import { whatsappAgentWebhook } from "./services/ai/whatsapp-agent/webhooks";
 import { createStorageStrategy } from "./services/storage";
+import { inventoryRoutes } from "./api/routes/inventory";
+import { automationRoutes } from "./api/routes/automation";
+import { businessTypeRoutes } from "./api/routes/business-types";
+import { staffRoutes } from "./api/routes/staff";
+import { packageRoutes } from "./api/routes/packages";
+import { constantsRoutes } from "./api/routes/constants";
 
 // Test routes - ONLY enabled via ENABLE_TEST_ROUTES=true (SECURITY: never in production)
 const enableTestRoutes = env.ENABLE_TEST_ROUTES === "true";
@@ -70,6 +78,39 @@ const modules = [
 ];
 
 const app = new Elysia()
+  // Swagger documentation
+  .use(
+    swagger({
+      documentation: {
+        info: {
+          title: "CitaBot API",
+          version: "1.0.0",
+          description:
+            "API de gestión de inventario, automatizaciones y personal para CitaBot",
+        },
+        tags: [
+          {
+            name: "Inventory",
+            description: "Gestión de inventario, productos y proveedores",
+          },
+          {
+            name: "Automation",
+            description: "Motor de automatizaciones y plantillas",
+          },
+          {
+            name: "Staff",
+            description: "Gestión de personal y disponibilidad",
+          },
+          { name: "Auth", description: "Autenticación" },
+          { name: "Profiles", description: "Perfiles de negocio" },
+          { name: "Clients", description: "Gestión de clientes" },
+          { name: "Services", description: "Servicios" },
+          { name: "Reservations", description: "Reservas y citas" },
+        ],
+      },
+      path: "/api/docs",
+    }),
+  )
   // CORS - configurable via CORS_ORIGIN env variable
   .use(
     cors({
@@ -147,6 +188,7 @@ const app = new Elysia()
       // healthSurveyRoutes: REMOVED
       .use(assetRoutes)
       .use(analyticsRoutes)
+      .use(businessKPIRoutes)
       .use(uploadRoutes)
       .use(onboardingRoutes)
       .use(publicRoutes)
@@ -164,6 +206,12 @@ const app = new Elysia()
       .use(conversationsRoutes)
       .use(whatsappAgentWebhook)
       .use(paymentMethodRoutes)
+      .use(inventoryRoutes)
+      .use(automationRoutes)
+      .use(businessTypeRoutes)
+      .use(staffRoutes)
+      .use(packageRoutes)
+      .use(constantsRoutes)
       // Test routes - ONLY enabled via ENABLE_TEST_ROUTES=true (SECURITY: never in production)
       .use(
         enableTestRoutes

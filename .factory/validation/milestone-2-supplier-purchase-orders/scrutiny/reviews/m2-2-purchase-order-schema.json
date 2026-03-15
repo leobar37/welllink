@@ -1,0 +1,34 @@
+{
+  "featureId": "m2-2-purchase-order-schema",
+  "reviewedAt": "2026-03-08T04:45:00.000Z",
+  "commitId": "4b80208",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The purchase order schema implementation covers most feature requirements but contains a critical bug in the purchase_order_item table where the notes field has an incorrect data type (uuid instead of text). Additionally, the unique index for order numbers is not properly configured as unique.",
+    "issues": [
+      {
+        "file": "packages/api/src/db/schema/purchase-order-item.ts",
+        "line": 36,
+        "severity": "blocking",
+        "description": "The notes field is defined as uuid(\"notes\") but should be text(\"notes\") to match the pattern used in all other schema files (product.ts, supplier.ts, stock-movement.ts, purchase-order.ts all use text for notes). Using uuid type is incorrect for freeform text notes."
+      },
+      {
+        "file": "packages/api/src/db/schema/purchase-order.ts",
+        "line": 60,
+        "severity": "non_blocking",
+        "description": "The index 'purchase_order_profile_order_number_unique_idx' is defined as a regular index, not a uniqueIndex, despite the comment stating 'Unique order number per profile'. If uniqueness enforcement is needed, this should be changed to uniqueIndex(). However, since orderNumber is optional (nullable), this may be intentional."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "conventions",
+      "observation": "The AGENTS.md documents schema naming conventions (singular names) and field naming patterns but does not explicitly specify data type conventions for common fields like 'notes'. The worker followed the pattern from other tables but made an error with uuid type.",
+      "evidence": "AGENTS.md mentions 'Check field names - not all use createdAt' but doesn't provide a reference for field types. Other schema files consistently use text() for notes fields."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "The purchase order schema feature is mostly correctly implemented with all required tables (purchase_order, purchase_order_item), the 5-value status enum, and proper foreign key relations. However, there is a blocking bug: the purchase_order_item.notes field incorrectly uses uuid type instead of text type. This must be fixed before the feature can be considered complete."
+}

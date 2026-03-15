@@ -1,0 +1,21 @@
+{
+  "featureId": "m3-3-fix-low-stock-notifications",
+  "reviewedAt": "2026-03-08T06:45:00.000Z",
+  "commitId": "a8fb071",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The implementation successfully integrates actual WhatsApp notifications for low stock alerts using EvolutionService. It properly fetches the profile's WhatsApp number from the profile table, checks for active WhatsApp configuration (enabled + connected), and sends formatted messages via the Evolution API. The implementation handles edge cases gracefully (missing phone number, missing WhatsApp config). Both the daily cron job (checkLowStock) and manual test function (testLowStockAlert) were updated with the notification logic.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "conventions",
+      "observation": "The worker directly used `evolutionService` imported from `./types` without registering it in services.ts. This is acceptable because the types.ts file creates a singleton instance directly, but AGENTS.md mentions 'ALWAYS register services in services.ts'. This is an exception pattern that works for Inngest functions but isn't documented.",
+      "evidence": "packages/api/src/inngest/functions/types.ts creates EvolutionService singleton directly, not using services.ts registration"
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "PASS - The feature successfully implements actual WhatsApp notifications for low stock alerts. The implementation integrates EvolutionService to send real WhatsApp messages to profile owners when products fall below minimum stock threshold. It properly handles missing configuration by logging and continuing to the next profile. The message format is correct with product details (name, SKU, current/min stock). This fix addresses the original issue of only logging to console without sending actual notifications."
+}

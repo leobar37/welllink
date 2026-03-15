@@ -143,9 +143,9 @@ export async function seedReservations() {
     const insertData: any = {
       profileId,
       serviceId,
-      patientName: data.patientName,
-      patientPhone: data.patientPhone,
-      patientEmail: data.patientEmail || null,
+      customerName: data.patientName,
+      customerPhone: data.patientPhone,
+      customerEmail: data.patientEmail || null,
       status: data.status,
       source: data.source || "web",
       notes: data.notes || null,

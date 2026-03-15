@@ -37,6 +37,10 @@ export const client = pgTable(
       .notNull()
       .default(ClientLabel.CONSUMIDOR),
     notes: text("notes"),
+    // Birthday for birthday trigger automation
+    birthday: timestamp("birthday"),
+    // Registration date for anniversary trigger automation (defaults to createdAt if not set)
+    registrationDate: timestamp("registration_date"),
     lastContactAt: timestamp("last_contact_at"),
     metadata: jsonb("metadata").$type<Record<string, unknown>>(),
     createdAt: timestamp("created_at").notNull().defaultNow(),

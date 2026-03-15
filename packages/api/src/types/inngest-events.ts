@@ -107,6 +107,13 @@ export interface MedicalReservationEvents {
     };
   };
 
+  "reservation.no_show": {
+    data: {
+      reservationId: string;
+      profileId: string;
+    };
+  };
+
   "appointment/reminder-24h": {
     data: {
       reservationId: string;
@@ -221,6 +228,26 @@ export interface MedicalReservationEvents {
       requestId: string;
       patientName: string;
       expiredAt: string;
+    };
+  };
+
+  // Automation events
+  "automation/execute": {
+    data: {
+      automationId?: string;
+      profileId: string;
+      triggerType: "event" | "schedule" | "condition";
+      eventType?: string;
+      triggerData: Record<string, unknown>;
+    };
+  };
+
+  "automation/retry": {
+    data: {
+      executionLogId: string;
+      automationId: string;
+      profileId: string;
+      triggerData: Record<string, unknown>;
     };
   };
 }

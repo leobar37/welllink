@@ -42,6 +42,7 @@ export interface FAQConfig {
 }
 import { user } from "./auth";
 import { asset } from "./asset";
+import { businessType } from "./business-type";
 
 export const profile = pgTable(
   "profile",
@@ -94,6 +95,11 @@ export const profile = pgTable(
     isAcceptingAppointments: boolean("is_accepting_appointments")
       .notNull()
       .default(true),
+    // Business type (industry categorization)
+    businessTypeId: uuid("business_type_id").references(
+      () => businessType.id,
+      { onDelete: "set null" }
+    ),
   },
   (table) => [
     index("profile_user_id_idx").on(table.userId),

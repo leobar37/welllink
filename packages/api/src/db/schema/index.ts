@@ -19,6 +19,7 @@ export * from "./whatsapp-context";
 
 // SERVICE & RESERVATION TABLES
 export * from "./service";
+export * from "./service-product";
 // time-slot: REMOVED - availability simplified, no pre-generated slots
 export * from "./reservation-request";
 export * from "./reservation";
@@ -39,3 +40,34 @@ export * from "./payment-method";
 
 // Agent Configuration
 export * from "./agent-config";
+
+// INVENTORY TABLES
+export * from "./supplier";
+export * from "./supplier-product";
+export * from "./product-category";
+export * from "./product";
+export * from "./inventory-item";
+export * from "./stock-movement";
+export * from "./purchase-order";
+export * from "./purchase-order-item";
+export * from "./low-stock-alert-sent";
+
+// AUTOMATION TABLES
+export * from "./automation";
+export * from "./automation-trigger";
+export * from "./automation-action";
+export * from "./automation-execution-log";
+export * from "./automation-template";
+
+// BUSINESS TYPE
+export * from "./business-type";
+
+// STAFF MANAGEMENT
+export * from "./staff";
+export * from "./staff-service";
+export * from "./staff-availability";
+
+// PACKAGES & MEMBERSHIPS
+export * from "./service-package";
+export * from "./membership";
+export * from "./client-package";

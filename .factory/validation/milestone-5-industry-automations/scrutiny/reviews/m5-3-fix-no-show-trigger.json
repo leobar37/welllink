@@ -1,0 +1,21 @@
+{
+  "featureId": "m5-3-fix-no-show-trigger",
+  "reviewedAt": "2026-03-08T09:30:00.000Z",
+  "commitId": "7860b13",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The implementation correctly fixes the no_show trigger by adding a cron-based function that detects confirmed reservations past their scheduled time (2+ hours), marks them as no_show, and sends the reservation.no_show event to trigger automations. The code follows existing patterns in the codebase and passes TypeScript and lint checks.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "conventions",
+      "observation": "The implementation follows the existing patterns in the codebase for Inngest functions - cron-based triggers, event sending, and proper error handling with try/catch per item.",
+      "evidence": "The code uses the same patterns as other cron functions like checkLowStock, checkBirthdayTriggers, etc."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Feature m5-3-fix-no-show-trigger correctly implements a cron-based solution to detect no-show reservations. The checkNoShowReservations function runs hourly (cron: 0 * * * *), finds confirmed reservations 2+ hours past their scheduled time, marks them as no_show, and sends the reservation.no_show event. The existing handleNoShowTrigger listens for this event and will fire correctly. TypeScript and lint checks pass for all changed files."
+}

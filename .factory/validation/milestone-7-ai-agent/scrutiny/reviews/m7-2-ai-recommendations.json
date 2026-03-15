@@ -1,0 +1,45 @@
+{
+  "featureId": "m7-2-ai-recommendations",
+  "reviewedAt": "2026-03-08T12:45:00.000Z",
+  "commitId": "09a5ff9",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The AI-powered recommendation tools have been successfully implemented. Three tools were created: get_client_history for retrieving client appointment history, get_service_recommendations for personalized service suggestions based on client history and preferences, and get_upsell_recommendations for complementary products/services. The implementation correctly analyzes client history, visit patterns, service categories, and product associations to provide context-aware recommendations.",
+    "issues": [
+      {
+        "file": "packages/api/src/services/ai/chat/tools/recommendations.ts",
+        "line": 13,
+        "severity": "non_blocking",
+        "description": "Repositories are instantiated directly with `new` instead of using dependency injection via the services plugin. This deviates from the project's DI pattern documented in AGENTS.md. However, this is consistent with how other AI tools in the same directory are implemented (inventory.ts uses the same pattern)."
+      },
+      {
+        "file": "packages/api/src/services/ai/chat/tools/recommendations.ts",
+        "line": 196,
+        "severity": "non_blocking",
+        "description": "The recommendation algorithm skips services the client has already booked (line: `if (usedServiceIds.has(service.id) && service.id !== currentServiceId) { continue; }`). This might be too restrictive - clients often rebook the same services they enjoyed. Consider allowing previously used services but with lower priority."
+      },
+      {
+        "file": "packages/api/src/services/ai/chat/tools/recommendations.ts",
+        "line": 328,
+        "severity": "non_blocking",
+        "description": "The `getServicesByIds` helper function fetches services sequentially in a loop. For better performance with many service IDs, consider using a single query with `inArray` instead of multiple individual queries."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "conventions",
+      "observation": "AI tools in packages/api/src/services/ai/chat/tools/ consistently instantiate repositories directly with `new` rather than using the DI pattern from services.ts. This is a known pattern deviation that should be documented in AGENTS.md as an exception for AI tool files.",
+      "evidence": "recommendations.ts:13-17 instantiates repositories directly. Same pattern exists in inventory.ts and other tool files."
+    },
+    {
+      "area": "knowledge",
+      "observation": "The recommendation engine uses a scoring algorithm that considers: category matches (+30), time since last visit (+20 for >60 days), service usage history (+5 per use), and complementary products (+40). This scoring logic should be documented for future maintainers.",
+      "evidence": "recommendations.ts lines 207-267 contain the scoring logic for service recommendations."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "The m7-2-ai-recommendations feature has been successfully implemented. Three AI tools (get_client_history, get_service_recommendations, get_upsell_recommendations) are properly integrated into the VoltAgent and provide context-aware recommendations based on client history, service categories, visit patterns, and product associations. The code follows the existing patterns in the AI tools directory and passes type checking. Minor non-blocking issues include direct repository instantiation (consistent with other AI tools) and a potentially restrictive filter that skips previously used services."
+}

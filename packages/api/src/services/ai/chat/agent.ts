@@ -15,6 +15,11 @@ import {
   getPaymentMethodDetailsTool,
   loadWhatsAppContextTool,
   pauseForHumanTool,
+  checkInventoryTool,
+  getProductInfoTool,
+  getClientHistoryTool,
+  getServiceRecommendationsTool,
+  getUpsellRecommendationsTool,
 } from "./tools";
 
 /**
@@ -53,6 +58,15 @@ export function createMedicalChatAgent(instructions?: string): Agent {
       // Payment information tools
       listPaymentMethodsTool,
       getPaymentMethodDetailsTool,
+
+      // Inventory tools
+      checkInventoryTool,
+      getProductInfoTool,
+
+      // Client history and recommendations
+      getClientHistoryTool,
+      getServiceRecommendationsTool,
+      getUpsellRecommendationsTool,
 
       // WhatsApp context tools
       loadWhatsAppContextTool,

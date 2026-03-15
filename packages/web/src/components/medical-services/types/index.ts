@@ -2,6 +2,7 @@ import { z } from "zod";
 
 // Esquema de validación para el formulario de servicios médicos
 export const medicalServiceSchema = z.object({
+  id: z.string().optional(),
   name: z.string().min(1, "El nombre es requerido"),
   description: z.string().optional(),
   duration: z.number().min(1, "La duración es requerida"),
@@ -10,6 +11,12 @@ export const medicalServiceSchema = z.object({
   requirements: z.string().optional(),
   isActive: z.boolean(),
   imageAssetId: z.string().optional(),
+  // Products consumed by this service
+  products: z.array(z.object({
+    productId: z.string(),
+    quantityRequired: z.number().min(1, "La cantidad debe ser mayor a 0").default(1),
+    isRequired: z.boolean().default(true),
+  })).optional(),
 });
 
 export type MedicalServiceFormValues = z.infer<typeof medicalServiceSchema>;

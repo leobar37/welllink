@@ -1,0 +1,50 @@
+{
+  "featureId": "m3-2-automatic-stock-deduction",
+  "reviewedAt": "2026-03-08T06:00:00.000Z",
+  "commitId": "07a7490",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The Inngest function for automatic stock deduction is properly configured and integrated. However, there is a blocking bug: the code does NOT filter products by `isRequired === true` when processing service products, despite the test cases verifying this behavior. The implementation processes ALL products linked to a service instead of only required ones.",
+    "issues": [
+      {
+        "file": "packages/api/src/inngest/functions/reservation-completed.ts",
+        "line": "67-90",
+        "severity": "blocking",
+        "description": "Missing filter for isRequired in service product processing. The code retrieves all service products (where isActive=true) but iterates through ALL of them without filtering by isRequired=true. According to the schema, products can be required or optional for a service. The test case 'should filter required products only' verifies the correct behavior, but the actual implementation doesn't match."
+      },
+      {
+        "file": "packages/api/src/inngest/functions/reservation-completed.ts",
+        "line": "139",
+        "severity": "non_blocking",
+        "description": "Type casting 'as any' used for reason field when inserting stock_movement. This is a workaround for the enum not being synced to the database yet. The migration file was created but needs to be pushed to the database."
+      },
+      {
+        "file": "packages/api/src/__tests__/stock-deduction.test.ts",
+        "line": "79-87",
+        "severity": "non_blocking",
+        "description": "Unit tests are isolated logic tests (no mocks of database), which is fine. However, they test the EXPECTED behavior (filtering by isRequired) that is NOT implemented in the actual code. This mismatch should be addressed."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "conventions",
+      "observation": "AGENTS.md specifies 'Check field names - not all use createdAt' but doesn't mention handling optional vs required fields in relationships. The service_product table has an isRequired boolean that determines if a product is mandatory or optional for a service, but this pattern isn't documented.",
+      "evidence": "service_product.isRequired field exists in schema but no convention guidance in AGENTS.md about filtering optional products"
+    },
+    {
+      "area": "skills",
+      "observation": "The fullstack-inngest skill was followed correctly (skillFeedback.followedProcedure = true). The worker created proper Inngest function with step.run pattern, but the skill doesn't provide guidance on handling service_product relationships with isRequired field.",
+      "evidence": "Transcript shows correct Inngest pattern usage, but no guidance on filtering optional products"
+    },
+    {
+      "area": "knowledge",
+      "observation": "Worker correctly identified in tests that isRequired filtering is needed ('should filter required products only' test), but didn't implement this filter in the actual code. This appears to be an oversight where tests were written for correct behavior but implementation didn't match.",
+      "evidence": "Test at line 79-87 filters by sp.isRequired, but implementation at line 67-90 iterates all products without filtering"
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "FAIL: The implementation has a blocking bug where it processes ALL service products instead of only required ones (isRequired=true). The Inngest function is properly configured, stock deduction logic is correct, and stock_movement records are created properly. However, the missing isRequired filter means optional products will have stock deducted when they shouldn't. Additionally, the unit tests verify correct behavior (filtering by isRequired) that isn't implemented, creating a mismatch between tests and code."
+}
