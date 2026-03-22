@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode, useState } from "react";
 import type { ReactNode } from "react";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
+import { AppErrorBoundary } from "@/components/app-error-boundary";
 import { ThemeProvider } from "@/contexts/theme-context";
 
 const createQueryClient = () =>
@@ -46,4 +47,8 @@ export default function Root() {
       </QueryClientProvider>
     </StrictMode>
   );
+}
+
+export function ErrorBoundary() {
+  return <AppErrorBoundary />;
 }

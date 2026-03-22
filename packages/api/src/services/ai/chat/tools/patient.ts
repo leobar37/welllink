@@ -4,6 +4,7 @@ import { ClientService } from "../../../../services/business/client";
 import { ClientRepository } from "../../../../services/repository/client";
 import { ClientNoteRepository } from "../../../../services/repository/client-note";
 import { ClientLabel } from "../../../../db/schema/client";
+import { sanitizeErrorMessage } from "../../../../utils/error-sanitizer";
 
 const clientRepository = new ClientRepository();
 const clientNoteRepository = new ClientNoteRepository();
@@ -66,7 +67,7 @@ export const getPatientTool = createTool({
     } catch (error) {
       return {
         error: true,
-        message: `Error looking up patient: ${error instanceof Error ? error.message : "Unknown error"}`,
+        message: sanitizeErrorMessage(error),
       };
     }
   },
@@ -100,7 +101,7 @@ export const createPatientTool = createTool({
     } catch (error) {
       return {
         error: true,
-        message: `Error creating patient: ${error instanceof Error ? error.message : "Unknown error"}`,
+        message: sanitizeErrorMessage(error),
       };
     }
   },
@@ -132,7 +133,7 @@ export const updatePatientLabelTool = createTool({
     } catch (error) {
       return {
         error: true,
-        message: `Error updating patient label: ${error instanceof Error ? error.message : "Unknown error"}`,
+        message: sanitizeErrorMessage(error),
       };
     }
   },

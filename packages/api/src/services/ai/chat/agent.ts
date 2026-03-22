@@ -1,4 +1,10 @@
 import { Agent } from "@voltagent/core";
+import type { Tool } from "@voltagent/core";
+import type { ToolCategory } from "../../../db/schema/profile";
+import {
+  filterToolsByCategories,
+  getToolCategoriesForProfile,
+} from "../../../utils/agent-tool-filter";
 
 import { chatAgentConfig, createChatAgentConfig } from "./config";
 import { createChatMemory } from "./memory/config";
@@ -22,11 +28,65 @@ import {
   getUpsellRecommendationsTool,
 } from "./tools";
 
+const allTools: Tool[] = [
+  // Patient management tools
+  getPatientTool,
+  createPatientTool,
+  updatePatientLabelTool,
+
+  // Service information tools
+  listServicesTool,
+  getServiceDetailsTool,
+
+  // Appointment scheduling tools
+  checkAvailabilityTool,
+  createReservationTool,
+
+  // FAQ and information tools
+  searchFAQTool,
+
+  // Payment information tools
+  listPaymentMethodsTool,
+  getPaymentMethodDetailsTool,
+
+  // Inventory tools
+  checkInventoryTool,
+  getProductInfoTool,
+
+  // Client history and recommendations
+  getClientHistoryTool,
+  getServiceRecommendationsTool,
+  getUpsellRecommendationsTool,
+
+  // WhatsApp context tools
+  loadWhatsAppContextTool,
+  pauseForHumanTool,
+];
+
+interface CreateAgentOptions {
+  instructions?: string;
+  enabledToolCategories?: ToolCategory[];
+}
+
 /**
  * Create the medical chat agent with all tools and memory
- * @param instructions - Optional custom instructions (uses default if not provided)
+ * @param options - Agent configuration options
+ * @param options.instructions - Optional custom instructions (uses default if not provided)
+ * @param options.enabledToolCategories - Optional array of enabled tool categories (defaults to all core tools)
  */
-export function createMedicalChatAgent(instructions?: string): Agent {
+export function createMedicalChatAgent(options?: CreateAgentOptions): Agent;
+export function createMedicalChatAgent(instructions?: string): Agent;
+export function createMedicalChatAgent(
+  optionsOrInstructions?: CreateAgentOptions | string,
+): Agent {
+  // Parse arguments
+  const options: CreateAgentOptions =
+    typeof optionsOrInstructions === "string"
+      ? { instructions: optionsOrInstructions }
+      : optionsOrInstructions || {};
+
+  const { instructions, enabledToolCategories } = options;
+
   // Create persistent memory for conversation history
   const memory = createChatMemory();
 
@@ -35,43 +95,16 @@ export function createMedicalChatAgent(instructions?: string): Agent {
     ? createChatAgentConfig(instructions)
     : chatAgentConfig;
 
-  // Create the agent with all tools
+  // Determine which tool categories to enable
+  const categories = getToolCategoriesForProfile(enabledToolCategories);
+
+  // Filter tools based on enabled categories
+  const filteredTools = filterToolsByCategories(allTools, categories);
+
+  // Create the agent with filtered tools
   const agent = new Agent({
     ...config,
-    tools: [
-      // Patient management tools
-      getPatientTool,
-      createPatientTool,
-      updatePatientLabelTool,
-
-      // Service information tools
-      listServicesTool,
-      getServiceDetailsTool,
-
-      // Appointment scheduling tools
-      checkAvailabilityTool,
-      createReservationTool,
-
-      // FAQ and information tools
-      searchFAQTool,
-
-      // Payment information tools
-      listPaymentMethodsTool,
-      getPaymentMethodDetailsTool,
-
-      // Inventory tools
-      checkInventoryTool,
-      getProductInfoTool,
-
-      // Client history and recommendations
-      getClientHistoryTool,
-      getServiceRecommendationsTool,
-      getUpsellRecommendationsTool,
-
-      // WhatsApp context tools
-      loadWhatsAppContextTool,
-      pauseForHumanTool,
-    ],
+    tools: filteredTools,
 
     // Attach persistent memory
     memory,

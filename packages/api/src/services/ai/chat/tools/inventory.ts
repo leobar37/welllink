@@ -3,6 +3,7 @@ import { z } from "zod";
 import { ProductRepository } from "../../../../services/repository/product";
 import { InventoryRepository } from "../../../../services/repository/inventory";
 import type { Product } from "../../../../db/schema/product";
+import { sanitizeErrorMessage } from "../../../../utils/error-sanitizer";
 
 // Instantiate repositories
 const productRepository = new ProductRepository();
@@ -14,14 +15,20 @@ const CheckInventoryInput = z.object({
   searchTerm: z
     .string()
     .describe(
-      "Product name, SKU, or barcode to search for. Can be partial match."
+      "Product name, SKU, or barcode to search for. Can be partial match.",
     ),
-  location: z.string().optional().describe("Specific location/warehouse to check"),
+  location: z
+    .string()
+    .optional()
+    .describe("Specific location/warehouse to check"),
 });
 
 const GetProductInfoInput = z.object({
   profileId: z.string().describe("The profile ID the product belongs to"),
-  productId: z.string().optional().describe("The specific product ID to look up"),
+  productId: z
+    .string()
+    .optional()
+    .describe("The specific product ID to look up"),
   searchTerm: z
     .string()
     .optional()
@@ -30,7 +37,7 @@ const GetProductInfoInput = z.object({
 
 /**
  * Tool: Check Inventory
- * 
+ *
  * Queries stock levels by product name, SKU, or barcode.
  * Returns available quantity and stock status.
  */
@@ -44,7 +51,7 @@ export const checkInventoryTool = createTool({
       // Search products by name, SKU, or barcode
       const products = await productRepository.searchByNameOrSkuDirect(
         profileId,
-        searchTerm
+        searchTerm,
       );
 
       if (products.length === 0) {
@@ -66,7 +73,7 @@ export const checkInventoryTool = createTool({
             const item = await inventoryRepository.findByProductIdDirect(
               p.id,
               profileId,
-              location
+              location,
             );
             stockInfo = {
               totalQuantity: item?.quantity ?? 0,
@@ -76,7 +83,10 @@ export const checkInventoryTool = createTool({
             };
           } else {
             // Get total stock across all locations
-            stockInfo = await inventoryRepository.getStockDirect(p.id, profileId);
+            stockInfo = await inventoryRepository.getStockDirect(
+              p.id,
+              profileId,
+            );
           }
 
           const isLowStock = stockInfo.availableQuantity <= (p.minStock ?? 0);
@@ -97,10 +107,10 @@ export const checkInventoryTool = createTool({
             status: isLowStock
               ? "low_stock"
               : stockInfo.availableQuantity > 0
-              ? "in_stock"
-              : "out_of_stock",
+                ? "in_stock"
+                : "out_of_stock",
           };
-        })
+        }),
       );
 
       // Format response
@@ -109,7 +119,7 @@ export const checkInventoryTool = createTool({
           (p) =>
             `• ${p.name} (SKU: ${p.sku}): ${p.stock.available} unidades${
               p.isLowStock ? " ⚠️ Stock bajo" : ""
-            }`
+            }`,
         )
         .join("\n");
 
@@ -122,9 +132,7 @@ export const checkInventoryTool = createTool({
     } catch (error) {
       return {
         error: true,
-        message: `Error consultando inventario: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: sanitizeErrorMessage(error),
       };
     }
   },
@@ -132,7 +140,7 @@ export const checkInventoryTool = createTool({
 
 /**
  * Tool: Get Product Info
- * 
+ *
  * Gets detailed product information including price, description,
  * and current availability status.
  */
@@ -147,12 +155,15 @@ export const getProductInfoTool = createTool({
 
       if (productId) {
         // Get by ID
-        product = await productRepository.findByIdAndProfile(productId, profileId);
+        product = await productRepository.findByIdAndProfile(
+          productId,
+          profileId,
+        );
       } else if (searchTerm) {
         // Search by name/SKU
         const products = await productRepository.searchByNameOrSkuDirect(
           profileId,
-          searchTerm
+          searchTerm,
         );
         product = products[0]; // Return first match
       } else {
@@ -172,7 +183,7 @@ export const getProductInfoTool = createTool({
       // Get stock information
       const stockInfo = await inventoryRepository.getStockDirect(
         product.id,
-        profileId
+        profileId,
       );
 
       const isLowStock = stockInfo.availableQuantity <= (product.minStock ?? 0);
@@ -215,19 +226,18 @@ export const getProductInfoTool = createTool({
           status: isLowStock
             ? "low_stock"
             : stockInfo.availableQuantity > 0
-            ? "in_stock"
-            : "out_of_stock",
-          message: stockInfo.availableQuantity > 0
-            ? `✅ Disponible: ${stockInfo.availableQuantity} unidades`
-            : "❌ Agotado",
+              ? "in_stock"
+              : "out_of_stock",
+          message:
+            stockInfo.availableQuantity > 0
+              ? `✅ Disponible: ${stockInfo.availableQuantity} unidades`
+              : "❌ Agotado",
         },
       };
     } catch (error) {
       return {
         error: true,
-        message: `Error obteniendo información del producto: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: sanitizeErrorMessage(error),
       };
     }
   },

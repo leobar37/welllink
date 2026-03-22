@@ -1,5 +1,6 @@
 import { Elysia, t } from "elysia";
 import { createMedicalChatAgent } from "../../services/ai/chat";
+import { getConversationHistory } from "../../services/ai/chat/memory/history";
 import { ProfileRepository } from "../../services/repository/profile";
 import { AgentConfigRepository } from "../../services/repository/agent-config";
 import { AgentConfigService } from "../../services/business/agent-config";
@@ -10,16 +11,32 @@ import {
 import type { AIMessagePart } from "../../services/ai/chat/schema";
 import { getMessageStrategy } from "../../services/ai/messaging";
 import { getChatInstructions } from "../../services/ai/chat/config";
+import type { ToolCategory } from "../../db/schema/profile";
+import {
+  agentRateLimit,
+  agentStreamRateLimit,
+} from "../../middleware/rate-limit";
 
 const profileRepository = new ProfileRepository();
 const agentConfigRepository = new AgentConfigRepository();
 const agentConfigService = new AgentConfigService(agentConfigRepository);
+
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const ProfileIdSchema = t.Optional(
+  t.String({
+    pattern: UUID_REGEX.source,
+    error: "profileId must be a valid UUID",
+  }),
+);
 
 /**
  * Agent API routes for AI chat functionality
  * Compatible with AI SDK useChat transport
  */
 export const agentRoutes = new Elysia({ prefix: "/agent" })
+  .use(agentRateLimit())
   .post(
     "/chat",
     async ({ body, set }) => {
@@ -31,6 +48,11 @@ export const agentRoutes = new Elysia({ prefix: "/agent" })
           return { error: "Message is required" };
         }
 
+        // Generate conversationId if not provided
+        const finalConversationId =
+          conversationId ||
+          `webchat:${profileId || "unknown"}:${crypto.randomUUID()}`;
+
         // Fetch profile data for dynamic context
         let profileInfo = {
           displayName: "el profesional",
@@ -39,6 +61,7 @@ export const agentRoutes = new Elysia({ prefix: "/agent" })
         };
 
         let toneInstructions: string | undefined;
+        let enabledToolCategories: ToolCategory[] | undefined;
 
         if (profileId) {
           const profile = await profileRepository.findById(profileId);
@@ -55,17 +78,26 @@ export const agentRoutes = new Elysia({ prefix: "/agent" })
                 profileId,
                 profile.displayName || "el profesional",
               );
+
+            // Get enabled tool categories from profile features
+            if (profile.featuresConfig?.enabledToolCategories) {
+              enabledToolCategories =
+                profile.featuresConfig.enabledToolCategories;
+            }
           }
         }
 
-        // Create agent with dynamic instructions
+        // Create agent with dynamic instructions and filtered tools
         const instructions = getChatInstructions({
           displayName: profileInfo.displayName,
           title: profileInfo.title,
           bio: profileInfo.bio,
           toneInstructions,
         });
-        const agent = createMedicalChatAgent(instructions);
+        const agent = createMedicalChatAgent({
+          instructions,
+          enabledToolCategories,
+        });
         const strategy = getMessageStrategy("webchat");
 
         // Build profile context message
@@ -81,7 +113,7 @@ ${profileInfo.bio ? `- Bio: ${profileInfo.bio}` : ""}
 
         // Generate response with the agent
         const result = await agent.generateText(fullMessage, {
-          conversationId,
+          conversationId: finalConversationId,
           context: new Map([
             ["userPhone", phone || "unknown"],
             ["channel", "webchat"],
@@ -101,6 +133,7 @@ ${profileInfo.bio ? `- Bio: ${profileInfo.bio}` : ""}
           usage: result.usage,
           parts: formatted.parts,
           hasStructuredResponse: formatted.hasStructuredResponse,
+          conversationId: finalConversationId,
         };
       } catch (error) {
         console.error("Agent chat error:", error);
@@ -116,7 +149,7 @@ ${profileInfo.bio ? `- Bio: ${profileInfo.bio}` : ""}
         message: t.String({ minLength: 1 }),
         phone: t.Optional(t.String()),
         conversationId: t.Optional(t.String()),
-        profileId: t.Optional(t.String()),
+        profileId: ProfileIdSchema,
       }),
     },
   )
@@ -131,6 +164,11 @@ ${profileInfo.bio ? `- Bio: ${profileInfo.bio}` : ""}
           return { error: "Message is required" };
         }
 
+        // Generate conversationId if not provided
+        const finalConversationId =
+          conversationId ||
+          `webchat:${profileId || "unknown"}:${crypto.randomUUID()}`;
+
         // Fetch profile data for dynamic context
         let profileInfo = {
           displayName: "el profesional",
@@ -139,6 +177,7 @@ ${profileInfo.bio ? `- Bio: ${profileInfo.bio}` : ""}
         };
 
         let toneInstructions: string | undefined;
+        let enabledToolCategories: ToolCategory[] | undefined;
 
         if (profileId) {
           const profile = await profileRepository.findById(profileId);
@@ -155,17 +194,26 @@ ${profileInfo.bio ? `- Bio: ${profileInfo.bio}` : ""}
                 profileId,
                 profile.displayName || "el profesional",
               );
+
+            // Get enabled tool categories from profile features
+            if (profile.featuresConfig?.enabledToolCategories) {
+              enabledToolCategories =
+                profile.featuresConfig.enabledToolCategories;
+            }
           }
         }
 
-        // Create agent with dynamic instructions
+        // Create agent with dynamic instructions and filtered tools
         const instructions = getChatInstructions({
           displayName: profileInfo.displayName,
           title: profileInfo.title,
           bio: profileInfo.bio,
           toneInstructions,
         });
-        const agent = createMedicalChatAgent(instructions);
+        const agent = createMedicalChatAgent({
+          instructions,
+          enabledToolCategories,
+        });
 
         // Build profile context message
         const profileContext = `Información del profesional que atienden:
@@ -181,7 +229,7 @@ ${profileInfo.bio ? `- Bio: ${profileInfo.bio}` : ""}
 
         // Stream response
         const stream = await agent.streamText(fullMessage, {
-          conversationId,
+          conversationId: finalConversationId,
           context: new Map([
             ["userPhone", phone || "unknown"],
             ["channel", "web"],
@@ -195,6 +243,11 @@ ${profileInfo.bio ? `- Bio: ${profileInfo.bio}` : ""}
         const readable = new ReadableStream({
           async start(controller) {
             try {
+              // Send conversationId at the start of the stream
+              controller.enqueue(
+                `data: ${JSON.stringify({ type: "conversation-id", conversationId: finalConversationId })}\n\n`,
+              );
+
               let accumulatedText = "";
 
               for await (const chunk of stream.fullStream) {
@@ -254,7 +307,7 @@ ${profileInfo.bio ? `- Bio: ${profileInfo.bio}` : ""}
         message: t.String({ minLength: 1 }),
         phone: t.Optional(t.String()),
         conversationId: t.Optional(t.String()),
-        profileId: t.Optional(t.String()),
+        profileId: ProfileIdSchema,
       }),
     },
   )
@@ -284,6 +337,39 @@ ${profileInfo.bio ? `- Bio: ${profileInfo.bio}` : ""}
         phone: t.String(),
         reason: t.String(),
         conversationId: t.Optional(t.String()),
+      }),
+    },
+  )
+  .get(
+    "/conversations/:conversationId",
+    async ({ params, set }) => {
+      try {
+        const { conversationId } = params;
+
+        if (!conversationId) {
+          set.status = 400;
+          return { error: "conversationId is required" };
+        }
+
+        const messages = await getConversationHistory(conversationId);
+
+        return {
+          success: true,
+          conversationId,
+          messages,
+        };
+      } catch (error) {
+        console.error("Error loading conversation:", error);
+        set.status = 500;
+        return {
+          error: "Failed to load conversation",
+          details: error instanceof Error ? error.message : "Unknown error",
+        };
+      }
+    },
+    {
+      params: t.Object({
+        conversationId: t.String(),
       }),
     },
   );

@@ -111,6 +111,11 @@ function getMenuItems(terminology: { customers: string; services: string }) {
       icon: CreditCard,
     },
     {
+      title: "Métodos de Pago",
+      url: "/dashboard/payment-methods",
+      icon: CreditCard,
+    },
+    {
       title: "Análisis de Automatizaciones",
       url: "/dashboard/automation-analytics",
       icon: BarChart3,
@@ -151,7 +156,7 @@ function getMenuItems(terminology: { customers: string; services: string }) {
 export function AppSidebar() {
   const location = useLocation();
   const { terminology, isLoading } = useTerminology();
-  
+
   const items = getMenuItems(terminology);
 
   return (

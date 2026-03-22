@@ -33,24 +33,32 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
 
   return (
     <>
-      <div className="flex flex-col items-center text-center space-y-4">
+      <div className="flex flex-col items-center text-center space-y-5">
         <Avatar
-          className="h-28 w-28 border-4 border-background shadow-xl cursor-pointer transition-transform hover:scale-105"
+          className="h-28 w-28 border-4 border-background shadow-2xl cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-primary/20 ring-2 ring-muted/50"
           onClick={() => avatarUrl && setIsImageOpen(true)}
         >
-          <AvatarImage src={avatarUrl} alt={profile.displayName} />
-          <AvatarFallback>{initials}</AvatarFallback>
+          <AvatarImage
+            src={avatarUrl}
+            alt={profile.displayName}
+            className="object-cover"
+          />
+          <AvatarFallback className="text-2xl font-semibold bg-gradient-to-br from-muted to-muted/50">
+            {initials}
+          </AvatarFallback>
         </Avatar>
 
-        <div className="space-y-2">
-          <h1 className="text-2xl font-bold tracking-tight">
+        <div className="space-y-3">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
             {profile.displayName}
           </h1>
           {displayTitle && (
-            <p className="text-muted-foreground font-medium">{displayTitle}</p>
+            <p className="text-muted-foreground font-medium text-base">
+              {displayTitle}
+            </p>
           )}
           {profile.bio && (
-            <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
+            <p className="text-sm text-muted-foreground/80 max-w-sm mx-auto leading-relaxed">
               {profile.bio}
             </p>
           )}
@@ -61,33 +69,33 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
               profile.clinicPhone ||
               profile.clinicEmail ||
               profile.clinicWebsite) && (
-              <div className="flex flex-col items-center gap-2 mt-4 pt-4 border-t border-border/50">
+              <div className="flex flex-col items-center gap-2.5 mt-5 pt-5 border-t border-border/40">
                 {profile.clinicAddress && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground/90 hover:text-muted-foreground transition-colors">
+                    <MapPin className="h-4 w-4 text-primary/60" />
                     <span>{profile.clinicAddress}</span>
                   </div>
                 )}
                 {profile.clinicPhone && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Phone className="h-4 w-4" />
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground/90 hover:text-muted-foreground transition-colors">
+                    <Phone className="h-4 w-4 text-primary/60" />
                     <span>{profile.clinicPhone}</span>
                   </div>
                 )}
                 {profile.clinicEmail && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Mail className="h-4 w-4" />
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground/90 hover:text-muted-foreground transition-colors">
+                    <Mail className="h-4 w-4 text-primary/60" />
                     <span>{profile.clinicEmail}</span>
                   </div>
                 )}
                 {profile.clinicWebsite && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Globe className="h-4 w-4" />
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground/90 hover:text-muted-foreground transition-colors">
+                    <Globe className="h-4 w-4 text-primary/60" />
                     <span>{profile.clinicWebsite}</span>
                   </div>
                 )}
                 {isOrganization && (
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground/70 mt-1">
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60 mt-2 px-3 py-1 bg-muted/30 rounded-full">
                     <Building2 className="h-3 w-3" />
                     <span>Clínica verificada</span>
                   </div>

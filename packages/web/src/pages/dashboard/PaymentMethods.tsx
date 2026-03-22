@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -11,7 +11,6 @@ import {
   Shield,
   Calendar,
   DollarSign,
-  Check,
   RotateCcw,
 } from "lucide-react";
 
@@ -33,14 +32,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { usePaymentMethods } from "@/hooks/use-payment-methods";
-import { cn } from "@/lib/utils";
 import type { PaymentMethodType } from "@/lib/types";
 import { PaymentMethodCard } from "@/components/dashboard/PaymentMethodCard";
 
 const paymentMethodSchema = z.object({
-  name: z.string().min(1, "Name is required").max(100),
+  name: z.string().min(1, "El nombre es requerido").max(100),
   type: z.enum([
     "cash",
     "credit_card",
@@ -71,17 +75,17 @@ const typeLabels: Record<
     color: "text-indigo-600",
   },
   bank_transfer: {
-    label: "Transferencia Bancaria",
+    label: "Transferencia",
     icon: Building2,
     color: "text-muted-foreground",
   },
   digital_wallet: {
-    label: "Billetera Digital",
+    label: "Billetera",
     icon: Smartphone,
     color: "text-purple-600",
   },
   insurance: {
-    label: "Seguro Médico",
+    label: "Seguro",
     icon: Shield,
     color: "text-emerald-600",
   },
@@ -100,13 +104,10 @@ export function PaymentMethodsPage() {
     deleteMethod,
     reorderMethods,
     seedDefaults,
+    toggleMethod,
   } = usePaymentMethods();
 
-  const [adding, setAdding] = useState(false);
-  const [selectedMethods, setSelectedMethods] = useState<Set<string>>(
-    new Set(),
-  );
-  const [editMode, setEditMode] = useState<"toggle" | "edit">("toggle");
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const form = useForm<PaymentMethodValues>({
     resolver: zodResolver(paymentMethodSchema),
@@ -116,14 +117,6 @@ export function PaymentMethodsPage() {
       instructions: "",
     },
   });
-
-  // Initialize selected methods with currently active ones
-  useEffect(() => {
-    if (methods) {
-      const activeIds = methods.filter((m) => m.isActive).map((m) => m.id);
-      setSelectedMethods(new Set(activeIds));
-    }
-  }, [methods]);
 
   function onSubmit(data: PaymentMethodValues) {
     createMethod.mutate(
@@ -135,7 +128,7 @@ export function PaymentMethodsPage() {
       },
       {
         onSuccess: () => {
-          setAdding(false);
+          setIsAddModalOpen(false);
           form.reset();
         },
       },
@@ -143,13 +136,7 @@ export function PaymentMethodsPage() {
   }
 
   function handleToggle(id: string, checked: boolean) {
-    const newSelected = new Set(selectedMethods);
-    if (checked) {
-      newSelected.add(id);
-    } else {
-      newSelected.delete(id);
-    }
-    setSelectedMethods(newSelected);
+    toggleMethod.mutate({ id, data: { isActive: checked } });
   }
 
   function handleMove(index: number, direction: "up" | "down") {
@@ -174,192 +161,132 @@ export function PaymentMethodsPage() {
     );
   }
 
-  const activeCount = methods?.filter((m) => m.isActive).length || 0;
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Métodos de Pago</h1>
-          <p className="text-muted-foreground mt-1">
-            Activa los métodos que deseas aceptar en tu clínica
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Métodos de Pago
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Activa los métodos que aceptas en tu clínica
           </p>
         </div>
         <div className="flex gap-2">
           <Button
-            variant="outline"
+            variant="ghost"
+            size="sm"
             onClick={() => seedDefaults.mutate()}
             disabled={seedDefaults.isPending}
+            className="text-muted-foreground"
           >
             {seedDefaults.isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
               <RotateCcw className="mr-2 h-4 w-4" />
             )}
-            Restaurar Defaults
+            Restaurar
           </Button>
-          <Button onClick={() => setAdding(!adding)} disabled={adding}>
+          <Button size="sm" onClick={() => setIsAddModalOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            Agregar Método
+            Agregar
           </Button>
         </div>
       </div>
 
-      {/* Status Card */}
-      <Card className="border-primary/20 bg-primary/5">
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div
-                className={cn(
-                  "p-2 rounded-full",
-                  activeCount > 0 ? "bg-green-100" : "bg-muted/50",
-                )}
-              >
-                {activeCount > 0 ? (
-                  <Check className="h-5 w-5 text-green-600" />
-                ) : (
-                  <div className="h-5 w-5 rounded-full border-2 border-muted-foreground/30" />
-                )}
-              </div>
-              <div>
-                <p className="font-medium">
-                  {activeCount} de {methods?.length || 0} métodos activos
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Activa los métodos que quieres mostrar a tus pacientes
-                </p>
-              </div>
-            </div>
-            {selectedMethods.size > 0 && (
-              <p className="text-sm text-muted-foreground">
-                {selectedMethods.size} método(s) seleccionado(s)
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Mode Toggle */}
-      <div className="flex gap-2 border-b pb-2">
-        <Button
-          variant={editMode === "toggle" ? "default" : "ghost"}
-          size="sm"
-          onClick={() => setEditMode("toggle")}
-        >
-          <Check className="mr-2 h-4 w-4" />
-          Seleccionar
-        </Button>
-        <Button
-          variant={editMode === "edit" ? "default" : "ghost"}
-          size="sm"
-          onClick={() => setEditMode("edit")}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Editar
-        </Button>
-      </div>
-
-      {adding && (
-        <Card className="border-primary/20 bg-primary/5">
-          <CardHeader>
-            <CardTitle className="text-base">
-              Nuevo Método Personalizado
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
-              >
-                <FormField
-                  control={form.control}
-                  name="type"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tipo de Pago</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar tipo" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {Object.entries(typeLabels).map(
-                            ([value, { label }]) => (
-                              <SelectItem key={value} value={value}>
-                                {label}
-                              </SelectItem>
-                            ),
-                          )}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nombre</FormLabel>
+      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nuevo Método</DialogTitle>
+            <DialogDescription>
+              Agrega un método de pago personalizado
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tipo</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
-                        <Input
-                          placeholder="Ej: Visa terminada en 4242"
-                          {...field}
-                        />
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar tipo" />
+                        </SelectTrigger>
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                      <SelectContent>
+                        {Object.entries(typeLabels).map(
+                          ([value, { label }]) => (
+                            <SelectItem key={value} value={value}>
+                              {label}
+                            </SelectItem>
+                          ),
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nombre</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ej: Yape, Plin, BCP..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="instructions"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Instrucciones</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Opcional: instrucciones para el cliente"
+                        className="resize-none"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => {
+                    setIsAddModalOpen(false);
+                    form.reset();
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={createMethod.isPending}>
+                  {createMethod.isPending && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
-                />
-                <FormField
-                  control={form.control}
-                  name="instructions"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Instrucciones</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Instrucciones para el cliente..."
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="flex gap-2">
-                  <Button type="submit" disabled={createMethod.isPending}>
-                    {createMethod.isPending && (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
-                    Guardar
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => {
-                      setAdding(false);
-                      form.reset();
-                    }}
-                  >
-                    Cancelar
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-      )}
+                  Guardar
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
 
-      {/* Payment Methods List */}
-      <div className="space-y-3">
+      <div className="space-y-2">
         {methods && methods.length > 0 ? (
           methods.map((method, index) => (
             <PaymentMethodCard
@@ -370,21 +297,28 @@ export function PaymentMethodsPage() {
               instructions={method.instructions}
               isActive={method.isActive}
               typeLabels={typeLabels}
-              editMode={editMode}
-              isSelected={selectedMethods.has(method.id)}
               index={index}
               totalMethods={methods.length}
               canDelete={true}
               isDeleting={deleteMethod.isPending}
+              isToggling={toggleMethod.isPending}
               onToggle={handleToggle}
               onMove={handleMove}
               onDelete={(id) => deleteMethod.mutate(id)}
             />
           ))
         ) : (
-          <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">
-            No hay métodos de pago configurados. Haz clic en "Restaurar
-            Defaults" para agregar los métodos estándar.
+          <div className="text-center py-8 text-muted-foreground">
+            <p className="text-sm">No hay métodos configurados</p>
+            <Button
+              variant="link"
+              size="sm"
+              onClick={() => seedDefaults.mutate()}
+              disabled={seedDefaults.isPending}
+              className="mt-1"
+            >
+              Restaurar métodos por defecto
+            </Button>
           </div>
         )}
       </div>

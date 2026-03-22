@@ -2,6 +2,7 @@ import { createTool } from "@voltagent/core";
 import { z } from "zod";
 import { PaymentMethodRepository } from "../../../../services/repository/payment-method";
 import { ProfileRepository } from "../../../../services/repository/profile";
+import { sanitizeErrorMessage } from "../../../../utils/error-sanitizer";
 
 const paymentMethodRepository = new PaymentMethodRepository();
 const profileRepository = new ProfileRepository();
@@ -112,8 +113,8 @@ export const listPaymentMethodsTool = createTool({
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-        message: `Error listing payment methods: ${error instanceof Error ? error.message : "Unknown error"}`,
+        error: true,
+        message: sanitizeErrorMessage(error),
       };
     }
   },
@@ -173,8 +174,8 @@ export const getPaymentMethodDetailsTool = createTool({
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-        message: `Error getting payment method details: ${error instanceof Error ? error.message : "Unknown error"}`,
+        error: true,
+        message: sanitizeErrorMessage(error),
       };
     }
   },

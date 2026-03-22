@@ -2,6 +2,7 @@ import { createTool } from "@voltagent/core";
 import { z } from "zod";
 import { ProfileRepository } from "../../../../services/repository/profile";
 import type { FAQConfig } from "../../../../db/schema/profile";
+import { sanitizeErrorMessage } from "../../../../utils/error-sanitizer";
 
 const profileRepository = new ProfileRepository();
 
@@ -120,7 +121,7 @@ export const searchFAQTool = createTool({
     } catch (error) {
       return {
         success: false,
-        message: `Error searching FAQ: ${error instanceof Error ? error.message : "Unknown error"}`,
+        message: sanitizeErrorMessage(error),
       };
     }
   },

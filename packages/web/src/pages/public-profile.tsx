@@ -9,6 +9,12 @@ import { FloatingActions } from "@/components/public-profile/floating-actions";
 import { MedicalServices } from "@/components/public-profile/medical-services";
 import { ProfileThemeProvider } from "@/components/public-profile/theme-provider";
 import { ChatWidget } from "@/components/chat";
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "@/components/ui/resizable";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
 
@@ -17,6 +23,7 @@ export function PublicProfilePage() {
   const [data, setData] = useState<PublicProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     async function fetchProfile() {
@@ -37,7 +44,6 @@ export function PublicProfilePage() {
           throw new Error("Profile not found");
         }
 
-        // The API returns exactly what we need, matching PublicProfileData structure
         setData(profileData as unknown as PublicProfileData);
       } catch (err) {
         console.error(err);
@@ -82,35 +88,81 @@ export function PublicProfilePage() {
     );
   }
 
+  if (isMobile) {
+    return (
+      <ProfileThemeProvider themeId={data.themeId}>
+        <div className="text-foreground pb-24 flex-1">
+          <main className="max-w-md mx-auto px-6 py-12 flex flex-col items-center space-y-8 animate-in fade-in duration-500">
+            <ProfileHeader profile={data.profile} />
+
+            <SocialLinks links={data.socialLinks} />
+
+            <MedicalServices
+              services={data.medicalServices || []}
+              username={data.profile.username}
+            />
+
+            <ActionButtons
+              features={data.features}
+              whatsappNumber={data.profile.whatsappNumber}
+              medicalServices={data.medicalServices || []}
+            />
+          </main>
+
+          <FloatingActions
+            username={data.profile.username}
+            displayName={data.profile.displayName}
+          />
+
+          <ChatWidget
+            profileId={data.profile.id}
+            doctorName={data.profile.displayName}
+          />
+        </div>
+      </ProfileThemeProvider>
+    );
+  }
+
   return (
     <ProfileThemeProvider themeId={data.themeId}>
-      <div className="text-foreground pb-24 flex-1">
-        <main className="max-w-md mx-auto px-6 py-12 flex flex-col items-center space-y-8 animate-in fade-in duration-500">
-          <ProfileHeader profile={data.profile} />
+      <div className="text-foreground flex-1 h-screen overflow-hidden">
+        <ResizablePanelGroup direction="horizontal" className="h-full">
+          <ResizablePanel defaultSize={70} minSize={50}>
+            <main className="h-full overflow-y-auto px-6 py-10 flex flex-col items-center space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <ProfileHeader profile={data.profile} />
 
-          <SocialLinks links={data.socialLinks} />
+              <SocialLinks links={data.socialLinks} />
 
-          <MedicalServices
-            services={data.medicalServices || []}
-            username={data.profile.username}
-          />
+              <MedicalServices
+                services={data.medicalServices || []}
+                username={data.profile.username}
+              />
 
-          <ActionButtons
-            features={data.features}
-            whatsappNumber={data.profile.whatsappNumber}
-            medicalServices={data.medicalServices || []}
-          />
-        </main>
+              <ActionButtons
+                features={data.features}
+                whatsappNumber={data.profile.whatsappNumber}
+                medicalServices={data.medicalServices || []}
+              />
 
-        <FloatingActions
-          username={data.profile.username}
-          displayName={data.profile.displayName}
-        />
+              {/* Footer spacing */}
+              <div className="h-8" />
+            </main>
+          </ResizablePanel>
 
-        <ChatWidget
-          profileId={data.profile.id}
-          doctorName={data.profile.displayName}
-        />
+          <ResizableHandle className="w-1.5 bg-border/30 hover:bg-primary/40 transition-all duration-200 data-[resize-handle-active]:bg-primary/60" />
+
+          <ResizablePanel
+            defaultSize={30}
+            minSize={20}
+            maxSize={45}
+            className="h-full flex flex-col overflow-hidden"
+          >
+            <ChatWidget
+              profileId={data.profile.id}
+              doctorName={data.profile.displayName}
+            />
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
     </ProfileThemeProvider>
   );

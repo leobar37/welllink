@@ -4,6 +4,7 @@ import { ReservationRequestRepository } from "../../../../services/repository/re
 import { ReservationRepository } from "../../../../services/repository/reservation";
 import { ProfileRepository } from "../../../../services/repository/profile";
 import { MedicalServiceRepository } from "../../../../services/repository/medical-service";
+import { sanitizeErrorMessage } from "../../../../utils/error-sanitizer";
 
 const reservationRequestRepository = new ReservationRequestRepository();
 const reservationRepository = new ReservationRepository();
@@ -115,17 +116,14 @@ async function generateAvailableSlots(
   const startOfDay = new Date(year, month - 1, day, 0, 0, 0);
   const endOfDay = new Date(year, month - 1, day, 23, 59, 59);
 
-  const existingReservations = await reservationRepository.findByProfileId(
-    profileId,
-  );
+  const existingReservations =
+    await reservationRepository.findByProfileId(profileId);
 
   // Filter reservations for this specific date
   const reservationsForDate = existingReservations.filter((res) => {
     const resDate = new Date(res.scheduledAtUtc);
     return (
-      res.status === "confirmed" &&
-      resDate >= startOfDay &&
-      resDate <= endOfDay
+      res.status === "confirmed" && resDate >= startOfDay && resDate <= endOfDay
     );
   });
 
@@ -147,7 +145,13 @@ async function generateAvailableSlots(
     currentHour < endHour ||
     (currentHour === endHour && currentMinute < endMinute)
   ) {
-    const slotStart = new Date(year, month - 1, day, currentHour, currentMinute);
+    const slotStart = new Date(
+      year,
+      month - 1,
+      day,
+      currentHour,
+      currentMinute,
+    );
     const slotEnd = new Date(
       year,
       month - 1,
@@ -239,7 +243,7 @@ export const checkAvailabilityTool = createTool({
     } catch (error) {
       return {
         error: true,
-        message: `Error verificando disponibilidad: ${error instanceof Error ? error.message : "Error desconocido"}`,
+        message: sanitizeErrorMessage(error),
       };
     }
   },
@@ -283,7 +287,7 @@ export const createReservationTool = createTool({
     } catch (error) {
       return {
         error: true,
-        message: `Error creando solicitud: ${error instanceof Error ? error.message : "Error desconocido"}`,
+        message: sanitizeErrorMessage(error),
       };
     }
   },

@@ -10,6 +10,17 @@ import {
   jsonb,
 } from "drizzle-orm/pg-core";
 
+// Tool categories for AI agent
+export type ToolCategory =
+  | "patient"
+  | "services"
+  | "appointments"
+  | "faq"
+  | "payments"
+  | "inventory"
+  | "recommendations"
+  | "whatsapp";
+
 // Features configuration type
 // health-survey: REMOVED - legacy wellness feature
 export interface FeaturesConfig {
@@ -20,6 +31,7 @@ export interface FeaturesConfig {
   appointments?: {
     enabled: boolean;
   };
+  enabledToolCategories?: ToolCategory[];
 }
 
 // FAQ item type
@@ -96,10 +108,9 @@ export const profile = pgTable(
       .notNull()
       .default(true),
     // Business type (industry categorization)
-    businessTypeId: uuid("business_type_id").references(
-      () => businessType.id,
-      { onDelete: "set null" }
-    ),
+    businessTypeId: uuid("business_type_id").references(() => businessType.id, {
+      onDelete: "set null",
+    }),
   },
   (table) => [
     index("profile_user_id_idx").on(table.userId),

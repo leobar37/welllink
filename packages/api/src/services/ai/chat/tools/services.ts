@@ -1,6 +1,7 @@
 import { createTool } from "@voltagent/core";
 import { z } from "zod";
 import { MedicalServiceRepository } from "../../../../services/repository/medical-service";
+import { sanitizeErrorMessage } from "../../../../utils/error-sanitizer";
 
 const medicalServiceRepository = new MedicalServiceRepository();
 
@@ -44,7 +45,7 @@ export const listServicesTool = createTool({
     } catch (error) {
       return {
         error: true,
-        message: `Error listing services: ${error instanceof Error ? error.message : "Unknown error"}`,
+        message: sanitizeErrorMessage(error),
       };
     }
   },
@@ -81,7 +82,7 @@ export const getServiceDetailsTool = createTool({
     } catch (error) {
       return {
         error: true,
-        message: `Error getting service details: ${error instanceof Error ? error.message : "Unknown error"}`,
+        message: sanitizeErrorMessage(error),
       };
     }
   },
